@@ -33,7 +33,7 @@ namespace Aiursoft.NugetNinja
             }
 
             var workingPath = args[0];
-            await extractor.Extract(workingPath);
+            var model = await extractor.Extract(workingPath);
 
             logger.LogInformation("Stopping NugetNinja...");
         }
