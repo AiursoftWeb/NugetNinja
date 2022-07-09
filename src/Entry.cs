@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,10 +11,14 @@ namespace Aiursoft.NugetNinja
 {
     public class Entry
     {
+        private readonly Extractor extractor;
         private readonly ILogger<Entry> logger;
 
-        public Entry(ILogger<Entry> logger)
+        public Entry(
+            Extractor extractor,
+            ILogger<Entry> logger)
         {
+            this.extractor = extractor;
             this.logger = logger;
         }
 
@@ -27,16 +33,7 @@ namespace Aiursoft.NugetNinja
             }
 
             var workingPath = args[0];
-            var csprojs = Directory
-                .EnumerateFiles(workingPath, "*.csproj", SearchOption.AllDirectories)
-                .ToArray();
-
-            foreach (var csproj in csprojs)
-            {
-                logger.LogTrace($"Parsing {csproj}...");
-            }
-
-            await Task.Delay(1000);
+            await extractor.Extract(workingPath);
 
             logger.LogInformation("Stopping NugetNinja...");
         }

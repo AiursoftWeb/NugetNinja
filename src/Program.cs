@@ -15,9 +15,10 @@ public class Program
         });
 
         services.AddSingleton<Entry>();
+        services.AddTransient<Extractor>();
 
         var serviceProvider = services.BuildServiceProvider();
         var entry = serviceProvider.GetRequiredService<Entry>();
-        await entry.StartEntry(new string[] { @"C:\Users\xuef\source\repos\AiursoftWeb" });
+        await entry.StartEntry(new string[] { @"C:\Users\xuef\source\repos\AiursoftWeb\Infrastructures" });
     }
 }
