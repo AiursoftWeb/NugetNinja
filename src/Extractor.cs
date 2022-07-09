@@ -28,7 +28,7 @@ namespace Aiursoft.NugetNinja
             foreach (var csprojPath in csprojs)
             {
                 logger.LogTrace($"Parsing {csprojPath}...");
-                await model.GetProject(csprojPath);
+                await model.BuildProject(csprojPath);
             }
 
             return model;

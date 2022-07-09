@@ -15,7 +15,7 @@ namespace Aiursoft.NugetNinja
 
         public List<Package> AllPackages { get; set; } = new List<Package>();
 
-        public async Task<Project> GetProject(string path)
+        public async Task<Project> BuildProject(string path)
         {
             var projectInDatabaes = AllProjects.FirstOrDefault(p => p.PathOnDisk == path);
             if (projectInDatabaes != null)
@@ -25,14 +25,14 @@ namespace Aiursoft.NugetNinja
             }
             else
             {
-                var builtProject = await BuildProject(path);
+                var builtProject = await BuildNewProject(path);
                 AllProjects.Add(builtProject);
                 RootProjects.Add(builtProject);
                 return builtProject;
             }
         }
 
-        private async Task<Project> BuildProject(string csprojPath)
+        private async Task<Project> BuildNewProject(string csprojPath)
         {
             var csprojFolder = new FileInfo(csprojPath).Directory?.FullName
                 ?? throw new IOException($"Can not get the .csproj file location based on path: '{csprojPath}'!");
@@ -43,7 +43,7 @@ namespace Aiursoft.NugetNinja
             var subProjectReferenceObjects = new List<Project>();
             foreach (var projectReference in projectReferences)
             {
-                var projectObject = await this.GetProject(projectReference);
+                var projectObject = await this.BuildProject(projectReference);
                 subProjectReferenceObjects.Add(projectObject);
             }
             var project = new Project(csprojPath)
