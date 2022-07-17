@@ -17,7 +17,7 @@ namespace Aiursoft.NugetNinja
             this.logger = logger;
         }
 
-        public async Task<Model> Extract(string rootPath)
+        public async Task<Model> Parse(string rootPath)
         {
             var csprojs = Directory
                 .EnumerateFiles(rootPath, "*.csproj", SearchOption.AllDirectories)
@@ -28,7 +28,7 @@ namespace Aiursoft.NugetNinja
             foreach (var csprojPath in csprojs)
             {
                 logger.LogTrace($"Parsing {csprojPath}...");
-                await model.BuildProject(csprojPath);
+                await model.IncludeProject(csprojPath);
             }
 
             return model;

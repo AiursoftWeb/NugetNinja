@@ -17,7 +17,7 @@ namespace Aiursoft.NugetNinja
 
         public override string ToString()
         {
-            return this.Name;
+            return Name;
         }
     }
 }

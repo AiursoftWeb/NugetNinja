@@ -19,6 +19,6 @@ public class Program
 
         var serviceProvider = services.BuildServiceProvider();
         var entry = serviceProvider.GetRequiredService<Entry>();
-        await entry.StartEntry(new string[] { @"C:\Users\xuef\source\repos\AiursoftWeb\Infrastructures" });
+        await entry.StartEntry(new string[] { @"C:\Users\AnduinXue\source\repos\AiursoftWeb\Infrastructures" });
     }
 }
