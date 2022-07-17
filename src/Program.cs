@@ -17,6 +17,8 @@ public class Program
         services.AddSingleton<Entry>();
         services.AddTransient<Extractor>();
         services.AddTransient<UselessProjectReferenceDetector>();
+        services.AddTransient<UselessPackageReferenceDetector>();
+        services.AddTransient<Enumerator>();
 
         var serviceProvider = services.BuildServiceProvider();
         var entry = serviceProvider.GetRequiredService<Entry>();

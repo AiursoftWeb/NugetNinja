@@ -8,6 +8,13 @@ namespace Aiursoft.NugetNinja
 {
     public class UselessProjectReferenceDetector
     {
+        private readonly Enumerator enumerator;
+
+        public UselessProjectReferenceDetector(Enumerator enumerator)
+        {
+            this.enumerator = enumerator;
+        }
+
         public IEnumerable<UselessProjectReference> Analyse(Model context)
         {
             foreach (var rootProject in context.AllProjects)
@@ -20,14 +27,14 @@ namespace Aiursoft.NugetNinja
             }
         }
 
-        public IEnumerable<UselessProjectReference> AnalyseProject(Project context)
+        private IEnumerable<UselessProjectReference> AnalyseProject(Project context)
         {
             var directReferences = context.ProjectReferences;
 
             var allRecursiveReferences = new List<Project>();
             foreach (var directReference in directReferences)
             {
-                var recursiveReferences = this.EnumerateAllBuiltProjects(directReference, includeSelf: false);
+                var recursiveReferences = enumerator.EnumerateAllBuiltProjects(directReference, includeSelf: false);
                 allRecursiveReferences.AddRange(recursiveReferences);
             }
 
@@ -36,22 +43,6 @@ namespace Aiursoft.NugetNinja
                 if (allRecursiveReferences.Contains(directReference))
                 {
                     yield return new UselessProjectReference(context, directReference);
-                }
-            }
-        }
-
-
-        private IEnumerable<Project> EnumerateAllBuiltProjects(Project input, bool includeSelf = true)
-        {
-            if (includeSelf)
-            {
-                yield return input;
-            }
-            foreach (var subProject in input.ProjectReferences)
-            {
-                foreach (var result in EnumerateAllBuiltProjects(subProject))
-                {
-                    yield return result;
                 }
             }
         }

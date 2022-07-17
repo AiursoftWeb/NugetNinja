@@ -19,7 +19,7 @@ namespace Aiursoft.NugetNinja
 
         public string BuildMessage()
         {
-            return $"The project: '{SourceProjectName}' don't have to reference '{TargetProjectName}' because it already has its access via anther path!";
+            return $"The project: '{SourceProjectName}' don't have to reference project '{TargetProjectName}' because it already has its access via another path!";
         }
     }
 }

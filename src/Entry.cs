@@ -12,16 +12,19 @@ namespace Aiursoft.NugetNinja
     public class Entry
     {
         private readonly Extractor extractor;
-        private readonly UselessProjectReferenceDetector detector;
+        private readonly UselessProjectReferenceDetector projectDetector;
+        private readonly UselessPackageReferenceDetector packageDetector;
         private readonly ILogger<Entry> logger;
 
         public Entry(
             Extractor extractor,
-            UselessProjectReferenceDetector detector,
+            UselessProjectReferenceDetector projectDetector,
+            UselessPackageReferenceDetector packageDetector,
             ILogger<Entry> logger)
         {
             this.extractor = extractor;
-            this.detector = detector;
+            this.projectDetector = projectDetector;
+            this.packageDetector = packageDetector;
             this.logger = logger;
         }
 
@@ -38,8 +41,14 @@ namespace Aiursoft.NugetNinja
             var workingPath = args[0];
             var model = await extractor.Parse(workingPath);
 
-            var uselessReferences = this.detector.Analyse(model).ToArray();
-            foreach (var uselessReference in uselessReferences)
+            var uselessProjectReferences = this.projectDetector.Analyse(model);
+            foreach (var uselessReference in uselessProjectReferences)
+            {
+                logger.LogWarning(uselessReference.BuildMessage());
+            }
+
+            var uselessPackageReferences = this.packageDetector.Analyse(model);
+            foreach (var uselessReference in uselessPackageReferences)
             {
                 logger.LogWarning(uselessReference.BuildMessage());
             }
