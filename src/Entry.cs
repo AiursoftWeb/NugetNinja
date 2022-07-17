@@ -41,13 +41,13 @@ namespace Aiursoft.NugetNinja
             var workingPath = args[0];
             var model = await extractor.Parse(workingPath);
 
-            var uselessProjectReferences = this.projectDetector.Analyse(model);
+            var uselessProjectReferences = this.projectDetector.Analyze(model);
             foreach (var uselessReference in uselessProjectReferences)
             {
                 logger.LogWarning(uselessReference.BuildMessage());
             }
 
-            var uselessPackageReferences = this.packageDetector.Analyse(model);
+            var uselessPackageReferences = this.packageDetector.Analyze(model);
             foreach (var uselessReference in uselessPackageReferences)
             {
                 logger.LogWarning(uselessReference.BuildMessage());

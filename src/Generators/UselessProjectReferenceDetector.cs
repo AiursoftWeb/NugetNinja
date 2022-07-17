@@ -15,11 +15,11 @@ namespace Aiursoft.NugetNinja
             this.enumerator = enumerator;
         }
 
-        public IEnumerable<UselessProjectReference> Analyse(Model context)
+        public IEnumerable<UselessProjectReference> Analyze(Model context)
         {
             foreach (var rootProject in context.AllProjects)
             {
-                var uselessReferences = this.AnalyseProject(rootProject);
+                var uselessReferences = this.AnalyzeProject(rootProject);
                 foreach(var reference in uselessReferences)
                 {
                     yield return reference;
@@ -27,7 +27,7 @@ namespace Aiursoft.NugetNinja
             }
         }
 
-        private IEnumerable<UselessProjectReference> AnalyseProject(Project context)
+        private IEnumerable<UselessProjectReference> AnalyzeProject(Project context)
         {
             var directReferences = context.ProjectReferences;
 
