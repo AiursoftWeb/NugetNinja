@@ -15,11 +15,11 @@ namespace Aiursoft.NugetNinja
             this.enumerator = enumerator;
         }
 
-        public IEnumerable<UselessPackageReference> Analyse(Model context)
+        public IEnumerable<UselessPackageReference> Analyze(Model context)
         {
             foreach (var rootProject in context.AllProjects)
             {
-                var uselessReferences = this.AnalyseProject(rootProject);
+                var uselessReferences = this.AnalyzeProject(rootProject);
                 foreach (var reference in uselessReferences)
                 {
                     yield return reference;
@@ -27,7 +27,7 @@ namespace Aiursoft.NugetNinja
             }
         }
 
-        private IEnumerable<UselessPackageReference> AnalyseProject(Project context)
+        private IEnumerable<UselessPackageReference> AnalyzeProject(Project context)
         {
             var allRelatedProjects = enumerator.EnumerateAllBuiltProjects(context, false);
             var allPackagesBroughtUp = allRelatedProjects.SelectMany(p => p.PackageReferences).ToArray();
