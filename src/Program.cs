@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Aiursoft.NugetNinja.Abstracts;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace Aiursoft.NugetNinja;
 
@@ -16,12 +18,21 @@ public class Program
 
         services.AddSingleton<Entry>();
         services.AddTransient<Extractor>();
-        services.AddTransient<UselessProjectReferenceDetector>();
-        services.AddTransient<UselessPackageReferenceDetector>();
+
+        var generators = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(t => t.IsClass)
+            .Where(t => t.GetInterfaces().Contains(typeof(IActionGenerator)));
+
+        foreach (var generator in generators)
+        {
+            services.AddTransient(typeof(IActionGenerator), generator);
+        }
+
         services.AddTransient<Enumerator>();
 
         var serviceProvider = services.BuildServiceProvider();
         var entry = serviceProvider.GetRequiredService<Entry>();
-        await entry.StartEntry(new string[] { @"C:\Users\AnduinXue\source\repos\AiursoftWeb\Infrastructures" });
+        await entry.StartEntry(new string[] { @"D:\ModelASpaceport" });
     }
 }

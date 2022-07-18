@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using Aiursoft.NugetNinja.Abstracts;
+using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -12,19 +13,16 @@ namespace Aiursoft.NugetNinja
     public class Entry
     {
         private readonly Extractor extractor;
-        private readonly UselessProjectReferenceDetector projectDetector;
-        private readonly UselessPackageReferenceDetector packageDetector;
+        private readonly IEnumerable<IActionGenerator> generators;
         private readonly ILogger<Entry> logger;
 
         public Entry(
             Extractor extractor,
-            UselessProjectReferenceDetector projectDetector,
-            UselessPackageReferenceDetector packageDetector,
+            IEnumerable<IActionGenerator> generators,
             ILogger<Entry> logger)
         {
             this.extractor = extractor;
-            this.projectDetector = projectDetector;
-            this.packageDetector = packageDetector;
+            this.generators = generators;
             this.logger = logger;
         }
 
@@ -41,16 +39,13 @@ namespace Aiursoft.NugetNinja
             var workingPath = args[0];
             var model = await extractor.Parse(workingPath);
 
-            var uselessProjectReferences = this.projectDetector.Analyze(model);
-            foreach (var uselessReference in uselessProjectReferences)
+            foreach(var generator in this.generators)
             {
-                logger.LogWarning(uselessReference.BuildMessage());
-            }
-
-            var uselessPackageReferences = this.packageDetector.Analyze(model);
-            foreach (var uselessReference in uselessPackageReferences)
-            {
-                logger.LogWarning(uselessReference.BuildMessage());
+                var actions = generator.Analyze(model);
+                foreach (var action in actions)
+                {
+                    logger.LogWarning(action.BuildMessage());
+                }
             }
 
             logger.LogInformation("Stopping NugetNinja...");

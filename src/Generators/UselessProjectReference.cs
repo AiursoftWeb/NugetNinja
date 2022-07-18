@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Aiursoft.NugetNinja.Abstracts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Aiursoft.NugetNinja
 {
-    public class UselessProjectReference
+    public class UselessProjectReference : IAction
     {
         public  UselessProjectReference(Project source, Project target)
         {
@@ -20,6 +21,12 @@ namespace Aiursoft.NugetNinja
         public string BuildMessage()
         {
             return $"The project: '{SourceProjectName}' don't have to reference project '{TargetProjectName}' because it already has its access via another path!";
+        }
+
+        public void TakeAction()
+        {
+            // To DO; Remove this reference.
+            throw new NotImplementedException();
         }
     }
 }

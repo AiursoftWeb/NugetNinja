@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Aiursoft.NugetNinja.Abstracts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Aiursoft.NugetNinja
 {
-    public class UselessPackageReferenceDetector
+    public class UselessPackageReferenceDetector : IActionGenerator
     {
         private readonly Enumerator enumerator;
 
@@ -15,7 +16,7 @@ namespace Aiursoft.NugetNinja
             this.enumerator = enumerator;
         }
 
-        public IEnumerable<UselessPackageReference> Analyze(Model context)
+        public IEnumerable<IAction> Analyze(Model context)
         {
             foreach (var rootProject in context.AllProjects)
             {
@@ -25,6 +26,18 @@ namespace Aiursoft.NugetNinja
                     yield return reference;
                 }
             }
+        }
+
+        public string GetCommandAlias()
+        {
+            // To do:
+            throw new NotImplementedException();
+        }
+
+        public string GetHelp()
+        {
+            // To do
+            throw new NotImplementedException();
         }
 
         private IEnumerable<UselessPackageReference> AnalyzeProject(Project context)
