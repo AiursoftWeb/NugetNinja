@@ -246,6 +246,7 @@ public class Project
         var doc = new HtmlDocument();
         doc.OptionOutputOriginalCase = true;
         doc.LoadHtml(csprojContent);
+        var newline = HtmlNode.CreateNode("\r\n    ");
 
         var itemGroup = doc.DocumentNode
             .Descendants("ItemGroup")
@@ -254,11 +255,16 @@ public class Project
         if (itemGroup == null)
         {
             itemGroup = doc.CreateElement("ItemGroup");
-            doc.DocumentNode.AppendChild(itemGroup);
+            doc.DocumentNode.FirstChild?.AppendChild(itemGroup);
+            doc.DocumentNode.FirstChild?.AppendChild(newline);
         }
 
         var reference = doc.CreateElement("FrameworkReference");
         reference.Attributes.Add("Include", frameworkReference);
+        
+        itemGroup.AppendChild(newline);
+        itemGroup.AppendChild(reference);
+        itemGroup.AppendChild(newline);
 
         await SaveDocToDisk(doc);
     }
