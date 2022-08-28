@@ -44,6 +44,24 @@ public class MissingPropertyDetector : IActionDetector
             if (string.IsNullOrWhiteSpace(project.ImplicitUsings) && _enforceImplicitUsings)
                 yield return new MissingProperty(project, nameof(project.ImplicitUsings), "enable");
 
+            if (
+                project.PackageReferences.Any(p => p.Name == "Microsoft.AspNetCore.App") ||
+                project.PackageReferences.Any(p => p.Name == "Microsoft.AspNetCore.All") // Is an old Web Project.
+                )
+            {
+                if (project.PackageReferences.FirstOrDefault(p => p.Name == "Microsoft.AspNetCore.App") is not null)
+                    yield return new ObsoletePackageReference(project, "Microsoft.AspNetCore.App");
+                if (project.PackageReferences.FirstOrDefault(p => p.Name == "Microsoft.AspNetCore.All") is not null)
+                    yield return new ObsoletePackageReference(project, "Microsoft.AspNetCore.All");
+                if (project.PackageReferences.FirstOrDefault(p => p.Name == "Microsoft.AspNetCore.Razor.Design") is not null)
+                    yield return new ObsoletePackageReference(project, "Microsoft.AspNetCore.Razor.Design");
+
+                if (project.Sdk?.Equals("Microsoft.NET.Sdk.Web", StringComparison.OrdinalIgnoreCase) == false)
+                {
+                    yield return new InsertFrameworkReference(project, "Microsoft.AspNetCore.App");
+                }
+            }
+
             // Skip executable programs.
             if (project.Executable())
             {

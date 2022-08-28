@@ -599,5 +599,10 @@ public class Repository
     /// </summary>
     [JsonPropertyName("default_branch")]
     public string? DefaultBranch { get; set; }
+
+    public override string ToString()
+    {
+        return this.FullName ?? throw new NullReferenceException($"The {nameof(FullName)} of this repo is null!");
+    }
 }
 

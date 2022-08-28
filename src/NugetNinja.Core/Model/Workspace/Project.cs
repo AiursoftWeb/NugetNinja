@@ -60,6 +60,8 @@ public class Project
 
     public List<Package> PackageReferences { get; init; } = new();
 
+    public List<string> FrameworkReferences { get; init; } = new();
+
     public string[] GetTargetFrameworks()
     {
         if (!string.IsNullOrWhiteSpace(TargetFrameworks))
@@ -234,6 +236,29 @@ public class Project
             propertyGroup.AppendChild(property);
             propertyGroup.AppendChild(newline);
         }
+
+        await SaveDocToDisk(doc);
+    }
+
+    public async Task AddFrameworkReference(string frameworkReference)
+    {
+        var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
+        var doc = new HtmlDocument();
+        doc.OptionOutputOriginalCase = true;
+        doc.LoadHtml(csprojContent);
+
+        var itemGroup = doc.DocumentNode
+            .Descendants("ItemGroup")
+            .FirstOrDefault();
+
+        if (itemGroup == null)
+        {
+            itemGroup = doc.CreateElement("ItemGroup");
+            doc.DocumentNode.AppendChild(itemGroup);
+        }
+
+        var reference = doc.CreateElement("FrameworkReference");
+        reference.Attributes.Add("Include", frameworkReference);
 
         await SaveDocToDisk(doc);
     }
