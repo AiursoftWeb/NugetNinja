@@ -1,10 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿using Microsoft.Extensions.DependencyInjection;
+using Aiursoft.NugetNinja.Core;
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.NugetNinja.Core;
-
-namespace Microsoft.NugetNinja.AllOfficialsPlugin;
+namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
 
 public class StartUp : IStartUp
 {

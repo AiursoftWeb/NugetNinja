@@ -1,15 +1,14 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
 using Microsoft.Extensions.Logging;
-using Microsoft.NugetNinja.Core;
-using Microsoft.NugetNinja.DeprecatedPackagePlugin;
-using Microsoft.NugetNinja.PossiblePackageUpgradePlugin;
-using Microsoft.NugetNinja.UselessPackageReferencePlugin;
-using Microsoft.NugetNinja.UselessProjectReferencePlugin;
-using Microsoft.NugetNinja.MissingPropertyPlugin;
+using Aiursoft.NugetNinja.Core;
+using Aiursoft.NugetNinja.DeprecatedPackagePlugin;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
+using Aiursoft.NugetNinja.UselessPackageReferencePlugin;
+using Aiursoft.NugetNinja.UselessProjectReferencePlugin;
+using Aiursoft.NugetNinja.MissingPropertyPlugin;
 
-namespace Microsoft.NugetNinja.AllOfficialsPlugin;
+namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
 
 public class RunAllOfficialPluginsService : IEntryService
 {

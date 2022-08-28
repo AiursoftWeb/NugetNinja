@@ -1,12 +1,11 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.NugetNinja.AllOfficialsPlugin;
-using Microsoft.NugetNinja.Core;
-using Microsoft.NugetNinja.PrBot;
+using Aiursoft.NugetNinja.AllOfficialsPlugin;
+using Aiursoft.NugetNinja.Core;
+using Aiursoft.NugetNinja.PrBot;
 
 await CreateHostBuilder(args)
     .Build()

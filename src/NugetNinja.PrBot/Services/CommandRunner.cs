@@ -1,11 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.NugetNinja.PrBot;
+namespace Aiursoft.NugetNinja.PrBot;
 
 public class CommandRunner
 {

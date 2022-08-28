@@ -1,11 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.NugetNinja.AllOfficialsPlugin;
+using Aiursoft.NugetNinja.AllOfficialsPlugin;
 
-namespace Microsoft.NugetNinja.PrBot;
+namespace Aiursoft.NugetNinja.PrBot;
 
 public class Entry
 {

@@ -1,10 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
 using Microsoft.Extensions.Logging;
-using Microsoft.NugetNinja.Core;
+using Aiursoft.NugetNinja.Core;
 
-namespace Microsoft.NugetNinja.PossiblePackageUpgradePlugin;
+namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
 
 public class PackageReferenceUpgradeDetector : IActionDetector
 {

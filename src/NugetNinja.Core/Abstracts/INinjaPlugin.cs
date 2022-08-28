@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
-namespace Microsoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core;
 
 public interface INinjaPlugin
 {

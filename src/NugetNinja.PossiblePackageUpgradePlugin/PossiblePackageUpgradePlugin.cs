@@ -1,9 +1,6 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿using Aiursoft.NugetNinja.Core;
 
-using Microsoft.NugetNinja.Core;
-
-namespace Microsoft.NugetNinja.PossiblePackageUpgradePlugin;
+namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
 
 public class PossiblePackageUpgradePlugin : INinjaPlugin
 {

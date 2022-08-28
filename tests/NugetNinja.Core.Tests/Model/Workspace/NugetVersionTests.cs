@@ -1,5 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 #pragma warning disable CS1718 // Comparison made to same variable
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning disable CS0253 // Possible unintended reference comparison; right hand side needs cast
@@ -10,7 +9,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core;
 
 [TestClass]
 public class NugetVersionTests

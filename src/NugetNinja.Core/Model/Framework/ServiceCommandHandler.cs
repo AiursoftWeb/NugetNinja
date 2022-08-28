@@ -1,11 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
 using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core;
 
 public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
     where TE : class, IEntryService

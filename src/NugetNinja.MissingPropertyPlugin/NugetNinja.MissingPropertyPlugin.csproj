@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Microsoft.NugetNinja.MissingPropertyPlugin</RootNamespace>
+    <RootNamespace>Aiursoft.NugetNinja.MissingPropertyPlugin</RootNamespace>
   </PropertyGroup>
 
 

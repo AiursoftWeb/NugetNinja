@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Microsoft.NugetNinja.Core</RootNamespace>
+    <RootNamespace>Aiursoft.NugetNinja.Core</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

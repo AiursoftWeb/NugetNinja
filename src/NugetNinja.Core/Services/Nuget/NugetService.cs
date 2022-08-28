@@ -1,12 +1,11 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
 using System.Net;
 using System.Text.Json;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core;
 
 public class NugetService
 {

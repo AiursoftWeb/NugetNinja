@@ -1,11 +1,7 @@
 # Nuget Ninja (A Hackthon project)
 
 ![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)
-![Build Status](https://github.com/microsoft/NugetNinja/actions/workflows/build.yml/badge.svg)
-
-(Nuget Ninjia was not built or released as a production product. Instead it was our hackthon project while we prefer opensource. It was not officialy release by Microsoft as a product.)
-
-(Non-production! This project is still working in progress...)
+![Build Status](https://github.com/AiursoftWeb/NugetNinja/actions/workflows/build.yml/badge.svg)
 
 Nuget Ninjia is a tool for detecting dependencies of .NET projects. It analyzes the dependency structure of .NET projects in a directory and builds a directed acyclic graph. And will give some modification suggestions for Nuget packages, so that the dependencies of the project are as concise and up-to-date as possible.
 
@@ -58,22 +54,8 @@ Requirements about how to develop.
 
 ## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+There are many ways to contribute to the project: logging bugs, submitting pull requests, reporting issues, and creating suggestions.
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+Even if you have push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your personal workflow cruft out of sight.
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-## Trademarks
-
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
-trademarks or logos is subject to and must follow 
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+We're also interested in your feedback for the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.

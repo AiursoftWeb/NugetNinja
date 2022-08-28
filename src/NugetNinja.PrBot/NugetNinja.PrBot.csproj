@@ -9,7 +9,7 @@
     <Nullable>enable</Nullable>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
-    <RootNamespace>Microsoft.NugetNinja.PrBot</RootNamespace>
+    <RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

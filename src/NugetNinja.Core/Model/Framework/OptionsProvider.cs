@@ -1,9 +1,8 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+﻿
 
 using System.CommandLine;
 
-namespace Microsoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core;
 
 public static class OptionsProvider
 {
