@@ -11,20 +11,6 @@
 		<PublishSingleFile>true</PublishSingleFile>
 		<SelfContained>true</SelfContained>
 		<RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
-		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>ninja.bot</ToolCommandName>
-		<AssemblyName>ninja.bot</AssemblyName>
-		<Company>Aiursoft</Company>
-		<Product>NugetNinja</Product>
-		<Authors>anduin2017 codgician</Authors>
-		<Description>A bot for detecting dependencies of .NET GitHub repositories and create pull request automatically.</Description>
-		<PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
-		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/Aiursoft/NugetNinja.git</RepositoryUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageId>Aiursoft.NugetNinja.PrBot</PackageId>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/Aiursoft/Nugetninja</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
