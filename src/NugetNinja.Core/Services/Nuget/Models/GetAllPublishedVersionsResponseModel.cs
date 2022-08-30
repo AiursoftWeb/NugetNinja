@@ -7,5 +7,5 @@ namespace Aiursoft.NugetNinja.Core;
 public class GetAllPublishedVersionsResponseModel
 {
     [JsonPropertyName("versions")]
-    public List<string>? Versions { get; init; }
+    public IReadOnlyCollection<string>? Versions { get; init; }
 }
