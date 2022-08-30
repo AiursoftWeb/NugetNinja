@@ -126,12 +126,12 @@ public class License
     /// 
     /// </summary>
     [JsonPropertyName("url")]
-    public string? url { get; set; }
+    public string? Url { get; set; }
     /// <summary>
     /// 
     /// </summary>
     [JsonPropertyName("node_id")]
-    public string? node_id { get; set; }
+    public string? NodeId { get; set; }
 }
 
 public class Repository
@@ -140,13 +140,13 @@ public class Repository
     /// 
     /// </summary>
     [JsonPropertyName("id")]
-    public int id { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     [JsonPropertyName("node_id")]
-    public string? node_id { get; set; }
+    public string? NodeId { get; set; }
 
     /// <summary>
     /// 
@@ -266,19 +266,19 @@ public class Repository
     /// 
     /// </summary>
     [JsonPropertyName("git_tags_url")]
-    public string? gitTagsUrl { get; set; }
+    public string? GitTagsUrl { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     [JsonPropertyName("git_refs_url")]
-    public string? gitRefsUrl { get; set; }
+    public string? GitRefsUrl { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     [JsonPropertyName("trees_url")]
-    public string? trees_url { get; set; }
+    public string? TreesUrl { get; set; }
 
     /// <summary>
     /// 
