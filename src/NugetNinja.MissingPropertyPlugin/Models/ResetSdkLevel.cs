@@ -2,20 +2,20 @@
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
 
-public class ResetSDK : IAction
+public class ResetSdkLevel : IAction
 {
     public Project Project { get; }
-    public string NewSDK { get; }
+    public string NewSdk { get; }
 
-    public ResetSDK(Project project, string newSdk)
+    public ResetSdkLevel(Project project, string newSdk)
     {
         Project = project;
-        NewSDK = newSdk;
+        NewSdk = newSdk;
     }
 
     public string BuildMessage()
     {
-        return $"The project: '{Project}' with SDK: '{Project.Sdk}' should be changed to '{NewSDK}'.";
+        return $"The project: '{Project}' with SDK: '{Project.Sdk}' should be changed to '{NewSdk}'.";
     }
 
     public Task TakeActionAsync()

@@ -1,6 +1,4 @@
-﻿
-
-namespace Aiursoft.NugetNinja.Core;
+﻿namespace Aiursoft.NugetNinja.Core;
 
 public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEquatable<NugetVersion?>
 {
