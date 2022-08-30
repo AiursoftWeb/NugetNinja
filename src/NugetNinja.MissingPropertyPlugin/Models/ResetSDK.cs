@@ -7,10 +7,10 @@ public class ResetSDK : IAction
     public Project Project { get; }
     public string NewSDK { get; }
 
-    public ResetSDK(Project project, string newSDK)
+    public ResetSDK(Project project, string newSdk)
     {
         Project = project;
-        NewSDK = newSDK;
+        NewSDK = newSdk;
     }
 
     public string BuildMessage()
