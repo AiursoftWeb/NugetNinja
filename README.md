@@ -42,9 +42,9 @@ Requirements about how to develop.
 
 1. Execute `dotnet restore` to restore all .NET dependencies.
 2. Execute the following command to build the app:
-   * `dotnet publish -c Release -r win-x64   --self-contained` on Windows.
-   * `dotnet publish -c Release -r linux-x64 --self-contained` on Linux.
-   * `dotnet publish -c Release -r osx-x64   --self-contained` on Mac OS.
+   * `dotnet publish -c Release -r win-x64` on Windows.
+   * `dotnet publish -c Release -r linux-x64` on Linux.
+   * `dotnet publish -c Release -r osx-x64` on Mac OS.
 3. Execute `dotnet run` to run the app
 
 ## Run in Microsoft Visual Studio

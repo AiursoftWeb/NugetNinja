@@ -1,17 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>0.0.1</Version>
+		<!--Build and code-->
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<Version>0.0.1</Version>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<AssemblyName>ninja-bot</AssemblyName>
+		<RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
+		<!--Tool-->
+		<PackAsTool>false</PackAsTool>
+		<!--Best practice-->
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
-		<SelfContained Condition="'$(Configuration)' != 'Debug'">true</SelfContained>
-		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">true</PublishTrimmed>
+		<SelfContained>true</SelfContained>
+		<PublishTrimmed>false</PublishTrimmed>
 		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">true</PublishReadyToRun>
 		<PublishSingleFile Condition="'$(Configuration)' != 'Debug'">true</PublishSingleFile>
+		<!--Nuget-->
+		<Company>Aiursoft</Company>
+		<Product>NugetNinja Bot</Product>
+		<Authors>anduin2017 codgician</Authors>
+		<Description>A bot for detecting dependencies of .NET projects and create pull requests automatically.</Description>
+		<PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/Aiursoft/NugetNinja.git</RepositoryUrl>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageId>Aiursoft.NugetNinja.PrBot</PackageId>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/Aiursoft/Nugetninja</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
