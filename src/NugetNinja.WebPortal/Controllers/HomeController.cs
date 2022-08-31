@@ -13,6 +13,7 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        _logger.LogInformation("A user accessed the index page.");
         return View();
     }
 }

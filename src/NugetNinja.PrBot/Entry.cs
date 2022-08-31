@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Aiursoft.NugetNinja.AllOfficialsPlugin;
+using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.PrBot;
 

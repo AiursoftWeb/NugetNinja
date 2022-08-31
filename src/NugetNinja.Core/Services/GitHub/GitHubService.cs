@@ -6,7 +6,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.PrBot;
+namespace Aiursoft.NugetNinja.Core;
 
 public class GitHubService
 {
@@ -56,7 +56,7 @@ public class GitHubService
     public async IAsyncEnumerable<Repository> GetMyStars(string userName)
     {
         _logger.LogInformation($"Listing all stared repositories based on user's name: {userName}...");
-        for (int i = 1;; i++)
+        for (var i = 1;; i++)
         {
             var endpoint = $@"https://api.github.com/users/{userName}/starred?page={i}";
             var currentPageItems = await SendHttpAndGetJson<List<Repository>>(endpoint, HttpMethod.Get);

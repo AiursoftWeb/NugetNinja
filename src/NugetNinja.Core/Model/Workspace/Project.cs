@@ -69,9 +69,9 @@ public class Project
             return TargetFrameworks.Split(';');
         }
 
-        if (!string.IsNullOrWhiteSpace(this.TargetFramework))
+        if (!string.IsNullOrWhiteSpace(TargetFramework))
         {
-            return new[] { this.TargetFramework };
+            return new[] { TargetFramework };
         }
 
         return Array.Empty<string>();

@@ -33,7 +33,7 @@ public class MissingPropertyDetector : IActionDetector
         await Task.CompletedTask;
         foreach (var project in context.AllProjects)
         {
-            var versionSuggestion = this.AnalyzeVersion(project);
+            var versionSuggestion = AnalyzeVersion(project);
             if (versionSuggestion != null)
             {
                 yield return versionSuggestion;
@@ -80,7 +80,6 @@ public class MissingPropertyDetector : IActionDetector
                 yield return new MissingProperty(project, nameof(project.OutputType), "Library");
 
             // To do: Load those properties from GitHub API.
-
             //if (string.IsNullOrWhiteSpace(project.PackageLicenseExpression) && string.IsNullOrWhiteSpace(project.PackageLicenseFile))
             //    yield return new MissingProperty(project, nameof(project.PackageLicenseExpression), "MIT");
             //if (string.IsNullOrWhiteSpace(project.Description))
@@ -105,7 +104,7 @@ public class MissingPropertyDetector : IActionDetector
     private ResetRuntime? AnalyzeVersion(Project project)
     {
         var runtimes = project.GetTargetFrameworks();
-        for (int i = 0; i < runtimes.Length; i++)
+        for (var i = 0; i < runtimes.Length; i++)
         {
             foreach (var notSupportedRuntime in _notSupportedRuntimes)
             {
