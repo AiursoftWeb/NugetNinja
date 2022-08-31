@@ -2,7 +2,7 @@
     ViewData["Title"] = "Home Page";
 }
 <div class="jumbotron">
-    <form class="container" method="post" action="/Home/Create">
+    <form class="container" method="post" asp-controller="Home" asp-action="Subscribe">
         <div class="col-12">
             <h3>Welcome to Aiursoft Warp</h3>
             <p>Warp is a simple web application which shorten your URL.</p>
@@ -32,11 +32,6 @@
             <button type="submit" class="btn btn-lg btn-success mb-3">
                 <i class="fas fa-random"></i> Create redirect
             </button>
-            <a class="btn btn-primary btn-lg mb-3" role="button" href="/Dashboard/Index">
-                <i class="fas fa-pencil-alt"></i>
-                Sign in to your personal URL database
-            </a>
         </div>
-        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8AGKuofGumhOr8ddoI9-YJ-8DKPHXjasTARX-ezGXBLMaqTP3Ay2uQiNf4keRorutn9S1JdWl_Ix94M8ayWTVu6bGs2UD_8aPjW5GvPW8VGZDlbhbQPSmUNc6GQIo8KqNExQoNyuERSPvoGOXpfIHno" />
     </form>
 </div>
