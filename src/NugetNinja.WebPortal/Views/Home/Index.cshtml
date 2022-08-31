@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="jumbotron">
+    <form class="container" method="post" action="/Home/Create">
+        <div class="col-12">
+            <h3>Welcome to Aiursoft Warp</h3>
+            <p>Warp is a simple web application which shorten your URL.</p>
+        </div>
+
+        <div class="col-12 mb-3 mt-5">
+            <div class="form-group">
+                <input type="url" id="url" class="form-control form-control-lg" placeholder="Input the long url. Example: https://github.com/AiursoftWeb/Infrastructures" data-val="true" data-val-maxlength="The field Url must be a string or array type with a maximum length of &#x27;1000&#x27;." data-val-maxlength-max="1000" data-val-minlength="The field Url must be a string or array type with a minimum length of &#x27;5&#x27;." data-val-minlength-min="5" data-val-required="The Url field is required." data-val-url="The Url field is not a valid fully-qualified http, https, or ftp URL." maxlength="1000" name="Url" value="" />
+                <span class="text-danger field-validation-valid" data-valmsg-for="Url" data-valmsg-replace="true"></span>
+            </div>
+
+            <div class="form-group col-lg-4 col-md-6 col-sm-8 col-12 p-0 d-none" id="record-name-part">
+                <label for="NewRecordName">Shorten URL (You can edit it below)</label>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">https://</span>
+                    </div>
+                    <input type="text" class="form-control form-control-lg" placeholder="Enter a valid domain" data-val="true" data-val-maxlength="The field Your shorten URL must be a string or array type with a maximum length of &#x27;50&#x27;." data-val-maxlength-max="50" data-val-minlength="The field Your shorten URL must be a string or array type with a minimum length of &#x27;5&#x27;." data-val-minlength-min="5" data-val-required="The Your shorten URL field is required." id="NewRecordName" maxlength="50" name="NewRecordName" value="e7b0bbc">
+                    <div class="input-group-append">
+                        <span class="input-group-text">.aiurs.co</span>
+                    </div>
+                </div>
+                <span class="text-danger field-validation-valid" data-valmsg-for="NewRecordName" data-valmsg-replace="true"></span>
+            </div>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-lg btn-success mb-3">
+                <i class="fas fa-random"></i> Create redirect
+            </button>
+            <a class="btn btn-primary btn-lg mb-3" role="button" href="/Dashboard/Index">
+                <i class="fas fa-pencil-alt"></i>
+                Sign in to your personal URL database
+            </a>
+        </div>
+        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8AGKuofGumhOr8ddoI9-YJ-8DKPHXjasTARX-ezGXBLMaqTP3Ay2uQiNf4keRorutn9S1JdWl_Ix94M8ayWTVu6bGs2UD_8aPjW5GvPW8VGZDlbhbQPSmUNc6GQIo8KqNExQoNyuERSPvoGOXpfIHno" />
+    </form>
+</div>
