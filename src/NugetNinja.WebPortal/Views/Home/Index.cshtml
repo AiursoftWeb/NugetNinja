@@ -1,36 +1,25 @@
-﻿@{
+﻿@model Aiursoft.NugetNinja.WebPortal.Models.ViewModels.HomeViewModels.IndexViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 <div class="jumbotron">
     <form class="container" method="post" asp-controller="Home" asp-action="Subscribe">
         <div class="col-12">
-            <h3>Welcome to Aiursoft Warp</h3>
-            <p>Warp is a simple web application which shorten your URL.</p>
+            <h3>Welcome to Aiursoft Nuget Ninja!</h3>
+            <p>Nuget Ninjia is a tool for detecting dependencies of .NET projects.</p>
+            <p>It analyzes the dependency structure of .NET projects in a directory and builds a directed acyclic graph. And will give some modification suggestions, so that the dependencies of the project are as concise and up-to-date.</p>
         </div>
 
         <div class="col-12 mb-3 mt-5">
             <div class="form-group">
-                <input type="url" id="url" class="form-control form-control-lg" placeholder="Input the long url. Example: https://github.com/AiursoftWeb/Infrastructures" data-val="true" data-val-maxlength="The field Url must be a string or array type with a maximum length of &#x27;1000&#x27;." data-val-maxlength-max="1000" data-val-minlength="The field Url must be a string or array type with a minimum length of &#x27;5&#x27;." data-val-minlength-min="5" data-val-required="The Url field is required." data-val-url="The Url field is not a valid fully-qualified http, https, or ftp URL." maxlength="1000" name="Url" value="" />
-                <span class="text-danger field-validation-valid" data-valmsg-for="Url" data-valmsg-replace="true"></span>
-            </div>
-
-            <div class="form-group col-lg-4 col-md-6 col-sm-8 col-12 p-0 d-none" id="record-name-part">
-                <label for="NewRecordName">Shorten URL (You can edit it below)</label>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">https://</span>
-                    </div>
-                    <input type="text" class="form-control form-control-lg" placeholder="Enter a valid domain" data-val="true" data-val-maxlength="The field Your shorten URL must be a string or array type with a maximum length of &#x27;50&#x27;." data-val-maxlength-max="50" data-val-minlength="The field Your shorten URL must be a string or array type with a minimum length of &#x27;5&#x27;." data-val-minlength-min="5" data-val-required="The Your shorten URL field is required." id="NewRecordName" maxlength="50" name="NewRecordName" value="e7b0bbc">
-                    <div class="input-group-append">
-                        <span class="input-group-text">.aiurs.co</span>
-                    </div>
-                </div>
-                <span class="text-danger field-validation-valid" data-valmsg-for="NewRecordName" data-valmsg-replace="true"></span>
+                <input type="url" class="form-control form-control-lg" asp-for="GitHubRepositoryUrl"
+                       placeholder="Input the GitHub C# repository address. Example: https://github.com/AiursoftWeb/Infrastructures"  />
+                <span asp-validation-for="GitHubRepositoryUrl" class="text-danger"></span>
             </div>
         </div>
         <div class="col-12">
             <button type="submit" class="btn btn-lg btn-success mb-3">
-                <i class="fas fa-random"></i> Create redirect
+                <i class="fas fa-random"></i> Subscribe Nuget Ninja Pull requests
             </button>
         </div>
     </form>
