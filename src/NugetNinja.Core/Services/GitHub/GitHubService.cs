@@ -118,7 +118,7 @@ This pull request may break or change the behavior of this application. Review w
 
         request.Headers.Add("Authorization", $"token {_configuration["GitHubToken"]}");
         request.Headers.Add("accept", "application/json");
-        request.Headers.Add("User-Agent", ".NET HTTP Client");
+        request.Headers.Add("User-Agent", $"Aiursoft.NugetNinja {Helper.AppVersion}");
 
         var response = await _httpClient.SendAsync(request);
         try
