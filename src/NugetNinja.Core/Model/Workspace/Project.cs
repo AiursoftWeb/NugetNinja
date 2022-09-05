@@ -97,10 +97,12 @@ public class Project
     public async Task SetPackageReferenceVersionAsync(string refName, NugetVersion newVersion)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
-        var doc = new HtmlDocument();
-        doc.OptionOutputOriginalCase = true;
-        doc.OptionAutoCloseOnEnd = true;
-        doc.OptionWriteEmptyNodes = true;
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
+        };
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
             .Descendants("PackageReference")
@@ -121,10 +123,12 @@ public class Project
     public async Task ReplacePackageReferenceAsync(string refName, Package newPackage)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
-        var doc = new HtmlDocument();
-        doc.OptionOutputOriginalCase = true;
-        doc.OptionAutoCloseOnEnd = true;
-        doc.OptionWriteEmptyNodes = true;
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
+        };
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
             .Descendants("PackageReference")
@@ -143,10 +147,12 @@ public class Project
     public async Task RemovePackageReferenceAsync(string refName)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
-        var doc = new HtmlDocument();
-        doc.OptionOutputOriginalCase = true;
-        doc.OptionAutoCloseOnEnd = true;
-        doc.OptionWriteEmptyNodes = true;
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
+        };
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
             .Descendants("PackageReference")
@@ -164,8 +170,10 @@ public class Project
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
         var contextPath = Path.GetDirectoryName(PathOnDisk) ?? throw new IOException($"Couldn't find the project path based on: '{PathOnDisk}'.");
-        var doc = new HtmlDocument();
-        doc.OptionOutputOriginalCase = true;
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true
+        };
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
             .Descendants("ProjectReference")
@@ -182,8 +190,10 @@ public class Project
     public async Task RemoveProperty(string propertyName)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
-        var doc = new HtmlDocument();
-        doc.OptionOutputOriginalCase = true;
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true
+        };
         doc.LoadHtml(csprojContent);
 
         var existingNodes = doc.DocumentNode
@@ -201,8 +211,10 @@ public class Project
     public async Task AddOrUpdateProperty(string propertyName, string propertyValue)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
-        var doc = new HtmlDocument();
-        doc.OptionOutputOriginalCase = true;
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true
+        };
         doc.LoadHtml(csprojContent);
 
         var existingNodes = doc.DocumentNode
@@ -243,8 +255,10 @@ public class Project
     public async Task AddFrameworkReference(string frameworkReference)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
-        var doc = new HtmlDocument();
-        doc.OptionOutputOriginalCase = true;
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true
+        };
         doc.LoadHtml(csprojContent);
         var newline = HtmlNode.CreateNode("\r\n    ");
 
