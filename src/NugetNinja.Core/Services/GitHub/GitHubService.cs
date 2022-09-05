@@ -3,6 +3,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Aiursoft.NugetNinja.Core.Services.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -118,7 +119,7 @@ This pull request may break or change the behavior of this application. Review w
 
         request.Headers.Add("Authorization", $"token {_configuration["GitHubToken"]}");
         request.Headers.Add("accept", "application/json");
-        request.Headers.Add("User-Agent", ".NET HTTP Client");
+        request.Headers.Add("User-Agent", $"Aiursoft.NugetNinja {Helper.AppVersion}");
 
         var response = await _httpClient.SendAsync(request);
         try
