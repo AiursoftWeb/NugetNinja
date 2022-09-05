@@ -1,7 +1,7 @@
 # Nuget Ninja
 
 ![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)
-![Build Status](https://github.com/AiursoftWeb/NugetNinja/actions/workflows/build.yml/badge.svg)
+[![Build status](https://dev.azure.com/aiursoft/Star/_apis/build/status/NugetNinja%20Build)](https://dev.azure.com/aiursoft/Star/_build/latest?definitionId=18)
 [![NuGet version (Aiursoft.NugetNinja)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.svg?style=flat-square)](https://www.nuget.org/packages/Aiursoft.NugetNinja/)
 [![NuGet version (Aiursoft.NugetNinja.PrBot)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.PrBot.svg?style=flat-square)](https://www.nuget.org/packages/Aiursoft.NugetNinja.PrBot/)
 
