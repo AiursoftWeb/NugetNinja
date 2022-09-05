@@ -6,8 +6,5 @@ namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 
 public class UselessPackageReferencePlugin : INinjaPlugin
 {
-    public CommandHandler[] Install()
-    {
-        return new CommandHandler[] { new PackageReferenceHandler() };
-    }
+    public CommandHandler[] Install() => new CommandHandler[] { new PackageReferenceHandler() };
 }
