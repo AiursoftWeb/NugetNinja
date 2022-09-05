@@ -23,9 +23,8 @@ public class UselessPackageReferenceDetector : IActionDetector
 
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
-        foreach (var rootProject in context.AllProjects)
+        foreach (var uselessReferences in context.AllProjects.Select(AnalyzeProject))
         {
-            var uselessReferences = AnalyzeProject(rootProject);
             await foreach (var reference in uselessReferences)
             {
                 yield return reference;
@@ -74,7 +73,7 @@ public class UselessPackageReferenceDetector : IActionDetector
 
             if (accessiblePackagesForThisProject.Any(pa => pa.Name == directReference.Name))
             {
-                yield return new UselessPackageReference(context, directReference);
+                yield return new(context, directReference);
             }
         }
     }

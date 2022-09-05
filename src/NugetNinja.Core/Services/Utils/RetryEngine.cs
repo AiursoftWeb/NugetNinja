@@ -9,7 +9,7 @@ namespace Aiursoft.NugetNinja.Core;
 /// </summary>
 public class RetryEngine
 {
-    private static Random _rnd = new();
+    private static readonly Random Rnd = new();
     private readonly ILogger<RetryEngine> _logger;
 
     /// <summary>
@@ -81,6 +81,6 @@ public class RetryEngine
     private static int ExponentialBackoffTimeSlot(int time)
     {
         var max = (int)Math.Pow(2, time);
-        return _rnd.Next(0, max);
+        return Rnd.Next(0, max);
     }
 }
