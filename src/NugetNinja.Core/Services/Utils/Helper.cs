@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Aiursoft.NugetNinja.Core.Services.Utils;
+namespace Aiursoft.NugetNinja.Core;
 
 public static class Helper
 {
