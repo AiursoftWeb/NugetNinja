@@ -1,4 +1,4 @@
-# Nuget Ninja
+# Nuget Ninja2
 
 ![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Build Status](https://github.com/AiursoftWeb/NugetNinja/actions/workflows/build.yml/badge.svg)
