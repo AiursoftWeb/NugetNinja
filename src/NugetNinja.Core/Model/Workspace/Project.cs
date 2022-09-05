@@ -89,10 +89,7 @@ public class Project
             PackageReferences.Any(p => p.Name.Contains("xunit", StringComparison.OrdinalIgnoreCase));
     }
 
-    public override string ToString()
-    {
-        return Path.GetFileNameWithoutExtension(PathOnDisk);
-    }
+    public override string ToString() => Path.GetFileNameWithoutExtension(PathOnDisk);
 
     public async Task SetPackageReferenceVersionAsync(string refName, NugetVersion newVersion)
     {
