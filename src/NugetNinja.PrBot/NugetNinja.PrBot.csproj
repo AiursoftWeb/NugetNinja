@@ -4,8 +4,8 @@
 		<!--Build and code-->
 		<OutputType>Exe</OutputType>
 		<Version>0.0.1</Version>
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<!-- <RuntimeIdentifier>*</RuntimeIdentifier> -->
+		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>ninja-bot</AssemblyName>
 		<RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
 		<!--Tool-->
@@ -13,7 +13,7 @@
 		<!--Best practice-->
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<SelfContained>true</SelfContained>
+		<!-- <SelfContained>true</SelfContained> -->
 		<PublishTrimmed>false</PublishTrimmed>
 		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">true</PublishReadyToRun>
 		<PublishSingleFile Condition="'$(Configuration)' != 'Debug'">true</PublishSingleFile>

@@ -13,6 +13,8 @@ public static class StringExtensions
             return referencePath;
         }
 
+        referencePath = referencePath.Replace('\\', Path.DirectorySeparatorChar);
+
         return Path.GetFullPath(Path.Combine(currentPath, referencePath));
     }
 
