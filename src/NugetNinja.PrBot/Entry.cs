@@ -47,7 +47,7 @@ public class Entry
         _logger.LogInformation("Starting Nuget Ninja PR bot...");
 
         var myStars = await versionControl
-            .GetStars(connectionConfiguration.UserName)
+            .GetStars(connectionConfiguration.EndPoint, connectionConfiguration.UserName)
             .Where(r => r.Archived == false)
             .Where(r => r.Owner?.Login != connectionConfiguration.UserName)
             .ToListAsync();
@@ -110,11 +110,18 @@ public class Entry
         }
 
         // Fork repo.
-        if (!await versionControl.RepoExists(connectionConfiguration.UserName, repo.Name))
+        if (!await versionControl.RepoExists(endPoint: connectionConfiguration.EndPoint, connectionConfiguration.UserName, repo.Name))
         {
-            await versionControl.ForkRepo(repo.Owner.Login, repo.Name, connectionConfiguration.Token);
+            await versionControl.ForkRepo(
+                endPoint: connectionConfiguration.EndPoint,
+                org: repo.Owner.Login,
+                repo: repo.Name,
+                patToken: connectionConfiguration.Token);
             await Task.Delay(5000);
-            while (!await versionControl.RepoExists(connectionConfiguration.UserName, repo.Name))
+            while (!await versionControl.RepoExists(
+                endPoint: connectionConfiguration.EndPoint,
+                orgName: connectionConfiguration.UserName, 
+                repoName: repo.Name))
             {
                 // Wait a while. GitHub may need some time to fork the repo.
                 await Task.Delay(5000);
@@ -122,13 +129,16 @@ public class Entry
         }
 
         // Push to forked repo.
+        var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}") 
+            + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         await _workspaceManager.Push(
             sourcePath: workPath,
             branch: connectionConfiguration.ContributionBranch,
-            endpoint: $"https://{connectionConfiguration.UserName}:{connectionConfiguration.Token}@github.com/{connectionConfiguration.UserName}/{repo.Name}.git",
+            endpoint: pushPath,
             force: true);
 
         var existingPullRequestsByBot = await versionControl.GetPullRequest(
+            endPoint: connectionConfiguration.EndPoint,
             org: repo.Owner.Login,
             repo: repo.Name,
             head: $"{connectionConfiguration.UserName}:{connectionConfiguration.ContributionBranch}");
@@ -137,6 +147,7 @@ public class Entry
         {
             // Create a new pull request.
             await versionControl.CreatePullRequest(
+                endPoint: connectionConfiguration.EndPoint,
                 org: repo.Owner.Login,
                 repo: repo.Name,
                 head: $"{connectionConfiguration.UserName}:{connectionConfiguration.ContributionBranch}",

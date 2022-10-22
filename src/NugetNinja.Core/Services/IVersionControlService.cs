@@ -10,15 +10,15 @@ public interface IVersionControlService
 {
     public string GetName();
 
-    public Task<Repository> GetRepo(string orgName, string repoName);
+    public Task<Repository> GetRepo(string endPoint, string orgName, string repoName);
 
-    public Task<bool> RepoExists(string orgName, string repoName);
+    public Task<bool> RepoExists(string endPoint, string orgName, string repoName);
 
-    public IAsyncEnumerable<Repository> GetStars(string userName);
+    public IAsyncEnumerable<Repository> GetStars(string endPoint, string userName);
 
-    public Task ForkRepo(string org, string repo, string patToken);
+    public Task ForkRepo(string endPoint, string org, string repo, string patToken);
 
-    Task<List<PullRequest>> GetPullRequest(string org, string repo, string head);
+    Task<List<PullRequest>> GetPullRequest(string endPoint, string org, string repo, string head);
 
-    Task CreatePullRequest(string org, string repo, string head, string baseBranch, string patToken);
+    Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch, string patToken);
 }

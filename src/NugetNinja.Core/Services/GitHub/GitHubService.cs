@@ -20,19 +20,19 @@ public class GitHubService : IVersionControlService
 
     public string GetName() => "GitHub";
 
-    public async Task<Repository> GetRepo(string orgName, string repoName)
+    public async Task<Repository> GetRepo(string endPoint, string orgName, string repoName)
     {
         _logger.LogInformation($"Getting repository details based on org: {orgName}, repo: {repoName}...");
-        var endpoint = $@"https://api.github.com/repos/{orgName}/{repoName}";
+        var endpoint = $@"{endPoint}/repos/{orgName}/{repoName}";
         return await SendHttpAndGetJson<Repository>(endpoint, HttpMethod.Get);
     }
 
-    public async Task<bool> RepoExists(string orgName, string repoName)
+    public async Task<bool> RepoExists(string endPoint, string orgName, string repoName)
     {
         _logger.LogInformation($"Getting if repository exists based on org: {orgName}, repo: {repoName}...");
         try
         {
-            var endpoint = $@"https://api.github.com/repos/{orgName}/{repoName}";
+            var endpoint = $@"{endPoint}/repos/{orgName}/{repoName}";
             await SendHttp(endpoint, HttpMethod.Get, null);
             return true;
         }
@@ -42,19 +42,19 @@ public class GitHubService : IVersionControlService
         }
     }
 
-    public async Task<List<Repository>> GetRepos(string userName)
+    public async Task<List<Repository>> GetRepos(string endPoint, string userName)
     {
         _logger.LogInformation($"Listing all repositories based on user name: {userName}...");
-        var endpoint = $@"https://api.github.com/users/{userName}/repos";
+        var endpoint = $@"{endPoint}/users/{userName}/repos";
         return await SendHttpAndGetJson<List<Repository>>(endpoint, HttpMethod.Get);
     }
 
-    public async IAsyncEnumerable<Repository> GetStars(string userName)
+    public async IAsyncEnumerable<Repository> GetStars(string endPoint, string userName)
     {
         _logger.LogInformation($"Listing all stared repositories based on user's name: {userName}...");
         for (var i = 1;; i++)
         {
-            var endpoint = $@"https://api.github.com/users/{userName}/starred?page={i}";
+            var endpoint = $@"{endPoint}/users/{userName}/starred?page={i}";
             var currentPageItems = await SendHttpAndGetJson<List<Repository>>(endpoint, HttpMethod.Get);
             if (!currentPageItems.Any())
             {
@@ -68,27 +68,27 @@ public class GitHubService : IVersionControlService
         }
     }
 
-    public async Task ForkRepo(string org, string repo, string patToken)
+    public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
     {
         _logger.LogInformation($"Forking repository on GitHub with org: {org}, repo: {repo}...");
 
-        var endpoint = $@"https://api.github.com/repos/{org}/{repo}/forks";
+        var endpoint = $@"{endPoint}/repos/{org}/{repo}/forks";
         await SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 
-    public async Task<List<PullRequest>> GetPullRequest(string org, string repo, string head)
+    public async Task<List<PullRequest>> GetPullRequest(string endPoint, string org, string repo, string head)
     {
         _logger.LogInformation($"Getting pull requests on GitHub with org: {org}, repo: {repo}...");
 
-        var endpoint = $@"https://api.github.com/repos/{org}/{repo}/pulls?head={head}";
+        var endpoint = $@"{endPoint}/repos/{org}/{repo}/pulls?head={head}";
         return await SendHttpAndGetJson<List<PullRequest>>(endpoint, HttpMethod.Get);
     }
 
-    public async Task CreatePullRequest(string org, string repo, string head, string @base, string patToken)
+    public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string @base, string patToken)
     {
         _logger.LogInformation($"Creating a new pull request on GitHub with org: {org}, repo: {repo}...");
 
-        var endpoint = $@"https://api.github.com/repos/{org}/{repo}/pulls";
+        var endpoint = $@"{endPoint}/repos/{org}/{repo}/pulls";
         await SendHttp(endpoint, HttpMethod.Post, patToken, new
         {
             title = "Auto dependencies upgrade by bot.",
