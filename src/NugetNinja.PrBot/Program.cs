@@ -39,6 +39,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<Extractor>();
             services.AddTransient<ProjectsEnumerator>();
             services.AddTransient<IVersionControlService, GitHubService>();
+            services.AddTransient<IVersionControlService, GiteaService>();
             services.AddTransient<NugetService>();
             services.AddTransient<CommandRunner>();
             services.AddTransient<WorkspaceManager>();

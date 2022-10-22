@@ -33,6 +33,8 @@ public class Entry
 
     public async Task RunAsync()
     {
+        _logger.LogInformation("Starting Nuget Ninja PR bot...");
+
         foreach (var server in this._servers)
         {
             _logger.LogInformation($"Processing server: {server.Provider}...");
@@ -42,14 +44,13 @@ public class Entry
     }
 
 
-    public async Task RunServerAsync(Server connectionConfiguration, IVersionControlService versionControl)
+    public async Task RunServerAsync(Server server, IVersionControlService versionControl)
     {
-        _logger.LogInformation("Starting Nuget Ninja PR bot...");
 
         var myStars = await versionControl
-            .GetStars(connectionConfiguration.EndPoint, connectionConfiguration.UserName)
+            .GetStars(server.EndPoint, server.UserName, server.Token)
             .Where(r => r.Archived == false)
-            .Where(r => r.Owner?.Login != connectionConfiguration.UserName)
+            .Where(r => r.Owner?.Login != server.UserName)
             .ToListAsync();
 
         _logger.LogInformation($"Got {myStars.Count} stared repositories as registered to create pull requests automatically.");
@@ -61,7 +62,7 @@ public class Entry
             try
             {
                 _logger.LogInformation($"Processing repository {repo.FullName}...");
-                await ProcessRepository(repo, connectionConfiguration, versionControl);
+                await ProcessRepository(repo, server, versionControl);
             }
             catch (Exception e)
             {
@@ -110,7 +111,11 @@ public class Entry
         }
 
         // Fork repo.
-        if (!await versionControl.RepoExists(endPoint: connectionConfiguration.EndPoint, connectionConfiguration.UserName, repo.Name))
+        if (!await versionControl.RepoExists(
+            endPoint: connectionConfiguration.EndPoint, 
+            connectionConfiguration.UserName, 
+            repo.Name, 
+            patToken: connectionConfiguration.Token))
         {
             await versionControl.ForkRepo(
                 endPoint: connectionConfiguration.EndPoint,
@@ -121,7 +126,8 @@ public class Entry
             while (!await versionControl.RepoExists(
                 endPoint: connectionConfiguration.EndPoint,
                 orgName: connectionConfiguration.UserName, 
-                repoName: repo.Name))
+                repoName: repo.Name,
+                patToken: connectionConfiguration.Token))
             {
                 // Wait a while. GitHub may need some time to fork the repo.
                 await Task.Delay(5000);
@@ -137,11 +143,13 @@ public class Entry
             endpoint: pushPath,
             force: true);
 
-        var existingPullRequestsByBot = await versionControl.GetPullRequest(
+        var existingPullRequestsByBot = (await versionControl.GetPullRequest(
             endPoint: connectionConfiguration.EndPoint,
             org: repo.Owner.Login,
             repo: repo.Name,
-            head: $"{connectionConfiguration.UserName}:{connectionConfiguration.ContributionBranch}");
+            head: $"{connectionConfiguration.UserName}:{connectionConfiguration.ContributionBranch}",
+            patToken: connectionConfiguration.Token))
+            .Where(p => p.User?.Login == connectionConfiguration.UserName);
 
         if (existingPullRequestsByBot.All(p => p.State != "open"))
         {
