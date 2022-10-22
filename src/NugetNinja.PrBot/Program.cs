@@ -15,7 +15,8 @@ await CreateHostBuilder(args)
 
 static IHostBuilder CreateHostBuilder(string[] args)
 {
-    return Host.CreateDefaultBuilder(args)
+    return Host
+        .CreateDefaultBuilder(args)
         .ConfigureLogging(logging =>
         {
             logging
@@ -28,15 +29,16 @@ static IHostBuilder CreateHostBuilder(string[] args)
                 options.TimestampFormat = "mm:ss ";
             });
         })
-        .ConfigureServices(services =>
+        .ConfigureServices((context, services) =>
         {
             services.AddMemoryCache();
             services.AddHttpClient();
+            services.Configure<List<Server>>(context.Configuration.GetSection("Servers"));
             services.AddSingleton<CacheService>();
             services.AddTransient<RetryEngine>();
             services.AddTransient<Extractor>();
             services.AddTransient<ProjectsEnumerator>();
-            services.AddTransient<GitHubService>();
+            services.AddTransient<IVersionControlService, GitHubService>();
             services.AddTransient<NugetService>();
             services.AddTransient<CommandRunner>();
             services.AddTransient<WorkspaceManager>();

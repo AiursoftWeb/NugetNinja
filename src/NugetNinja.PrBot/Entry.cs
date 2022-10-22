@@ -4,35 +4,28 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Aiursoft.NugetNinja.AllOfficialsPlugin;
 using Aiursoft.NugetNinja.Core;
+using Microsoft.Extensions.Options;
 
 namespace Aiursoft.NugetNinja.PrBot;
 
 public class Entry
 {
-    private readonly string _githubToken;
-    private readonly string _workingBranch;
-    private readonly string _githubUserName;
-    private readonly string _githubUserDisplayName;
-    private readonly string _githubUserEmail;
     private readonly string _workspaceFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NugetNinjaWorkspace");
-    private readonly GitHubService _gitHubService;
+    private readonly List<Server> _servers;
+    private readonly IEnumerable<IVersionControlService> _versionControls;
     private readonly RunAllOfficialPluginsService _runAllOfficialPluginsService;
     private readonly WorkspaceManager _workspaceManager;
     private readonly ILogger<Entry> _logger;
 
     public Entry(
-        GitHubService gitHubService,
+        IOptions<List<Server>> servers,
+        IEnumerable<IVersionControlService> versionControls,
         RunAllOfficialPluginsService runAllOfficialPluginsService,
         WorkspaceManager workspaceManager,
-        IConfiguration configuration,
         ILogger<Entry> logger)
     {
-        _githubToken = configuration["GitHubToken"];
-        _workingBranch = configuration["ContributionBranch"];
-        _githubUserName = configuration["GitHubUserName"];
-        _githubUserDisplayName = configuration["GitHubUserDisplayName"];
-        _githubUserEmail = configuration["GitHubUserEmail"];
-        _gitHubService = gitHubService;
+        _servers = servers.Value;
+        _versionControls = versionControls;
         _runAllOfficialPluginsService = runAllOfficialPluginsService;
         _workspaceManager = workspaceManager;
         _logger = logger;
@@ -40,12 +33,23 @@ public class Entry
 
     public async Task RunAsync()
     {
+        foreach (var server in this._servers)
+        {
+            _logger.LogInformation($"Processing server: {server.Provider}...");
+            var serviceProvider = _versionControls.First(v => v.GetName() == server.Provider);
+            await this.RunServerAsync(server, serviceProvider);
+        }
+    }
+
+
+    public async Task RunServerAsync(Server connectionConfiguration, IVersionControlService versionControl)
+    {
         _logger.LogInformation("Starting Nuget Ninja PR bot...");
 
-        var myStars = await _gitHubService
-            .GetMyStars(_githubUserName)
+        var myStars = await versionControl
+            .GetStars(connectionConfiguration.UserName)
             .Where(r => r.Archived == false)
-            .Where(r => r.Owner?.Login != _githubUserName)
+            .Where(r => r.Owner?.Login != connectionConfiguration.UserName)
             .ToListAsync();
 
         _logger.LogInformation($"Got {myStars.Count} stared repositories as registered to create pull requests automatically.");
@@ -57,7 +61,7 @@ public class Entry
             try
             {
                 _logger.LogInformation($"Processing repository {repo.FullName}...");
-                await ProcessRepository(repo);
+                await ProcessRepository(repo, connectionConfiguration, versionControl);
             }
             catch (Exception e)
             {
@@ -72,7 +76,7 @@ public class Entry
         }
     }
 
-    private async Task ProcessRepository(Repository repo)
+    private async Task ProcessRepository(Repository repo, Server connectionConfiguration, IVersionControlService versionControl)
     {
         if (string.IsNullOrWhiteSpace(repo.Owner?.Login) || string.IsNullOrWhiteSpace(repo.Name))
         {
@@ -97,8 +101,8 @@ public class Entry
             return;
         }
         _logger.LogInformation($"{repo} is pending some fix. We will try to create\\update related pull request.");
-        await _workspaceManager.SetUserConfig(workPath, username: _githubUserDisplayName, email: _githubUserEmail);
-        var saved = await _workspaceManager.CommitToBranch(workPath, "Auto csproj fix and update by bot.", branch: _workingBranch);
+        await _workspaceManager.SetUserConfig(workPath, username: connectionConfiguration.DisplayName, email: connectionConfiguration.UserEmail);
+        var saved = await _workspaceManager.CommitToBranch(workPath, "Auto csproj fix and update by bot.", branch: connectionConfiguration.ContributionBranch);
         if (!saved)
         {
             _logger.LogInformation($"{repo} has no suggestion that we can make. Ignore.");
@@ -106,11 +110,11 @@ public class Entry
         }
 
         // Fork repo.
-        if (!await _gitHubService.RepoExists(_githubUserName, repo.Name))
+        if (!await versionControl.RepoExists(connectionConfiguration.UserName, repo.Name))
         {
-            await _gitHubService.ForkRepo(repo.Owner.Login, repo.Name);
+            await versionControl.ForkRepo(repo.Owner.Login, repo.Name, connectionConfiguration.Token);
             await Task.Delay(5000);
-            while (!await _gitHubService.RepoExists(_githubUserName, repo.Name))
+            while (!await versionControl.RepoExists(connectionConfiguration.UserName, repo.Name))
             {
                 // Wait a while. GitHub may need some time to fork the repo.
                 await Task.Delay(5000);
@@ -118,13 +122,26 @@ public class Entry
         }
 
         // Push to forked repo.
-        await _workspaceManager.Push(workPath, _workingBranch, $"https://{_githubUserName}:{_githubToken}@github.com/{_githubUserName}/{repo.Name}.git", force: true);
+        await _workspaceManager.Push(
+            sourcePath: workPath,
+            branch: connectionConfiguration.ContributionBranch,
+            endpoint: $"https://{connectionConfiguration.UserName}:{connectionConfiguration.Token}@github.com/{connectionConfiguration.UserName}/{repo.Name}.git",
+            force: true);
 
-        var existingPullRequestsByBot = await _gitHubService.GetPullRequest(repo.Owner.Login, repo.Name, head: $"{_githubUserName}:{_workingBranch}");
+        var existingPullRequestsByBot = await versionControl.GetPullRequest(
+            org: repo.Owner.Login,
+            repo: repo.Name,
+            head: $"{connectionConfiguration.UserName}:{connectionConfiguration.ContributionBranch}");
+
         if (existingPullRequestsByBot.All(p => p.State != "open"))
         {
             // Create a new pull request.
-            await _gitHubService.CreatePullRequest(repo.Owner.Login, repo.Name, head: $"{_githubUserName}:{_workingBranch}", @base: repo.DefaultBranch);
+            await versionControl.CreatePullRequest(
+                org: repo.Owner.Login,
+                repo: repo.Name,
+                head: $"{connectionConfiguration.UserName}:{connectionConfiguration.ContributionBranch}",
+                baseBranch: repo.DefaultBranch,
+                patToken: connectionConfiguration.Token);
         }
         else
         {
