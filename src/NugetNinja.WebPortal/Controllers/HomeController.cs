@@ -36,7 +36,7 @@ public class HomeController : Controller
         }
 
         var (org, repo) = model.GetGitHubValues();
-        if (!await _gitHubService.RepoExists(org, repo))
+        if (!await _gitHubService.RepoExists("https://api.github.com", org, repo, string.Empty))
         {
             ModelState.AddModelError(nameof(model.GitHubRepositoryUrl), $"The repository '{org}/{repo}' doesn't exist on GitHub!");
             return View(viewName: nameof(Index), model: model);

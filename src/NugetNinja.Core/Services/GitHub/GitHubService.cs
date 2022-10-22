@@ -112,7 +112,11 @@ This pull request may break or change the behavior of this application. Review w
                 new FormUrlEncodedContent(new Dictionary<string, string>())
         };
 
-        request.Headers.Add("Authorization", $"token {patToken}");
+        if (!string.IsNullOrWhiteSpace(patToken))
+        {
+            request.Headers.Add("Authorization", $"token {patToken}");
+        }
+
         request.Headers.Add("accept", "application/json");
         request.Headers.Add("User-Agent", $"Aiursoft.NugetNinja {Helper.AppVersion}");
 
