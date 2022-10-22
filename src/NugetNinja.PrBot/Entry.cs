@@ -149,7 +149,7 @@ public class Entry
             repo: repo.Name,
             head: $"{connectionConfiguration.UserName}:{connectionConfiguration.ContributionBranch}",
             patToken: connectionConfiguration.Token))
-            .Where(p => p.User?.Login == connectionConfiguration.UserName);
+            .Where(p => string.Equals(p.User?.Login, connectionConfiguration.UserName, StringComparison.OrdinalIgnoreCase));
 
         if (existingPullRequestsByBot.All(p => p.State != "open"))
         {
