@@ -1,4 +1,4 @@
-# Nuget Ninja2
+# Nuget Ninja
 
 ![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)
 [![Build status](https://dev.azure.com/aiursoft/Star/_apis/build/status/NugetNinja%20Build)](https://dev.azure.com/aiursoft/Star/_build/latest?definitionId=18)
