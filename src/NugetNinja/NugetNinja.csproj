@@ -25,7 +25,6 @@
 		<PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Aiursoft/NugetNinja.git</RepositoryUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>Aiursoft.NugetNinja</PackageId>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/Aiursoft/Nugetninja</PackageProjectUrl>
