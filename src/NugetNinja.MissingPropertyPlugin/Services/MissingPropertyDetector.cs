@@ -13,6 +13,7 @@ public class MissingPropertyDetector : IActionDetector
     private readonly bool _enforceImplicitUsings = false;
     private readonly string[] _notSupportedRuntimes = {
         "net5.0",
+        "netcoreapp3.1",
         "netcoreapp3.0",
         "netcoreapp2.2",
         "netcoreapp2.1",
@@ -117,11 +118,11 @@ public class MissingPropertyDetector : IActionDetector
 
         var cleanedRuntimes = runtimes.Select(r => r.ToLower().Trim()).Distinct().ToArray();
 
-        var deprecated = project.GetTargetFrameworks().Except(cleanedRuntimes).ToList();
-        var inserted = cleanedRuntimes.Except(project.GetTargetFrameworks()).ToList();
-        if (inserted.Any() || deprecated.Any())
+        var deprecatedCount = project.GetTargetFrameworks().Except(cleanedRuntimes).Count();
+        var insertedCount = cleanedRuntimes.Except(project.GetTargetFrameworks()).Count();
+        if (deprecatedCount > 0 || insertedCount > 0)
         {
-            return new ResetRuntime(project, cleanedRuntimes, inserted.Count, deprecated.Count);
+            return new ResetRuntime(project, cleanedRuntimes, insertedCount, deprecatedCount);
         }
         return null;
     }
