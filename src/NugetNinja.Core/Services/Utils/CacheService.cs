@@ -37,9 +37,9 @@ public class CacheService
         Func<Task<T>> fallback,
         int cachedMinutes = 20)
     {
-        if (_exceptions.ContainsKey(cacheKey))
+        if (_exceptions.TryGetValue(cacheKey, out var exception))
         {
-            throw _exceptions[cacheKey];
+            throw exception;
         }
 
         if (!_cache.TryGetValue(cacheKey, out T resultValue) || cachedMinutes <= 0)
