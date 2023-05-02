@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Aiursoft.NugetNinja.AllOfficialsPlugin;
@@ -40,6 +38,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<ProjectsEnumerator>();
             services.AddTransient<IVersionControlService, GitHubService>();
             services.AddTransient<IVersionControlService, GiteaService>();
+            services.AddTransient<IVersionControlService, AzureDevOpsService>();
             services.AddTransient<NugetService>();
             services.AddTransient<CommandRunner>();
             services.AddTransient<WorkspaceManager>();

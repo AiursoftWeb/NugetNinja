@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Aiursoft.NugetNinja.AllOfficialsPlugin;
-using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Options;
 
 namespace Aiursoft.NugetNinja.PrBot;
@@ -40,12 +39,10 @@ public class Entry
         }
     }
 
-
     public async Task RunServerAsync(Server server, IVersionControlService versionControl)
     {
-
         var myStars = await versionControl
-            .GetStars(server.EndPoint, server.UserName, server.Token)
+            .GetMyStars(server.EndPoint, server.UserName, server.Token)
             .Where(r => r.Archived == false)
             .Where(r => r.Owner?.Login != server.UserName)
             .ToListAsync();
@@ -132,15 +129,15 @@ public class Entry
         }
 
         // Push to forked repo.
-        var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}") 
-            + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
+        var pushPath = versionControl.GetPushPath(connectionConfiguration, repo);
+            
         await _workspaceManager.Push(
             sourcePath: workPath,
             branch: connectionConfiguration.ContributionBranch,
             endpoint: pushPath,
             force: true);
 
-        var existingPullRequestsByBot = (await versionControl.GetPullRequest(
+        var existingPullRequestsByBot = (await versionControl.GetPullRequests(
             endPoint: connectionConfiguration.EndPoint,
             org: repo.Owner.Login,
             repo: repo.Name,

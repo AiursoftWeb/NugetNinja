@@ -1,9 +1,10 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json;
+using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.PrBot;
 
 public class GiteaService : IVersionControlService
 {
@@ -41,14 +42,7 @@ public class GiteaService : IVersionControlService
         }
     }
 
-    public async Task<List<Repository>> GetRepos(string endPoint, string userName, string patToken)
-    {
-        _logger.LogInformation($"Listing all repositories based on user name: {userName}...");
-        var endpoint = $@"{endPoint}/users/{userName}/repos";
-        return await SendHttpAndGetJson<List<Repository>>(endpoint, HttpMethod.Get, patToken);
-    }
-
-    public async IAsyncEnumerable<Repository> GetStars(string endPoint, string userName, string patToken)
+    public async IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken)
     {
         _logger.LogInformation($"Listing all stared repositories based on user's name: {userName}...");
         for (var i = 1; ; i++)
@@ -75,7 +69,7 @@ public class GiteaService : IVersionControlService
         await SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 
-    public async Task<List<PullRequest>> GetPullRequest(string endPoint, string org, string repo, string head, string patToken)
+    public async Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head, string patToken)
     {
         _logger.LogInformation($"Getting pull requests on GitHub with org: {org}, repo: {repo}...");
 
@@ -135,5 +129,12 @@ This pull request may break or change the behavior of this application. Review w
         var json = await SendHttp(endPoint, method, patToken);
         var repos = JsonSerializer.Deserialize<T>(json) ?? throw new WebException($"The remote server returned non-json content: '{json}'");
         return repos;
+    }
+
+    public string GetPushPath(Server connectionConfiguration, Repository repo)
+    {
+        var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
+            + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
+        return pushPath;
     }
 }

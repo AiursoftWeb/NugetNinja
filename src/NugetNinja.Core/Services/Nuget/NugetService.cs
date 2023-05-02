@@ -1,5 +1,6 @@
 ﻿
 
+using System.IO.Compression;
 using System.Net;
 using System.Text.Json;
 using HtmlAgilityPack;
@@ -82,6 +83,7 @@ public class NugetService
             ?? throw new WebException($"Couldn't find a valid PackageBaseAddress from nuget server with path: '{serverRoot}'!");
         var registrationsBaseUrl = responseModel
             .Resources
+            .OrderByDescending(r => r.Type)
             .FirstOrDefault(r => r.Type.StartsWith("RegistrationsBaseUrl"))
             ?.Id
             ?? throw new WebException($"Couldn't find a valid RegistrationsBaseUrl from nuget server with path: '{serverRoot}'!");
@@ -111,7 +113,7 @@ public class NugetService
             var apiEndpoint = await GetApiEndpoint(server);
             var requestUrl = $"{apiEndpoint.RegistrationsBaseUrl.TrimEnd('/')}/{package.Name.ToLower()}/{package.Version.ToString().ToLower()}.json";
             var packageContext = await HttpGetJson<RegistrationIndex>(requestUrl, pat);
-            var packageCatalogUrl = packageContext.CatalogEntry ?? throw new WebException($"Couldn't ind a valid catalog entry for package: '{package}'!");
+            var packageCatalogUrl = packageContext.CatalogEntry ?? throw new WebException($"Couldn't find a valid catalog entry for package: '{package}'!");
             return await HttpGetJson<CatalogInformation>(packageCatalogUrl, pat);
         }
         catch
@@ -159,8 +161,20 @@ public class NugetService
         using var response = await _httpClient.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
-            var text = await response.Content.ReadAsStringAsync();
-            return text;
+            var isGZipEncoded = response.Content.Headers.ContentEncoding.Contains("gzip");
+            if (isGZipEncoded)
+            {
+                using var stream = await response.Content.ReadAsStreamAsync();
+                using var decompressionStream = new GZipStream(stream, CompressionMode.Decompress);
+                using var reader = new StreamReader(decompressionStream);
+                var text = await reader.ReadToEndAsync();
+                return text;
+            }
+            else
+            {
+                var text = await response.Content.ReadAsStringAsync();
+                return text;
+            }
         }
 
         throw new WebException($"The remote server returned unexpected status code: {response.StatusCode} - {response.ReasonPhrase}. Url: {url}.");
