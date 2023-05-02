@@ -17,6 +17,6 @@
 		<PublishSingleFile>false</PublishSingleFile>
 	</PropertyGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\NugetNinja.Core\NugetNinja.Core.csproj" />
+	  <ProjectReference Include="..\NugetNinja.PrBot\NugetNinja.PrBot.csproj" />
 	</ItemGroup>
 </Project>

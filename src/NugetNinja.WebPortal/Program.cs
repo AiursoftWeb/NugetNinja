@@ -1,4 +1,4 @@
-using Aiursoft.NugetNinja.Core;
+using Aiursoft.NugetNinja.PrBot;
 
 var builder = WebApplication.CreateBuilder(args);
 

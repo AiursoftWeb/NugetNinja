@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Aiursoft.NugetNinja.Core;
+using Aiursoft.NugetNinja.PrBot;
 using Aiursoft.NugetNinja.WebPortal.Models.ViewModels.HomeViewModels;
 using Microsoft.AspNetCore.Mvc;
 
