@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -12,30 +13,53 @@ namespace Aiursoft.NugetNinja.PrBot;
 
 public class AzureDevOpsService : IVersionControlService
 {
+    private readonly CacheService cacheService;
     private readonly HttpClient _httpClient;
     private readonly ILogger<AzureDevOpsService> _logger;
 
     public AzureDevOpsService(
+        CacheService cacheService,
         HttpClient httpClient,
         ILogger<AzureDevOpsService> logger)
     {
+        this.cacheService = cacheService;
         _httpClient = httpClient;
         _logger = logger;
     }
 
-    public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch, string patToken)
+    private Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken, bool allowCache = true)
     {
-#warning Use shared client!
-        var credentials = new VssBasicCredential(string.Empty, patToken);
-        var connection = new VssConnection(new Uri(endPoint), credentials);
+        return this.cacheService.RunWithCache<VssConnection>($"azure-devops-client-{endPoint}-token-{patToken}", fallback: async () => 
+        {
+            var credentials = new VssBasicCredential(string.Empty, patToken);
+            var connection = new VssConnection(new Uri(endPoint), credentials);
+            await connection.ConnectAsync();
+            return connection;
+        }, cachedMinutes: allowCache ? 20 : 0);
+    }
+
+    private async IAsyncEnumerable<GitRepository> GetGitRepositories(string endPoint, string patToken)
+    {
+        var connection = await GetAzureDevOpsConnection(endPoint, patToken);
         var client = connection.GetClient<GitHttpClient>();
         var projectClient = connection.GetClient<ProjectHttpClient>();
         foreach (var project in await projectClient.GetProjects())
         {
             var repos = await client.GetRepositoriesAsync(project.Name);
-            var azureDevOpsRepo = repos.FirstOrDefault(r => r.Name == repo);
-            if (azureDevOpsRepo != null)
+            foreach(var repo in repos)
             {
+                yield return repo;
+            }
+        }
+    }
+
+    public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch, string patToken)
+    {
+        await foreach(var azureDevOpsRepo in GetGitRepositories(endPoint, patToken))
+        {
+            if (azureDevOpsRepo.Name == repo)
+            {
+                var client = (await GetAzureDevOpsConnection(endPoint, patToken)).GetClient<GitHttpClient>();
                 await client.CreatePullRequestAsync(new GitPullRequest
                 {
                     Title = "Auto dependencies upgrade by bot.",
@@ -62,32 +86,27 @@ This pull request may break or change the behavior of this application. Review w
 
     public async IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken)
     {
-        var credentials = new VssBasicCredential(string.Empty, patToken);
-        var connection = new VssConnection(new Uri(endPoint), credentials);
-        await connection.ConnectAsync();
-        var client = connection.GetClient<GitHttpClient>();
-        var projectClient = connection.GetClient<ProjectHttpClient>();
-        foreach (var project in await projectClient.GetProjects())
+        await foreach (var repo in GetGitRepositories(endPoint, patToken))
         {
-            var repos = await client.GetRepositoriesAsync(project.Name);
-            foreach (var repo in repos)
+            if (repo.DefaultBranch != null)
             {
-                if (repo.DefaultBranch != null)
+                yield return new Repository
                 {
-                    yield return new Repository
+                    Name = repo.Name,
+                    FullName = repo.Name,
+                    Archived = false,
+                    Owner = new User
                     {
-                        Name = repo.Name,
-                        FullName = repo.Name,
-                        Archived = false,
-                        Owner = new User
-                        {
-                            Login = project.Name
-                        },
-                        // Hack here, because Azure DevOps is sooooo stupid that don't support the standard clone grammar.
-                        DefaultBranch = repo.DefaultBranch.Split('/').Last(),
-                        CloneUrl = repo.SshUrl
-                    };
-                }
+                        Login = repo.ProjectReference.Name
+                    },
+                    // Hack here, because Azure DevOps is sooooo stupid that don't support the standard clone grammar.
+                    DefaultBranch = repo.DefaultBranch.Split('/').Last(),
+                    CloneUrl = repo.SshUrl
+                };
+            }
+            else
+            {
+                _logger.LogWarning($"Got a repository from Azure Devops with name: {repo.Name} who's default branch is null!");
             }
         }
     }
@@ -96,17 +115,12 @@ This pull request may break or change the behavior of this application. Review w
 
     public async Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head, string patToken)
     {
-        var credentials = new VssBasicCredential(string.Empty, patToken);
-        var connection = new VssConnection(new Uri(endPoint), credentials);
-        var client = connection.GetClient<GitHttpClient>();
-        var projectClient = connection.GetClient<ProjectHttpClient>();
-        foreach (var project in await projectClient.GetProjects())
+        await foreach (var azureDevOpsRepo in GetGitRepositories(endPoint, patToken))
         {
-            var repos = await client.GetRepositoriesAsync(project.Name);
-            var azureDevOpsRepo = repos.FirstOrDefault(r => r.Name == repo);
-            if (azureDevOpsRepo != null)
+            if (azureDevOpsRepo.Name == repo)
             {
-                var prs = await client.GetPullRequestsAsync(azureDevOpsRepo.Id, new GitPullRequestSearchCriteria 
+                var client = (await GetAzureDevOpsConnection(endPoint, patToken)).GetClient<GitHttpClient>();
+                var prs = await client.GetPullRequestsAsync(azureDevOpsRepo.Id, new GitPullRequestSearchCriteria
                 {
                     SourceRefName = @"refs/heads/" + head.Split(':').Last(),
                 });
@@ -116,7 +130,6 @@ This pull request may break or change the behavior of this application. Review w
                 }).ToList();
             }
         }
-
         throw new Exception($"Could not find Azure DevOps repo based on name: {repo}");
     }
 
