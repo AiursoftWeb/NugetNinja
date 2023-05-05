@@ -1,8 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Text;
-using System.Text.Json;
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -13,23 +9,20 @@ namespace Aiursoft.NugetNinja.PrBot;
 
 public class AzureDevOpsService : IVersionControlService
 {
-    private readonly CacheService cacheService;
-    private readonly HttpClient _httpClient;
+    private readonly CacheService _cacheService;
     private readonly ILogger<AzureDevOpsService> _logger;
 
     public AzureDevOpsService(
         CacheService cacheService,
-        HttpClient httpClient,
         ILogger<AzureDevOpsService> logger)
     {
-        this.cacheService = cacheService;
-        _httpClient = httpClient;
+        _cacheService = cacheService;
         _logger = logger;
     }
 
     private Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken, bool allowCache = true)
     {
-        return this.cacheService.RunWithCache<VssConnection>($"azure-devops-client-{endPoint}-token-{patToken}", fallback: async () => 
+        return this._cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", fallback: async () => 
         {
             var credentials = new VssBasicCredential(string.Empty, patToken);
             var connection = new VssConnection(new Uri(endPoint), credentials);
