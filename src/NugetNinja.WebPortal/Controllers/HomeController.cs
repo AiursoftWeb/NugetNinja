@@ -31,7 +31,7 @@ public class HomeController : Controller
             return View(viewName: nameof(Index), model: model);
         }
 
-        var (org, repo) = model.GetGitHubValues();
+        //var (org, repo) = model.GetGitHubValues();
 
         await Task.Delay(1);
 
