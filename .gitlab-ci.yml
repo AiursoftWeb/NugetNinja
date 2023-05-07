@@ -22,7 +22,7 @@ build:
 analyze:
   stage: analyze
   script:
-    - dotnet tool install JetBrains.ReSharper.GlobalTools --global --ignore-failed-sources
+    - dotnet tool install JetBrains.ReSharper.GlobalTools --global || true
     - ls -la
     - ~/.dotnet/tools/jb inspectcode ./Aiursoft.NugetNinja.sln --output=analyze_output.xml --build
   artifacts:
