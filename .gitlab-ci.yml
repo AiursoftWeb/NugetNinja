@@ -1,9 +1,9 @@
 stages:
+  - restore
   - build
-  - test
   - analyze
-  - publish_linux
-  - publish_windows
+  - test
+  - publish
   - pack
 
 before_script:
