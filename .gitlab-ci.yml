@@ -27,8 +27,6 @@ analyze:
   artifacts:
     paths:
       - analyze_output.xml
-  tags:
-    - analyzer
 
 test:
   stage: test
