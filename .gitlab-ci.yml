@@ -35,7 +35,7 @@ analyze:
 test:
   stage: test
   script:
-    - dotnet test DotNetSolution --collect:"XPlat Code Coverage" -r cobertura
+    - dotnet test *.sln --collect:"XPlat Code Coverage" -r cobertura
   artifacts:
     reports:
       coverage_report:
