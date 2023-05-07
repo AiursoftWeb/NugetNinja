@@ -17,7 +17,7 @@ restore:
 build:
   stage: build
   script:
-    - dotnet build --configuration Release --runtime win-x64 --no-self-contained
+    - dotnet build --configuration Release --no-self-contained
 
 analyze:
   stage: analyze
