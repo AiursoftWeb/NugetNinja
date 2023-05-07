@@ -23,7 +23,12 @@ analyze:
   stage: analyze
   script:
     - dotnet tool install JetBrains.ReSharper.GlobalTools --global
-    - dotnet resharper-cleanupcode Aiursoft.NugetNinja.sln
+    - jb inspectcode /path/to/your/solution.sln -o analyze_output.xml
+  artifacts:
+    paths:
+      - analyze_output.xml
+  tags:
+    - analyzer
 
 test:
   stage: test
@@ -39,4 +44,3 @@ pack:
   stage: pack
   script:
     - dotnet pack --configuration Release --project src/NugetNinja/NugetNinja.csproj
-
