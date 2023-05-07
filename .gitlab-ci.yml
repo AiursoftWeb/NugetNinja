@@ -45,4 +45,4 @@ publish:
 pack:
   stage: pack
   script:
-    - dotnet pack --configuration Release --project '**/*.csproj'
+    - dotnet pack --configuration Release *.sln
