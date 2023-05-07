@@ -8,6 +8,9 @@ stages:
 
 before_script:
   - export DOTNET_CLI_TELEMETRY_OPTOUT=1
+  - export DOTNET_PRINT_TELEMETRY_MESSAGE=false
+  - export ASPNETCORE_ENVIRONMENT=Production
+  - export ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
 
 restore:
   stage: restore
@@ -37,9 +40,9 @@ test:
 publish:
   stage: publish
   script:
-    - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained --projects '**/*.csproj'
+    - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained *.sln
 
 pack:
   stage: pack
   script:
-    - dotnet pack --configuration Release --project src/NugetNinja/NugetNinja.csproj
+    - dotnet pack --configuration Release --project '**/*.csproj'
