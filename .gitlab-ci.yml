@@ -37,7 +37,7 @@ test:
 publish:
   stage: publish
   script:
-    - dotnet publish --configuration Release --output --runtime linux-x64 --no-self-contained --projects '**/*.csproj'
+    - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained --projects '**/*.csproj'
 
 pack:
   stage: pack
