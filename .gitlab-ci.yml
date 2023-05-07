@@ -12,6 +12,7 @@ before_script:
   - export ASPNETCORE_ENVIRONMENT=Production
   - export ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
   - export PATH=$PATH:$HOME/.dotnet/tools
+  - dotnet tool install trx2junit                       --global || echo "t2j already installed."
   - dotnet tool install JetBrains.ReSharper.GlobalTools --global || echo "JB already installed."
 
 restore:
@@ -36,17 +37,18 @@ test:
   stage: test
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --results-directory test-results --logger "trx;LogFileName=ut.xml"
+    - trx2junit test-results/ut.xml
   artifacts:
     when: always
     expire_in: 1 day
     paths:
-      - ./test-results/ut.xml
+      - test-results/ut.xml
+      - test-results/**/coverage.cobertura.xml
     reports:
-      junit: ./test-results/ut.xml
+      junit: test-results/ut.xml
       coverage_report:
         coverage_format: cobertura
         path: test-results/*/coverage.cobertura.xml
-
 
 publish:
   stage: publish
