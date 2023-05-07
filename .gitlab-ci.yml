@@ -23,7 +23,7 @@ analyze:
   stage: analyze
   script:
     - dotnet tool install JetBrains.ReSharper.GlobalTools --global
-    - jb inspectcode /path/to/your/solution.sln -o analyze_output.xml
+    - ~/.dotnet/tools/jb inspectcode ./Aiursoft.NugetNinja.sln
   artifacts:
     paths:
       - analyze_output.xml
