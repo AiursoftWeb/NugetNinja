@@ -4,7 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<Version>0.0.1</Version>
 		<TargetFramework>net6.0</TargetFramework>
-		<AssemblyName>ninja</AssemblyName>
+		<AssemblyName>ninja.webportal</AssemblyName>
 		<RootNamespace>Aiursoft.NugetNinja.WebPortal</RootNamespace>
 		<!--Tool-->
 		<PackAsTool>false</PackAsTool>

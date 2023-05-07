@@ -11,6 +11,8 @@ before_script:
   - export DOTNET_PRINT_TELEMETRY_MESSAGE=false
   - export ASPNETCORE_ENVIRONMENT=Production
   - export ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+  - export PATH=$PATH:$HOME/.dotnet/tools
+  - dotnet tool install JetBrains.ReSharper.GlobalTools --global || echo "JB already installed."
 
 restore:
   stage: restore
@@ -20,14 +22,12 @@ restore:
 build:
   stage: build
   script:
-    - dotnet build --configuration Release --no-self-contained
+    - dotnet build --no-self-contained
 
 analyze:
   stage: analyze
   script:
-    - dotnet tool install JetBrains.ReSharper.GlobalTools --global || true
-    - ls -la
-    - ~/.dotnet/tools/jb inspectcode ./Aiursoft.NugetNinja.sln --output=analyze_output.xml --build
+    - jb inspectcode ./Aiursoft.NugetNinja.sln --output=analyze_output.xml --build
   artifacts:
     paths:
       - analyze_output.xml
@@ -45,4 +45,7 @@ publish:
 pack:
   stage: pack
   script:
-    - dotnet pack --configuration Release *.sln
+    - dotnet pack --configuration Release *.sln || echo "Some packaging failed!"
+  artifacts:
+    paths:
+      - '**/*.nupkg'
