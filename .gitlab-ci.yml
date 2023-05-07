@@ -5,23 +5,19 @@ stages:
   - publish_linux
   - publish_windows
   - pack
-  - deploy-artifacts
-
-variables:
-  BUILD_ARTIFACTS_DIR: 'artifacts'
 
 before_script:
   - export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 restore:
-  stage: build
+  stage: restore
   script:
     - dotnet restore --configfile nuget.config
 
 build:
   stage: build
   script:
-    - dotnet build --configuration Release --runtime win-x64 --no-self-contained --output "${BUILD_ARTIFACTS_DIR}"
+    - dotnet build --configuration Release --runtime win-x64 --no-self-contained
 
 analyze:
   stage: analyze
@@ -34,24 +30,13 @@ test:
   script:
     - dotnet test --collect "Code coverage"
 
-publish_linux:
-  stage: publish_linux
+publish:
+  stage: publish
   script:
-    - dotnet publish --configuration Release --output "${BUILD_ARTIFACTS_DIR}/linux" --runtime linux-x64 --no-self-contained --projects '**/*.csproj'
-
-publish_windows:
-  stage: publish_windows
-  script:
-    - dotnet publish --configuration Release --output "${BUILD_ARTIFACTS_DIR}/windows" --runtime win-x64 --no-self-contained --projects '**/*.csproj'
+    - dotnet publish --configuration Release --output --runtime linux-x64 --no-self-contained --projects '**/*.csproj'
 
 pack:
   stage: pack
   script:
     - dotnet pack --configuration Release --project src/NugetNinja/NugetNinja.csproj
 
-deploy-artifacts:
-  stage: deploy-artifacts
-  paths:
-    - ${BUILD_ARTIFACTS_DIR}/
-  artifacts:
-    name: "NugetNinja"
