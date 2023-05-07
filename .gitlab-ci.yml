@@ -35,12 +35,18 @@ analyze:
 test:
   stage: test
   script:
-    - dotnet test *.sln --collect:"XPlat Code Coverage" --results-directory cobertura
+    - dotnet test *.sln --collect:"XPlat Code Coverage" --results-directory test-results --logger "trx;LogFileName=ut.xml"
   artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - ./test-results/ut.xml
     reports:
+      junit: ./test-results/ut.xml
       coverage_report:
         coverage_format: cobertura
-        path: cobertura/*/coverage.cobertura.xml
+        path: test-results/*/coverage.cobertura.xml
+
 
 publish:
   stage: publish
