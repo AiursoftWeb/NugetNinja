@@ -1,5 +1,6 @@
 stages:
   - build
+  - lint
   - test
   - publish
 
@@ -18,11 +19,20 @@ build:
     - dotnet restore --configfile nuget.config
     - dotnet build --no-self-contained
 
+lint:
+  stage: lint
+  script:
+    - jb inspectcode ./*.sln --output=analyze_output.xml --build
+    - grep -q 'WARNING' analyze_output.xml && echo "Warning found" && cat analyze_output.xml && exit 1 || echo "No warning found"
+  artifacts:
+    when: always
+    expire_in: 1 day
+    paths:
+      - ./analyze_output.xml
+
 test:
   stage: test
   script:
-    - jb inspectcode ./*.sln --output=analyze_output.xml --build
-    - grep -q 'WARNING' analyze_output.xml && echo "Warning found" && exit 1 || echo "No warning found"
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
     when: always
@@ -30,7 +40,6 @@ test:
     paths:
       - ./**/TestResults.xml
       - ./**/coverage.cobertura.xml
-      - ./analyze_output.xml
     reports:
       junit:
         - ./**/TestResults.xml
