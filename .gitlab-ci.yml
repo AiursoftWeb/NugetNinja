@@ -5,17 +5,17 @@ stages:
   - publish
 
 before_script:
-  - export DOTNET_CLI_TELEMETRY_OPTOUT=1
-  - export PATH=$PATH:$HOME/.dotnet/tools
-  - dotnet tool install JetBrains.ReSharper.GlobalTools --global || echo "JB already installed."
-  - cat /etc/lsb-release && uname -a && pwd && ls -ashl
+  - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
+  - 'export PATH=$PATH:$HOME/.dotnet/tools'
+  - 'dotnet tool install JetBrains.ReSharper.GlobalTools --global || echo "JB already installed."'
+  - 'cat /etc/lsb-release && uname -a && pwd && ls -ashl'
   - 'echo "Hostname: $(hostname)"'
   - 'echo "Uptime: $(uptime -p)"'
   - 'echo "Memory: $(free -h | awk "/^Mem:/{print \$2}")"'
   - 'echo "CPU Cores: $(nproc)"'
   - 'echo "Available Disk Space: $(df -h --output=avail / | tail -1)"'
-  - 'echo "IP Address: $(hostname -I | awk "{print \$1}")"'
-  - dotnet --info
+  - 'echo "IP Address: $(hostname -I)"'
+  - 'dotnet --info'
 
 build:
   stage: build
