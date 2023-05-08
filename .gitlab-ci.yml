@@ -25,6 +25,8 @@ build:
 
 lint:
   stage: lint
+  needs: 
+    - build
   script:
     - jb inspectcode ./*.sln --output=analyze_output.xml --build
     - grep -q 'WARNING' analyze_output.xml && echo "Warning found" && cat analyze_output.xml && exit 1 || echo "No warning found"
@@ -36,6 +38,8 @@ lint:
 
 test:
   stage: test
+  needs: 
+    - build
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
@@ -53,6 +57,9 @@ test:
 
 publish:
   stage: publish
+  needs: 
+    - lint
+    - test
   script:
     - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained *.sln
     - dotnet pack --configuration Release *.sln || echo "Some packaging failed!"
