@@ -35,15 +35,16 @@ analyze:
 test:
   stage: test
   script:
-    - dotnet test *.sln --collect:"XPlat Code Coverage" --results-directory test-results --logger "junit;LogFileName=ut.xml;MethodFormat=Class;FailureBodyFormat=Verbose"
+    - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
     when: always
     expire_in: 1 day
     paths:
-      - test-results/ut.xml
-      - test-results/**/coverage.cobertura.xml
+      - ./**/TestResults.xml
+      - ./**/coverage.cobertura.xml
     reports:
-      junit: test-results/ut.xml
+      junit:
+        - ./**/*test-result.xml
       coverage_report:
         coverage_format: cobertura
         path: test-results/*/coverage.cobertura.xml
