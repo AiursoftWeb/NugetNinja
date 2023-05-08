@@ -6,12 +6,16 @@ stages:
 
 before_script:
   - export DOTNET_CLI_TELEMETRY_OPTOUT=1
-  - export DOTNET_PRINT_TELEMETRY_MESSAGE=false
-  - export ASPNETCORE_ENVIRONMENT=Production
-  - export ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
   - export PATH=$PATH:$HOME/.dotnet/tools
-  - dotnet --info
   - dotnet tool install JetBrains.ReSharper.GlobalTools --global || echo "JB already installed."
+  - cat /etc/lsb-release && uname -a && pwd && ls -ashl
+  - 'echo "Hostname: $(hostname)"'
+  - 'echo "Uptime: $(uptime -p)"'
+  - 'echo "Memory: $(free -h | awk "/^Mem:/{print \$2}")"'
+  - 'echo "CPU Cores: $(nproc)"'
+  - 'echo "Available Disk Space: $(df -h --output=avail / | tail -1)"'
+  - 'echo "IP Address: $(hostname -I | awk "{print \$1}")"'
+  - dotnet --info
 
 build:
   stage: build
