@@ -63,7 +63,19 @@ publish:
   script:
     - dotnet build --configuration Release --no-self-contained *.sln
     - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained *.sln
+  artifacts:
+    expire_in: 7 day
+    paths:
+      - '**/*.nupkg'
+
+pack_job:
+  stage: publish
+  needs: 
+    - lint
+    - test
+  script:
     - dotnet pack --configuration Release *.sln || echo "Some packaging failed!"
   artifacts:
+    expire_in: 7 day
     paths:
       - '**/*.nupkg'
