@@ -9,6 +9,7 @@ before_script:
   - export ASPNETCORE_ENVIRONMENT=Production
   - export ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
   - export PATH=$PATH:$HOME/.dotnet/tools
+  - dotnet --info
   - dotnet tool install JetBrains.ReSharper.GlobalTools --global || echo "JB already installed."
 
 build:
@@ -20,7 +21,8 @@ build:
 test:
   stage: test
   script:
-    - jb inspectcode ./Aiursoft.NugetNinja.sln --output=analyze_output.xml --build
+    - jb inspectcode ./*.sln --output=analyze_output.xml --build
+    - grep -q 'WARNING' analyze_output.xml && echo "Warning found" && exit 1 || echo "No warning found"
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
     when: always
