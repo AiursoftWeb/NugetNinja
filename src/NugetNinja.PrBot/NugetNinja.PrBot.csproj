@@ -9,11 +9,12 @@
 		<AssemblyName>ninja-bot</AssemblyName>
 		<RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
 		<!--Tool-->
-		<PackAsTool>false</PackAsTool>
+		<PackAsTool>true</PackAsTool>
+		<ToolCommandName>ninja-bot</ToolCommandName>
 		<!--Best practice-->
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<!-- <SelfContained>true</SelfContained> -->
+		<SelfContained>false</SelfContained>
 		<PublishTrimmed>false</PublishTrimmed>
 		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">true</PublishReadyToRun>
 		<PublishSingleFile Condition="'$(Configuration)' != 'Debug'">true</PublishSingleFile>
