@@ -61,6 +61,7 @@ publish:
     - lint
     - test
   script:
+    - dotnet build --configuration Release --no-self-contained *.sln
     - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained *.sln
     - dotnet pack --configuration Release *.sln || echo "Some packaging failed!"
   artifacts:
