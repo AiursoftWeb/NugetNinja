@@ -24,13 +24,15 @@ restore_job:
 
 build_job:
   stage: build
+  needs: 
+    - restore_job
   script:
     - dotnet build --no-self-contained
 
 lint_job:
   stage: lint
   needs: 
-    - build
+    - build_job
   script:
     - jb inspectcode ./*.sln --output=analyze_output.xml --build
     - grep 'WARNING' analyze_output.xml && cat analyze_output.xml && exit 1 || echo "No warning found"
@@ -43,7 +45,7 @@ lint_job:
 test_job:
   stage: test
   needs: 
-    - build
+    - build_job
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
@@ -62,10 +64,9 @@ test_job:
 publish_job:
   stage: publish
   needs: 
-    - lint
-    - test
+    - lint_job
+    - test_job
   script:
-    - dotnet build --configuration Release --no-self-contained *.sln
     - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained *.sln
   artifacts:
     expire_in: 7 day
@@ -75,9 +76,10 @@ publish_job:
 pack_job:
   stage: publish
   needs: 
-    - lint
-    - test
+    - lint_job
+    - test_job
   script:
+    - dotnet build --configuration Release --no-self-contained *.sln
     - dotnet pack --configuration Release *.sln || echo "Some packaging failed!"
   artifacts:
     expire_in: 7 day
