@@ -31,7 +31,7 @@ test:
       - ./analyze_output.xml
     reports:
       junit:
-        - ./**/*test-result.xml
+        - ./**/TestResults.xml
       coverage_report:
         coverage_format: cobertura
         path: ./**/coverage.cobertura.xml
