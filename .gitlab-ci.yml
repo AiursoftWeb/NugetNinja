@@ -1,8 +1,8 @@
 stages:
-  - build
-  - lint
-  - test
-  - publish
+  - Building
+  - Linting
+  - Testing
+  - Publishing
 
 before_script:
   - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
@@ -17,22 +17,22 @@ before_script:
   - 'echo "IP Address: $(hostname -I)"'
   - 'dotnet --info'
 
-restore_job:
-  stage: build
+restore:
+  stage: Building
   script:
     - dotnet restore --configfile nuget.config
 
-build_job:
-  stage: build
+build:
+  stage: Building
   needs: 
-    - restore_job
+    - restore
   script:
     - dotnet build --no-self-contained
 
-lint_job:
-  stage: lint
+lint:
+  stage: Linting
   needs: 
-    - build_job
+    - build
   script:
     - jb inspectcode ./*.sln --output=analyze_output.xml --build
     - grep 'WARNING' analyze_output.xml && cat analyze_output.xml && exit 1 || echo "No warning found"
@@ -42,10 +42,10 @@ lint_job:
     paths:
       - ./analyze_output.xml
 
-test_job:
-  stage: test
+test:
+  stage: Testing
   needs: 
-    - build_job
+    - build
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
@@ -61,11 +61,11 @@ test_job:
         coverage_format: cobertura
         path: ./**/coverage.cobertura.xml
 
-publish_job:
-  stage: publish
+publish:
+  stage: Publishing
   needs: 
-    - lint_job
-    - test_job
+    - lint
+    - test
   script:
     - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained *.sln
   artifacts:
@@ -73,11 +73,11 @@ publish_job:
     paths:
       - '**/*.nupkg'
 
-pack_job:
-  stage: publish
+pack:
+  stage: Publishing
   needs: 
-    - lint_job
-    - test_job
+    - lint
+    - test
   script:
     - dotnet build --configuration Release --no-self-contained *.sln
     - dotnet pack --configuration Release *.sln || echo "Some packaging failed!"

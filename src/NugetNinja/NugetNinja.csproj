@@ -15,8 +15,8 @@
 		<Nullable>enable</Nullable>
 		<SelfContained>false</SelfContained>
 		<PublishTrimmed>false</PublishTrimmed>
-		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">true</PublishReadyToRun>
-		<PublishSingleFile Condition="'$(Configuration)' != 'Debug'">true</PublishSingleFile>
+		<PublishReadyToRun>false</PublishReadyToRun>
+		<PublishSingleFile>false</PublishSingleFile>
 		<!--Nuget--> 
 		<Company>Aiursoft</Company>
 		<Product>NugetNinja</Product>
