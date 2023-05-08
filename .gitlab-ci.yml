@@ -1,10 +1,7 @@
 stages:
-  - restore
   - build
-  - analyze
   - test
   - publish
-  - pack
 
 before_script:
   - export DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -14,27 +11,16 @@ before_script:
   - export PATH=$PATH:$HOME/.dotnet/tools
   - dotnet tool install JetBrains.ReSharper.GlobalTools --global || echo "JB already installed."
 
-restore:
-  stage: restore
-  script:
-    - dotnet restore --configfile nuget.config
-
 build:
   stage: build
   script:
+    - dotnet restore --configfile nuget.config
     - dotnet build --no-self-contained
-
-analyze:
-  stage: analyze
-  script:
-    - jb inspectcode ./Aiursoft.NugetNinja.sln --output=analyze_output.xml --build
-  artifacts:
-    paths:
-      - analyze_output.xml
 
 test:
   stage: test
   script:
+    - jb inspectcode ./Aiursoft.NugetNinja.sln --output=analyze_output.xml --build
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
     when: always
@@ -42,21 +28,18 @@ test:
     paths:
       - ./**/TestResults.xml
       - ./**/coverage.cobertura.xml
+      - ./analyze_output.xml
     reports:
       junit:
         - ./**/*test-result.xml
       coverage_report:
         coverage_format: cobertura
-        path: test-results/*/coverage.cobertura.xml
+        path: ./**/coverage.cobertura.xml
 
 publish:
   stage: publish
   script:
     - dotnet publish --configuration Release --runtime linux-x64 --no-self-contained *.sln
-
-pack:
-  stage: pack
-  script:
     - dotnet pack --configuration Release *.sln || echo "Some packaging failed!"
   artifacts:
     paths:
