@@ -17,13 +17,17 @@ before_script:
   - 'echo "IP Address: $(hostname -I)"'
   - 'dotnet --info'
 
-build:
+restore_job:
   stage: build
   script:
     - dotnet restore --configfile nuget.config
+
+build_job:
+  stage: build
+  script:
     - dotnet build --no-self-contained
 
-lint:
+lint_job:
   stage: lint
   needs: 
     - build
@@ -36,7 +40,7 @@ lint:
     paths:
       - ./analyze_output.xml
 
-test:
+test_job:
   stage: test
   needs: 
     - build
@@ -55,7 +59,7 @@ test:
         coverage_format: cobertura
         path: ./**/coverage.cobertura.xml
 
-publish:
+publish_job:
   stage: publish
   needs: 
     - lint
