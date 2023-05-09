@@ -46,9 +46,13 @@ test:
   stage: Testing
   needs: 
     - build
-  coverage: '/line-rate="([0-9.]+)"/'
+  coverage: '/line-rate="(\d+\.\d+)"/'
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
+    - COVERAGE_FILE=$(find . -type f -name "coverage.cobertura.xml")
+    - COVERAGE_VALUE=$(grep -oPm 1 'line-rate="\K([0-9.]+)' "$COVERAGE_FILE")
+    - COVERAGE_PERCENTAGE=$(echo "scale=2; $COVERAGE_VALUE * 100" | bc)
+    - 'echo "Coverage: $COVERAGE_PERCENTAGE%"'
   artifacts:
     when: always
     expire_in: 1 day
