@@ -49,6 +49,8 @@ test:
   coverage: '/<coverage line-rate="([\d.]+)" branch-rate="[\d.]+" version="[\d.]+" timestamp="[\d]+" lines-covered="[\d]+" lines-valid="[\d]+" branches-covered="[\d]+" branches-valid="[\d]+">/'
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
+    - COVERAGE_VALUE=$(grep -oP 'line-rate="\K([0-9.]+)' ./**/coverage.cobertura.xml)
+    - 'echo "Coverage: $COVERAGE_VALUE"'
   artifacts:
     when: always
     expire_in: 1 day
