@@ -46,7 +46,7 @@ test:
   stage: Testing
   needs: 
     - build
-  coverage: '/line-rate="([\d.]+)"/'
+  coverage: '/<coverage line-rate="([\d.]+)" branch-rate="[\d.]+" version="[\d.]+" timestamp="[\d]+" lines-covered="[\d]+" lines-valid="[\d]+" branches-covered="[\d]+" branches-valid="[\d]+">/'
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
