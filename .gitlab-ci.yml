@@ -46,6 +46,7 @@ test:
   stage: Testing
   needs: 
     - build
+  coverage: '/line-rate="([\d.]+)"/'
   script:
     - dotnet test *.sln --collect:"XPlat Code Coverage" --logger "junit;MethodFormat=Class"
   artifacts:
