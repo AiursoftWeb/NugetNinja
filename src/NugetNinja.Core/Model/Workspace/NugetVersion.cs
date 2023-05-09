@@ -1,10 +1,11 @@
-﻿namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core;
 
 public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEquatable<NugetVersion?>
 {
     public NugetVersion(string versionString)
     {
         SourceString = versionString;
+
         var trimmedVersion = versionString.Replace("*", "0");
         if (trimmedVersion.Contains("-"))
         {
@@ -13,11 +14,13 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
         }
         else
         {
+            
             PrimaryVersion = Version.Parse(trimmedVersion);
         }
     }
 
     public string SourceString { get; set; }
+
     public Version PrimaryVersion { get; }
     public string AdditionalText { get; } = string.Empty;
 
@@ -37,6 +40,7 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
     {
         if (ReferenceEquals(otherNugetVersion, null))
         {
+
             throw new ArgumentNullException(paramName: nameof(otherNugetVersion));
         }
 
@@ -52,6 +56,7 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
         }
         if (!string.IsNullOrWhiteSpace(AdditionalText))
         {
+
             return -1;
         }
         if (!string.IsNullOrWhiteSpace(otherNugetVersion.AdditionalText))
@@ -67,6 +72,7 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
         if (ReferenceEquals(otherNugetVersion, null))
         {
             return false;
+
         }
         return
             PrimaryVersion.Equals(otherNugetVersion.PrimaryVersion) &&
@@ -82,6 +88,7 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
     {
         if (ReferenceEquals(this, obj))
             return true;
+
         if (ReferenceEquals(this, null))
             return false;
         if (obj is NugetVersion nuVersion)
@@ -91,6 +98,7 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
 
     public override int GetHashCode()
     {
+
         return HashCode.Combine(PrimaryVersion, AdditionalText);
     }
 }
