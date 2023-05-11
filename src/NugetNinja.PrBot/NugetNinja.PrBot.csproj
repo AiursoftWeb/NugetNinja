@@ -24,11 +24,11 @@
 		<Description>A bot for detecting dependencies of .NET projects and create pull requests automatically.</Description>
 		<PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
 		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/Aiursoft/NugetNinja.git</RepositoryUrl>
+		<RepositoryUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</RepositoryUrl>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>Aiursoft.NugetNinja.PrBot</PackageId>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/Aiursoft/Nugetninja</PackageProjectUrl>
+		<PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninjaa</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>

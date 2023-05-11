@@ -24,10 +24,10 @@
 		<Description>A tool for detecting dependencies of .NET projects.</Description>
 		<PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
 		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/Aiursoft/NugetNinja.git</RepositoryUrl>
+		<RepositoryUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</RepositoryUrl>
 		<PackageId>Aiursoft.NugetNinja</PackageId>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/Aiursoft/Nugetninja</PackageProjectUrl>
+		<PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
