@@ -26,10 +26,7 @@ public class HomeController : Controller
     [HttpPost]
     public async Task<IActionResult> Subscribe([FromForm] IndexViewModel model)
     {
-        if (!ModelState.IsValid)
-        {
-            return View(viewName: nameof(Index), model: model);
-        }
+        if (!ModelState.IsValid) return View(nameof(Index), model);
 
         //var (org, repo) = model.GetGitHubValues();
 
@@ -62,7 +59,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
-    public IActionResult Unsubscribe([FromForm][Required][Url] string githubUrl)
+    public IActionResult Unsubscribe([FromForm] [Required] [Url] string githubUrl)
     {
         _logger.LogInformation($"A user unsubscribed the repo: {githubUrl}");
 

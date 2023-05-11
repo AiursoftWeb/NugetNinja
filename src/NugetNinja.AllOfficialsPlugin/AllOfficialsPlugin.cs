@@ -4,5 +4,8 @@ namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
 
 public class AllOfficialsPlugin : INinjaPlugin
 {
-    public CommandHandler[] Install() => new CommandHandler[] { new AllOfficialsHandler() };
+    public CommandHandler[] Install()
+    {
+        return new CommandHandler[] { new AllOfficialsHandler() };
+    }
 }

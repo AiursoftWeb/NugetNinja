@@ -1,8 +1,8 @@
 ﻿using System.CommandLine;
 using Aiursoft.NugetNinja.AllOfficialsPlugin;
 using Aiursoft.NugetNinja.Core;
-using Aiursoft.NugetNinja.MissingPropertyPlugin;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin;
+using Aiursoft.NugetNinja.MissingPropertyPlugin;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
 using Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 using Aiursoft.NugetNinja.UselessProjectReferencePlugin;

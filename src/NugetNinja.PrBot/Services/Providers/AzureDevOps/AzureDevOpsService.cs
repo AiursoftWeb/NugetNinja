@@ -20,36 +20,10 @@ public class AzureDevOpsService : IVersionControlService
         _logger = logger;
     }
 
-    private Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken, bool allowCache = true)
+    public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch,
+        string patToken)
     {
-        return this._cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", fallback: async () => 
-        {
-            var credentials = new VssBasicCredential(string.Empty, patToken);
-            var connection = new VssConnection(new Uri(endPoint), credentials);
-            await connection.ConnectAsync();
-            return connection;
-        }, cachedMinutes: allowCache ? 20 : 0);
-    }
-
-    private async IAsyncEnumerable<GitRepository> GetGitRepositories(string endPoint, string patToken)
-    {
-        var connection = await GetAzureDevOpsConnection(endPoint, patToken);
-        var client = connection.GetClient<GitHttpClient>();
-        var projectClient = connection.GetClient<ProjectHttpClient>();
-        foreach (var project in await projectClient.GetProjects())
-        {
-            var repos = await client.GetRepositoriesAsync(project.Name);
-            foreach(var repo in repos)
-            {
-                yield return repo;
-            }
-        }
-    }
-
-    public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch, string patToken)
-    {
-        await foreach(var azureDevOpsRepo in GetGitRepositories(endPoint, patToken))
-        {
+        await foreach (var azureDevOpsRepo in GetGitRepositories(endPoint, patToken))
             if (azureDevOpsRepo.Name == repo)
             {
                 var client = (await GetAzureDevOpsConnection(endPoint, patToken)).GetClient<GitHttpClient>();
@@ -64,11 +38,10 @@ The bot tries to fetch all possible updates and modify the project files automat
 This pull request may break or change the behavior of this application. Review with cautious!",
                     // Hack here, because Azure DevOps is sooooo stupid that their developers have no idea about forking.
                     SourceRefName = @"refs/heads/" + head.Split(':').Last(),
-                    TargetRefName = @"refs/heads/" + baseBranch,
-                }, repositoryId: azureDevOpsRepo.Id);
+                    TargetRefName = @"refs/heads/" + baseBranch
+                }, azureDevOpsRepo.Id);
                 return;
             }
-        }
     }
 
     public Task ForkRepo(string endPoint, string org, string repo, string patToken)
@@ -80,9 +53,7 @@ This pull request may break or change the behavior of this application. Review w
     public async IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken)
     {
         await foreach (var repo in GetGitRepositories(endPoint, patToken))
-        {
             if (repo.DefaultBranch != null)
-            {
                 yield return new Repository
                 {
                     Name = repo.Name,
@@ -96,33 +67,33 @@ This pull request may break or change the behavior of this application. Review w
                     DefaultBranch = repo.DefaultBranch.Split('/').Last(),
                     CloneUrl = repo.SshUrl
                 };
-            }
             else
-            {
-                _logger.LogWarning($"Got a repository from Azure Devops with name: {repo.Name} who's default branch is null!");
-            }
-        }
+                _logger.LogWarning(
+                    $"Got a repository from Azure Devops with name: {repo.Name} who's default branch is null!");
     }
 
-    public string GetName() => "AzureDevOps";
+    public string GetName()
+    {
+        return "AzureDevOps";
+    }
 
-    public async Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head, string patToken)
+    public async Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
+        string patToken)
     {
         await foreach (var azureDevOpsRepo in GetGitRepositories(endPoint, patToken))
-        {
             if (azureDevOpsRepo.Name == repo)
             {
                 var client = (await GetAzureDevOpsConnection(endPoint, patToken)).GetClient<GitHttpClient>();
                 var prs = await client.GetPullRequestsAsync(azureDevOpsRepo.Id, new GitPullRequestSearchCriteria
                 {
-                    SourceRefName = @"refs/heads/" + head.Split(':').Last(),
+                    SourceRefName = @"refs/heads/" + head.Split(':').Last()
                 });
                 return prs.Select(p => new PullRequest
                 {
                     State = p.Status.ToString()
                 }).ToList();
             }
-        }
+
         throw new Exception($"Could not find Azure DevOps repo based on name: {repo}");
     }
 
@@ -137,5 +108,28 @@ This pull request may break or change the behavior of this application. Review w
     {
         // Hack here, because Azure DevOps is sooooo stupid that doesn't support pushing with HTTPS + PAT grammar.
         return repo.CloneUrl ?? throw new Exception($"Repo {repo}'s clone Url is null!");
+    }
+
+    private Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken, bool allowCache = true)
+    {
+        return _cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", async () =>
+        {
+            var credentials = new VssBasicCredential(string.Empty, patToken);
+            var connection = new VssConnection(new Uri(endPoint), credentials);
+            await connection.ConnectAsync();
+            return connection;
+        }, allowCache ? 20 : 0);
+    }
+
+    private async IAsyncEnumerable<GitRepository> GetGitRepositories(string endPoint, string patToken)
+    {
+        var connection = await GetAzureDevOpsConnection(endPoint, patToken);
+        var client = connection.GetClient<GitHttpClient>();
+        var projectClient = connection.GetClient<ProjectHttpClient>();
+        foreach (var project in await projectClient.GetProjects())
+        {
+            var repos = await client.GetRepositoriesAsync(project.Name);
+            foreach (var repo in repos) yield return repo;
+        }
     }
 }

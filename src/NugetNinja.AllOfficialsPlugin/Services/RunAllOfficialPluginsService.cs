@@ -1,19 +1,17 @@
-﻿
-
-using Microsoft.Extensions.Logging;
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin;
+using Aiursoft.NugetNinja.MissingPropertyPlugin;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
 using Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 using Aiursoft.NugetNinja.UselessProjectReferencePlugin;
-using Aiursoft.NugetNinja.MissingPropertyPlugin;
+using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
 
 public class RunAllOfficialPluginsService : IEntryService
 {
-    private readonly ILogger<RunAllOfficialPluginsService> _logger;
     private readonly Extractor _extractor;
+    private readonly ILogger<RunAllOfficialPluginsService> _logger;
     private readonly List<IActionDetector> _pluginDetectors;
 
     public RunAllOfficialPluginsService(
@@ -27,7 +25,7 @@ public class RunAllOfficialPluginsService : IEntryService
     {
         _logger = logger;
         _extractor = extractor;
-        _pluginDetectors = new()
+        _pluginDetectors = new List<IActionDetector>
         {
             missingPropertyDetector,
             uselessPackageReferenceDetector,
@@ -50,10 +48,7 @@ public class RunAllOfficialPluginsService : IEntryService
             await foreach (var action in actions)
             {
                 _logger.LogWarning(action.BuildMessage());
-                if (shouldTakeAction)
-                {
-                    await action.TakeActionAsync();
-                }
+                if (shouldTakeAction) await action.TakeActionAsync();
             }
         }
     }

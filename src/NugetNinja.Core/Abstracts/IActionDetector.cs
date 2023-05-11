@@ -1,6 +1,4 @@
-﻿
-
-namespace Aiursoft.NugetNinja.Core;
+﻿namespace Aiursoft.NugetNinja.Core;
 
 public interface IActionDetector
 {

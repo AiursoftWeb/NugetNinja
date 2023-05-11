@@ -14,7 +14,7 @@ public class CommandRunner
     }
 
     /// <summary>
-    /// Run git command.
+    ///     Run git command.
     /// </summary>
     /// <param name="path">Path</param>
     /// <param name="arguments">Arguments</param>
@@ -22,10 +22,7 @@ public class CommandRunner
     /// <returns>Task</returns>
     public async Task<string> RunGit(string path, string arguments, bool integrateResultInProcess = true)
     {
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
         var process = new Process
         {
@@ -52,17 +49,14 @@ public class CommandRunner
         {
             throw new GitCommandException(
                 "Start Git failed! Please install Git at https://git-scm.com .",
-                command: arguments,
-                result: "Start git failed.",
-                path: path);
+                arguments,
+                "Start git failed.",
+                path);
         }
 
         await Task.Run(process.WaitForExit);
 
-        if (!integrateResultInProcess)
-        {
-            return string.Empty;
-        }
+        if (!integrateResultInProcess) return string.Empty;
 
         var consoleOutput = string.Empty;
         var output = await process.StandardOutput.ReadToEndAsync();
@@ -72,13 +66,11 @@ public class CommandRunner
             error.Contains("'git-lfs' was not found") ||
             output.Contains("git-lfs: command not found") ||
             error.Contains("git-lfs: command not found"))
-        {
             throw new GitCommandException(
                 "Start Git failed! Git LFS not found!",
-                command: arguments,
-                result: "Start git failed.",
-                path: path);
-        }
+                arguments,
+                "Start git failed.",
+                path);
 
         if (!string.IsNullOrWhiteSpace(error))
         {
@@ -88,9 +80,9 @@ public class CommandRunner
                 _logger.LogTrace(consoleOutput);
                 throw new GitCommandException(
                     $"Git command resulted an error: git {arguments} on {path} got result: {error}",
-                    command: arguments,
-                    result: error,
-                    path: path);
+                    arguments,
+                    error,
+                    path);
             }
         }
 

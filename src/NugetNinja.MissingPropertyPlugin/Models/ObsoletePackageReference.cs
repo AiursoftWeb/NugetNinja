@@ -15,7 +15,8 @@ public class ObsoletePackageReference : IAction
 
     public string BuildMessage()
     {
-        return $"The project: '{SourceProject}' don't have to reference package '{TargetPackage}' because it is deprecated.";
+        return
+            $"The project: '{SourceProject}' don't have to reference package '{TargetPackage}' because it is deprecated.";
     }
 
     public Task TakeActionAsync()

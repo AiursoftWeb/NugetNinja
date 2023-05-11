@@ -1,6 +1,4 @@
-﻿
-
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin;
 
@@ -17,7 +15,8 @@ public class VulnerablePackageReplacement : IAction
 
     public string BuildMessage()
     {
-        return $@"The project: '{SourceProjectName}' referenced a package {Package} {Package.Version} which has known vulnerabilities! Please consider to upgrade\remove\replace it!";
+        return
+            $@"The project: '{SourceProjectName}' referenced a package {Package} {Package.Version} which has known vulnerabilities! Please consider to upgrade\remove\replace it!";
     }
 
     public Task TakeActionAsync()

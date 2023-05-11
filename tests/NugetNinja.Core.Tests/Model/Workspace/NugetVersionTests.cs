@@ -1,5 +1,4 @@
-﻿
-#pragma warning disable CS1718 // Comparison made to same variable
+﻿#pragma warning disable CS1718 // Comparison made to same variable
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning disable CS0253 // Possible unintended reference comparison; right hand side needs cast
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -62,7 +61,7 @@ public class NugetVersionTests
     [TestMethod]
     public void TestOtherTypeEquals()
     {
-        NugetVersion version1 = new NugetVersion("10.1.0.0-Preview");
+        var version1 = new NugetVersion("10.1.0.0-Preview");
         object version2 = new NugetVersion("10.1.0.0-preview");
         Assert.IsTrue(version1.Equals(version1 as object));
         Assert.IsFalse(version1 == version2);
@@ -74,7 +73,7 @@ public class NugetVersionTests
     [TestMethod]
     public void TestOtherTypeNullEquals()
     {
-        NugetVersion version1 = new NugetVersion("10.1.0.0-Preview");
+        var version1 = new NugetVersion("10.1.0.0-Preview");
         object version2 = null;
         Assert.IsFalse(version1.Equals(version2));
     }

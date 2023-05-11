@@ -10,9 +10,11 @@ public interface IVersionControlService
 
     public Task ForkRepo(string endPoint, string org, string repo, string patToken);
 
-    public Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head, string patToken);
+    public Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
+        string patToken);
 
-    public Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch, string patToken);
+    public Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch,
+        string patToken);
 
     public string GetPushPath(Server connectionConfiguration, Repository repo);
 }

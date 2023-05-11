@@ -1,7 +1,5 @@
-﻿
-
+﻿using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.DependencyInjection;
-using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 

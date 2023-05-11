@@ -1,6 +1,4 @@
-﻿
-
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 

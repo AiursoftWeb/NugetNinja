@@ -11,7 +11,7 @@ public class IndexViewModel
     [Required(ErrorMessage = "The {0} is required.")]
     [Display(Name = "GitHub repository url")]
     [Url(ErrorMessage = "The {0} is not a valid url!")]
-    [RegularExpression(pattern: GithubRepoRegexPattern, ErrorMessage = "The URL is not a GitHub repository address!")]
+    [RegularExpression(GithubRepoRegexPattern, ErrorMessage = "The URL is not a GitHub repository address!")]
     public string GitHubRepositoryUrl { get; set; } = string.Empty;
 
     public (string org, string repo) GetGitHubValues()

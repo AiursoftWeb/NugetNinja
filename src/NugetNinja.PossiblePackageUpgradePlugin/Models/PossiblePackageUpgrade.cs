@@ -1,6 +1,4 @@
-﻿
-
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
 
@@ -19,7 +17,8 @@ public class PossiblePackageUpgrade : IAction
 
     public string BuildMessage()
     {
-        return $"The project: '{SourceProjectName}' should upgrade the package '{Package}' from '{Package.SourceVersionText}' to '{NewVersion}'.";
+        return
+            $"The project: '{SourceProjectName}' should upgrade the package '{Package}' from '{Package.SourceVersionText}' to '{NewVersion}'.";
     }
 
     public Task TakeActionAsync()

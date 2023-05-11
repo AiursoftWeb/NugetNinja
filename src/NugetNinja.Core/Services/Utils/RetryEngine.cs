@@ -1,11 +1,9 @@
-﻿
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.Core;
 
 /// <summary>
-/// Retry engine.
+///     Retry engine.
 /// </summary>
 public class RetryEngine
 {
@@ -13,7 +11,7 @@ public class RetryEngine
     private readonly ILogger<RetryEngine> _logger;
 
     /// <summary>
-    /// Creates new retry engine.
+    ///     Creates new retry engine.
     /// </summary>
     /// <param name="logger">Logger</param>
     public RetryEngine(ILogger<RetryEngine> logger)
@@ -22,7 +20,7 @@ public class RetryEngine
     }
 
     /// <summary>
-    /// Run a task with retry.
+    ///     Run a task with retry.
     /// </summary>
     /// <typeparam name="T">Response type.</typeparam>
     /// <param name="taskFactory">Task factory.</param>
@@ -35,7 +33,6 @@ public class RetryEngine
         Predicate<Exception>? when = null)
     {
         for (var i = 1; i <= attempts; i++)
-        {
             try
             {
                 _logger.LogTrace($"Starting a job with retry. Attempt: {i}. (Starts from 1)");
@@ -49,32 +46,33 @@ public class RetryEngine
                     var shouldRetry = when.Invoke(e);
                     if (!shouldRetry)
                     {
-                        _logger.LogCritical("A task that was asked to retry failed. But from the given condition is false, we gave up retry.");
+                        _logger.LogCritical(
+                            "A task that was asked to retry failed. But from the given condition is false, we gave up retry.");
                         throw;
                     }
-                    else
-                    {
-                        _logger.LogWarning("A task that was asked to retry failed. But from the given condition is true, we will keep retry.");
-                    }
+
+                    _logger.LogWarning(
+                        "A task that was asked to retry failed. But from the given condition is true, we will keep retry.");
                 }
 
                 if (i >= attempts)
                 {
-                    _logger.LogCritical($"A task that was asked to retry failed. Maximum attempts {attempts} already reached. We have to crash it.");
+                    _logger.LogCritical(
+                        $"A task that was asked to retry failed. Maximum attempts {attempts} already reached. We have to crash it.");
                     throw;
                 }
 
-                _logger.LogWarning($"A task that was asked to retry failed. Current attempt is {i}. maximum attempts is {attempts}. Will retry soon...");
+                _logger.LogWarning(
+                    $"A task that was asked to retry failed. Current attempt is {i}. maximum attempts is {attempts}. Will retry soon...");
 
                 await Task.Delay(ExponentialBackoffTimeSlot(i) * 1000);
             }
-        }
 
         throw new InvalidOperationException("Code shall not reach here.");
     }
 
     /// <summary>
-    /// Please see <see href="https://en.wikipedia.org/wiki/Exponential_backoff">Exponetial backoff </see> time slot. 
+    ///     Please see <see href="https://en.wikipedia.org/wiki/Exponential_backoff">Exponetial backoff </see> time slot.
     /// </summary>
     /// <param name="time">the time of trial</param>
     /// <returns>Time slot to wait.</returns>

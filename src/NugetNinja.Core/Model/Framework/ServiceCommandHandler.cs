@@ -1,6 +1,4 @@
-﻿
-
-using System.CommandLine;
+﻿using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -22,13 +20,15 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
             OptionsProvider.PatToken);
     }
 
-    public Task Execute(string path, bool dryRun, bool verbose, bool allowPreview, string customNugetServer, string patToken)
+    public Task Execute(string path, bool dryRun, bool verbose, bool allowPreview, string customNugetServer,
+        string patToken)
     {
         var services = BuildServices(verbose, allowPreview, customNugetServer, patToken);
         return RunFromServices(services, path, dryRun);
     }
 
-    protected virtual ServiceCollection BuildServices(bool verbose, bool allowPreview, string customNugetServer, string patToken)
+    protected virtual ServiceCollection BuildServices(bool verbose, bool allowPreview, string customNugetServer,
+        string patToken)
     {
         var services = new ServiceCollection();
         services.AddLogging(logging =>
@@ -36,7 +36,7 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
             logging
                 .AddFilter("Microsoft.Extensions", LogLevel.Warning)
                 .AddFilter("System", LogLevel.Warning);
-            logging.AddSimpleConsole(options => 
+            logging.AddSimpleConsole(options =>
             {
                 options.IncludeScopes = verbose;
                 options.SingleLine = true;
@@ -54,13 +54,10 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         services.AddTransient<ProjectsEnumerator>();
         services.AddTransient<NugetService>();
 
-        if (!string.IsNullOrWhiteSpace(customNugetServer))
-        {
-            NugetService.CustomNugetServer = customNugetServer;
-        }
+        if (!string.IsNullOrWhiteSpace(customNugetServer)) NugetService.CustomNugetServer = customNugetServer;
         NugetService.AllowPreview = allowPreview;
         NugetService.PatToken = patToken;
-        
+
         startUp.ConfigureServices(services);
         services.AddTransient<TE>();
         return services;
@@ -74,6 +71,6 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
 
         var fullPath = Path.GetFullPath(path);
         logger.LogTrace($"Starting service: '{typeof(TE).Name}'. Full path is: '{fullPath}', Dry run is: '{dryRun}'.");
-        return service.OnServiceStartedAsync(fullPath, shouldTakeAction: !dryRun);
+        return service.OnServiceStartedAsync(fullPath, !dryRun);
     }
 }

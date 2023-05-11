@@ -4,14 +4,14 @@ namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
 
 public class ResetSdkLevel : IAction
 {
-    public Project Project { get; }
-    public string NewSdk { get; }
-
     public ResetSdkLevel(Project project, string newSdk)
     {
         Project = project;
         NewSdk = newSdk;
     }
+
+    public Project Project { get; }
+    public string NewSdk { get; }
 
     public string BuildMessage()
     {

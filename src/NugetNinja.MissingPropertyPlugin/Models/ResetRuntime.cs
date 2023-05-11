@@ -1,15 +1,11 @@
-﻿
-
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
 
 public class ResetRuntime : IAction
 {
-    private readonly int _inserted;
     private readonly int _deprecated;
-    public Project Project { get; }
-    public string[] NewRuntimes { get; }
+    private readonly int _inserted;
 
     public ResetRuntime(
         Project project,
@@ -23,9 +19,13 @@ public class ResetRuntime : IAction
         NewRuntimes = newRuntimes;
     }
 
+    public Project Project { get; }
+    public string[] NewRuntimes { get; }
+
     public string BuildMessage()
     {
-        return $"The project: '{Project}' with runtimes: '{string.Join(',', Project.GetTargetFrameworks())}' should insert {_inserted} runtime(s) and deprecate {_deprecated} runtime(s) to '{string.Join(',', NewRuntimes)}'.";
+        return
+            $"The project: '{Project}' with runtimes: '{string.Join(',', Project.GetTargetFrameworks())}' should insert {_inserted} runtime(s) and deprecate {_deprecated} runtime(s) to '{string.Join(',', NewRuntimes)}'.";
     }
 
     public async Task TakeActionAsync()
@@ -37,7 +37,8 @@ public class ResetRuntime : IAction
         }
         else
         {
-            await Project.AddOrUpdateProperty(nameof(Project.TargetFramework), NewRuntimes.FirstOrDefault() ?? string.Empty);
+            await Project.AddOrUpdateProperty(nameof(Project.TargetFramework),
+                NewRuntimes.FirstOrDefault() ?? string.Empty);
             await Project.RemoveProperty(nameof(Project.TargetFrameworks));
         }
     }

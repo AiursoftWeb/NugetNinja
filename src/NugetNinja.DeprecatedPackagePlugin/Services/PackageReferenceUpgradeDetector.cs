@@ -1,7 +1,5 @@
-﻿
-
+﻿using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
-using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin;
 
@@ -21,38 +19,38 @@ public class DeprecatedPackageDetector : IActionDetector
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
         foreach (var project in context.AllProjects)
+        foreach (var package in project.PackageReferences)
         {
-            foreach (var package in project.PackageReferences)
+            CatalogInformation? catalogInformation;
+            try
             {
-                CatalogInformation? catalogInformation;
-                try
+                catalogInformation = await _nugetService.GetPackageDeprecationInfo(package);
+            }
+            catch (Exception e)
+            {
+                _logger.LogTrace(e, $"Failed to get package deprecation info by name: '{package}'.");
+                _logger.LogCritical($"Failed to get package deprecation info by name: '{package}'.");
+                continue;
+            }
+
+            if (catalogInformation.Deprecation != null)
+            {
+                Package? alternative = null;
+                if (!string.IsNullOrWhiteSpace(catalogInformation.Deprecation.AlternatePackage?.Id))
                 {
-                    catalogInformation = await _nugetService.GetPackageDeprecationInfo(package);
+                    var alternativeVersion =
+                        await _nugetService.GetLatestVersion(catalogInformation.Deprecation.AlternatePackage.Id);
+                    alternative = new Package(catalogInformation.Deprecation.AlternatePackage.Id, alternativeVersion);
                 }
-                catch (Exception e)
-                {
-                    _logger.LogTrace(e, $"Failed to get package deprecation info by name: '{package}'.");
-                    _logger.LogCritical($"Failed to get package deprecation info by name: '{package}'.");
-                    continue;
-                }
-                if (catalogInformation.Deprecation != null)
-                {
-                    Package? alternative = null;
-                    if (!string.IsNullOrWhiteSpace(catalogInformation.Deprecation.AlternatePackage?.Id))
-                    {
-                        var alternativeVersion = await _nugetService.GetLatestVersion(catalogInformation.Deprecation.AlternatePackage.Id);
-                        alternative = new Package(catalogInformation.Deprecation.AlternatePackage.Id, alternativeVersion);
-                    }
-                    
-                    yield return new DeprecatedPackageReplacement(
-                        source: project,
-                        target: package,
-                        alternative: alternative);
-                }
-                else if (catalogInformation.Vulnerabilities?.Any() == true)
-                {
-                    yield return new VulnerablePackageReplacement(project, package);
-                }
+
+                yield return new DeprecatedPackageReplacement(
+                    project,
+                    package,
+                    alternative);
+            }
+            else if (catalogInformation.Vulnerabilities?.Any() == true)
+            {
+                yield return new VulnerablePackageReplacement(project, package);
             }
         }
     }

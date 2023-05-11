@@ -1,15 +1,13 @@
-﻿
-
+﻿using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
-using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 
 public class UselessPackageReferenceDetector : IActionDetector
 {
+    private readonly ProjectsEnumerator _enumerator;
     private readonly ILogger<UselessPackageReferenceDetector> _logger;
     private readonly NugetService _nugetService;
-    private readonly ProjectsEnumerator _enumerator;
 
     public UselessPackageReferenceDetector(
         ILogger<UselessPackageReferenceDetector> logger,
@@ -24,12 +22,8 @@ public class UselessPackageReferenceDetector : IActionDetector
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
         foreach (var uselessReferences in context.AllProjects.Select(AnalyzeProject))
-        {
-            await foreach (var reference in uselessReferences)
-            {
-                yield return reference;
-            }
-        }
+        await foreach (var reference in uselessReferences)
+            yield return reference;
     }
 
     private async IAsyncEnumerable<UselessPackageReference> AnalyzeProject(Project context)
@@ -39,11 +33,10 @@ public class UselessPackageReferenceDetector : IActionDetector
         foreach (var relatedProject in relatedProjects)
         {
             accessiblePackages.AddRange(relatedProject.PackageReferences);
-            foreach(var package in relatedProject.PackageReferences)
-            {
+            foreach (var package in relatedProject.PackageReferences)
                 try
                 {
-                    var recursivePackagesBroughtUp = await _nugetService.GetPackageDependencies(package: package);
+                    var recursivePackagesBroughtUp = await _nugetService.GetPackageDependencies(package);
                     accessiblePackages.AddRange(recursivePackagesBroughtUp);
                 }
                 catch (Exception e)
@@ -51,17 +44,15 @@ public class UselessPackageReferenceDetector : IActionDetector
                     _logger.LogTrace(e, $"Failed to get package dependencies by name: '{package}'.");
                     _logger.LogCritical($"Failed to get package dependencies by name: '{package}'.");
                 }
-            }
         }
 
         foreach (var directReference in context.PackageReferences)
         {
             var accessiblePackagesForThisProject = accessiblePackages.ToList();
             foreach (var otherDirectReference in context.PackageReferences.Where(p => p != directReference))
-            {
                 try
                 {
-                    var references = await _nugetService.GetPackageDependencies(package: otherDirectReference);
+                    var references = await _nugetService.GetPackageDependencies(otherDirectReference);
                     accessiblePackagesForThisProject.AddRange(references);
                 }
                 catch (Exception e)
@@ -69,12 +60,9 @@ public class UselessPackageReferenceDetector : IActionDetector
                     _logger.LogTrace(e, $"Failed to get package dependencies by name: '{otherDirectReference}'.");
                     _logger.LogCritical($"Failed to get package dependencies by name: '{otherDirectReference}'.");
                 }
-            }
 
             if (accessiblePackagesForThisProject.Any(pa => pa.Name == directReference.Name))
-            {
-                yield return new(context, directReference);
-            }
+                yield return new UselessPackageReference(context, directReference);
         }
     }
 }

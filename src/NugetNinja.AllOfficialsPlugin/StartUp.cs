@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
 

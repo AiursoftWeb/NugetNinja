@@ -1,6 +1,4 @@
-﻿
-
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 
@@ -17,7 +15,8 @@ public class UselessPackageReference : IAction
 
     public string BuildMessage()
     {
-        return $"The project: '{SourceProjectName}' don't have to reference package '{TargetPackage}' because it already has its access via another path!";
+        return
+            $"The project: '{SourceProjectName}' don't have to reference package '{TargetPackage}' because it already has its access via another path!";
     }
 
     public Task TakeActionAsync()

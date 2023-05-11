@@ -1,16 +1,14 @@
-﻿
-
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.PrBot;
 
 /// <summary>
-/// Workspace initializer.
+///     Workspace initializer.
 /// </summary>
 public class WorkspaceManager
 {
-    private readonly RetryEngine _retryEngine;
     private readonly CommandRunner _commandRunner;
+    private readonly RetryEngine _retryEngine;
 
     public WorkspaceManager(
         RetryEngine retryEngine,
@@ -21,7 +19,7 @@ public class WorkspaceManager
     }
 
     /// <summary>
-    /// Get current branch from a git repo.
+    ///     Get current branch from a git repo.
     /// </summary>
     /// <param name="path">Path</param>
     /// <returns>Current branch.</returns>
@@ -37,11 +35,8 @@ public class WorkspaceManager
     public async Task SwitchToBranch(string sourcePath, string targetBranch, bool fromCurrent)
     {
         var currentBranch = await GetBranch(sourcePath);
-        if (string.Equals(currentBranch, targetBranch, StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-        
+        if (string.Equals(currentBranch, targetBranch, StringComparison.OrdinalIgnoreCase)) return;
+
         try
         {
             await _commandRunner.RunGit(sourcePath, $"checkout -b {targetBranch}");
@@ -61,7 +56,7 @@ public class WorkspaceManager
     }
 
     /// <summary>
-    /// Get remote origin's URL from a local git repo.
+    ///     Get remote origin's URL from a local git repo.
     /// </summary>
     /// <param name="path">Path.</param>
     /// <returns>Remote URL.</returns>
@@ -78,7 +73,7 @@ public class WorkspaceManager
     }
 
     /// <summary>
-    /// Clone a repo.
+    ///     Clone a repo.
     /// </summary>
     /// <param name="path">Path on disk.</param>
     /// <param name="branch">Init branch.</param>
@@ -90,12 +85,9 @@ public class WorkspaceManager
     }
 
     /// <summary>
-    /// Switch a folder to a target branch (Latest remote).
-    /// 
-    /// Supports empty folder. We will clone the repo there.
-    /// 
-    /// Supports folder with existing content. We will clean that folder and checkout to the target branch.
-    /// 
+    ///     Switch a folder to a target branch (Latest remote).
+    ///     Supports empty folder. We will clone the repo there.
+    ///     Supports folder with existing content. We will clean that folder and checkout to the target branch.
     /// </summary>
     /// <param name="path">Path</param>
     /// <param name="branch">Branch name</param>
@@ -107,13 +99,13 @@ public class WorkspaceManager
         {
             var remote = await GetRemoteUrl(path);
             if (!string.Equals(remote, endPoint, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new GitCommandException($"The repository with remote: '{remote}' is not a repository for {endPoint}.", command: "remote -v", result: remote, path);
-            }
+                throw new GitCommandException(
+                    $"The repository with remote: '{remote}' is not a repository for {endPoint}.", "remote -v", remote,
+                    path);
 
             await _commandRunner.RunGit(path, "reset --hard HEAD");
             await _commandRunner.RunGit(path, "clean . -fdx");
-            await SwitchToBranch(path, branch, fromCurrent: false);
+            await SwitchToBranch(path, branch, false);
             await Fetch(path);
             await _commandRunner.RunGit(path, $"reset --hard origin/{branch}");
         }
@@ -128,7 +120,7 @@ public class WorkspaceManager
     }
 
     /// <summary>
-    /// Do a commit. (With adding local changes)
+    ///     Do a commit. (With adding local changes)
     /// </summary>
     /// <param name="sourcePath">Commit path.</param>
     /// <param name="message">Commie message.</param>
@@ -137,7 +129,7 @@ public class WorkspaceManager
     public async Task<bool> CommitToBranch(string sourcePath, string message, string branch)
     {
         await _commandRunner.RunGit(sourcePath, "add .");
-        await SwitchToBranch(sourcePath, branch, fromCurrent: true);
+        await SwitchToBranch(sourcePath, branch, true);
         var commitResult = await _commandRunner.RunGit(sourcePath, $@"commit -m ""{message}""");
         return !commitResult.Contains("nothing to commit, working tree clean");
     }
@@ -149,7 +141,7 @@ public class WorkspaceManager
     }
 
     /// <summary>
-    /// Push a local folder to remote.
+    ///     Push a local folder to remote.
     /// </summary>
     /// <param name="sourcePath">Folder path..</param>
     /// <param name="branch">Remote branch.</param>
@@ -172,7 +164,8 @@ public class WorkspaceManager
         try
         {
             var forceString = force ? "--force" : string.Empty;
-            var pushResult = await _commandRunner.RunGit(sourcePath, $@"push --set-upstream ninja {branch} {forceString}");
+            var pushResult =
+                await _commandRunner.RunGit(sourcePath, $@"push --set-upstream ninja {branch} {forceString}");
             return pushResult.Contains("->") || pushResult.Contains("Everything up-to-date");
         }
         catch (GitCommandException e) when (e.GitOutput.Contains("rejected]"))
@@ -184,7 +177,7 @@ public class WorkspaceManager
     }
 
     /// <summary>
-    /// If current path is pending a git commit.
+    ///     If current path is pending a git commit.
     /// </summary>
     /// <param name="sourcePath">Path</param>
     /// <returns>Bool</returns>
@@ -201,31 +194,20 @@ public class WorkspaceManager
             async attempt =>
             {
                 var workJob = _commandRunner.RunGit(path, "fetch --verbose",
-                    integrateResultInProcess: attempt % 2 == 0);
+                    attempt % 2 == 0);
                 var waitJob = Task.Delay(TimeSpan.FromSeconds(attempt * 50));
                 await Task.WhenAny(workJob, waitJob);
                 if (workJob.IsCompleted)
-                {
                     return await workJob;
-                }
-                else
-                {
-                    throw new TimeoutException("Git fetch job has exceeded the timeout and we have to retry it.");
-                }
+                throw new TimeoutException("Git fetch job has exceeded the timeout and we have to retry it.");
             });
     }
 
     private void ClearPath(string path)
     {
         var di = new DirectoryInfo(path);
-        foreach (var file in di.GetFiles())
-        {
-            file.Delete();
-        }
+        foreach (var file in di.GetFiles()) file.Delete();
 
-        foreach (var dir in di.GetDirectories())
-        {
-            dir.Delete(true);
-        }
+        foreach (var dir in di.GetDirectories()) dir.Delete(true);
     }
 }

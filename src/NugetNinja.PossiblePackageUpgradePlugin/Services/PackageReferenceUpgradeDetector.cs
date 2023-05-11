@@ -1,7 +1,5 @@
-﻿
-
+﻿using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
-using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
 
@@ -21,26 +19,21 @@ public class PackageReferenceUpgradeDetector : IActionDetector
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
         foreach (var project in context.AllProjects)
+        foreach (var package in project.PackageReferences)
         {
-            foreach (var package in project.PackageReferences)
+            NugetVersion? latest;
+            try
             {
-                NugetVersion? latest;
-                try
-                {
-                    latest = await _nugetService.GetLatestVersion(package.Name);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogTrace(e, $"Failed to get package latest version by name: '{package}'.");
-                    _logger.LogCritical($"Failed to get package latest version by name: '{package}'.");
-                    continue;
-                }
-                
-                if (package.Version < latest)
-                {
-                    yield return new PossiblePackageUpgrade(project, package, latest);
-                }
+                latest = await _nugetService.GetLatestVersion(package.Name);
             }
+            catch (Exception e)
+            {
+                _logger.LogTrace(e, $"Failed to get package latest version by name: '{package}'.");
+                _logger.LogCritical($"Failed to get package latest version by name: '{package}'.");
+                continue;
+            }
+
+            if (package.Version < latest) yield return new PossiblePackageUpgrade(project, package, latest);
         }
     }
 }

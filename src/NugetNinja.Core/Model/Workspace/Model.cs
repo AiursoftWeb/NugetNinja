@@ -1,6 +1,4 @@
-﻿
-
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 
 namespace Aiursoft.NugetNinja.Core;
 
@@ -30,7 +28,8 @@ public class Model
     private async Task<Project> BuildNewProject(string csprojPath)
     {
         var csprojFolder = new FileInfo(csprojPath).Directory?.FullName
-            ?? throw new IOException($"Can not get the .csproj file location based on path: '{csprojPath}'!");
+                           ?? throw new IOException(
+                               $"Can not get the .csproj file location based on path: '{csprojPath}'!");
         var csprojContent = await File.ReadAllTextAsync(csprojPath);
         var csprojDoc = new HtmlDocument();
         csprojDoc.LoadHtml(csprojContent);
@@ -44,6 +43,7 @@ public class Model
             var projectObject = await IncludeProject(projectReference);
             subProjectReferenceObjects.Add(projectObject);
         }
+
         var project = new Project(csprojPath, csprojDoc.DocumentNode)
         {
             PackageReferences = packageReferences.ToList(),
@@ -58,19 +58,15 @@ public class Model
         var packageReferences = doc.DocumentNode
             .Descendants("PackageReference")
             .Select(p => new Package(
-                name: p.Attributes["Include"].Value,
-                versionText: p.Attributes["Version"]?.Value ?? "0.0.1"))
+                p.Attributes["Include"].Value,
+                p.Attributes["Version"]?.Value ?? "0.0.1"))
             .ToArray();
 
         foreach (var package in packageReferences)
-        {
             if (!AllPackages.Any(p =>
-                p.Name == package.Name &&
-                p.Version == package.Version))
-            {
+                    p.Name == package.Name &&
+                    p.Version == package.Version))
                 AllPackages.Add(package);
-            }
-        }
 
         return packageReferences;
     }

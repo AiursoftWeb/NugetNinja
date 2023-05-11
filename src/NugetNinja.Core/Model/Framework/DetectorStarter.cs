@@ -1,14 +1,12 @@
-﻿
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.Core;
 
 public class DetectorStarter<T> : IEntryService where T : IActionDetector
 {
-    private readonly ILogger<DetectorStarter<T>> _logger;
-    private readonly Extractor _extractor;
     private readonly T _detector;
+    private readonly Extractor _extractor;
+    private readonly ILogger<DetectorStarter<T>> _logger;
 
     public DetectorStarter(
         ILogger<DetectorStarter<T>> logger,
@@ -30,10 +28,7 @@ public class DetectorStarter<T> : IEntryService where T : IActionDetector
         await foreach (var action in actions)
         {
             _logger.LogWarning(action.BuildMessage());
-            if (shouldTakeAction)
-            {
-                await action.TakeActionAsync();
-            }
+            if (shouldTakeAction) await action.TakeActionAsync();
         }
     }
 }

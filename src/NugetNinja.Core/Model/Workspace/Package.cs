@@ -1,6 +1,4 @@
-﻿
-
-namespace Aiursoft.NugetNinja.Core;
+﻿namespace Aiursoft.NugetNinja.Core;
 
 public class Package
 {
@@ -13,14 +11,12 @@ public class Package
             versionText.Contains(')') ||
             versionText.Contains('[') ||
             versionText.Contains(']'))
-        {
             versionText = versionText
                 .Replace("(", string.Empty)
                 .Replace(")", string.Empty)
                 .Replace("[", string.Empty)
                 .Replace("]", string.Empty)
                 .Split(',')[0];
-        }
 
         Version = new NugetVersion(versionText);
     }
@@ -37,5 +33,8 @@ public class Package
     public NugetVersion Version { get; set; }
     public string SourceVersionText { get; set; }
 
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return Name;
+    }
 }

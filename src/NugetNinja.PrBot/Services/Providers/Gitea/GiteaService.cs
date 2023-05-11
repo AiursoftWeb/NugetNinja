@@ -19,12 +19,9 @@ public class GiteaService : IVersionControlService
         _logger = logger;
     }
 
-    public string GetName() => "Gitea";
-    public async Task<Repository> GetRepo(string endPoint, string orgName, string repoName, string patToken)
+    public string GetName()
     {
-        _logger.LogInformation($"Getting repository details based on org: {orgName}, repo: {repoName}...");
-        var endpoint = $@"{endPoint}/repos/{orgName}/{repoName}";
-        return await SendHttpAndGetJson<Repository>(endpoint, HttpMethod.Get, patToken);
+        return "Gitea";
     }
 
     public async Task<bool> RepoExists(string endPoint, string orgName, string repoName, string patToken)
@@ -45,19 +42,13 @@ public class GiteaService : IVersionControlService
     public async IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken)
     {
         _logger.LogInformation($"Listing all stared repositories based on user's name: {userName}...");
-        for (var i = 1; ; i++)
+        for (var i = 1;; i++)
         {
             var endpoint = $@"{endPoint}/users/{userName}/starred?page={i}";
             var currentPageItems = await SendHttpAndGetJson<List<Repository>>(endpoint, HttpMethod.Get, patToken);
-            if (!currentPageItems.Any())
-            {
-                yield break;
-            }
+            if (!currentPageItems.Any()) yield break;
 
-            foreach (var repo in currentPageItems)
-            {
-                yield return repo;
-            }
+            foreach (var repo in currentPageItems) yield return repo;
         }
     }
 
@@ -69,7 +60,8 @@ public class GiteaService : IVersionControlService
         await SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 
-    public async Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head, string patToken)
+    public async Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
+        string patToken)
     {
         _logger.LogInformation($"Getting pull requests on GitHub with org: {org}, repo: {repo}...");
 
@@ -77,7 +69,8 @@ public class GiteaService : IVersionControlService
         return await SendHttpAndGetJson<List<PullRequest>>(endpoint, HttpMethod.Get, patToken);
     }
 
-    public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string @base, string patToken)
+    public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string @base,
+        string patToken)
     {
         _logger.LogInformation($"Creating a new pull request on GitHub with org: {org}, repo: {repo}...");
 
@@ -96,13 +89,28 @@ This pull request may break or change the behavior of this application. Review w
         });
     }
 
+    public string GetPushPath(Server connectionConfiguration, Repository repo)
+    {
+        var pushPath = string.Format(connectionConfiguration.PushEndPoint,
+                           $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
+                       + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
+        return pushPath;
+    }
+
+    public async Task<Repository> GetRepo(string endPoint, string orgName, string repoName, string patToken)
+    {
+        _logger.LogInformation($"Getting repository details based on org: {orgName}, repo: {repoName}...");
+        var endpoint = $@"{endPoint}/repos/{orgName}/{repoName}";
+        return await SendHttpAndGetJson<Repository>(endpoint, HttpMethod.Get, patToken);
+    }
+
     private async Task<string> SendHttp(string endPoint, HttpMethod method, string patToken, object? body = null)
     {
         var request = new HttpRequestMessage(method, endPoint)
         {
-            Content = body != null ?
-                new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json") :
-                new FormUrlEncodedContent(new Dictionary<string, string>())
+            Content = body != null
+                ? new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+                : new FormUrlEncodedContent(new Dictionary<string, string>())
         };
 
         request.Headers.Add("Authorization", $"token {patToken}");
@@ -127,14 +135,8 @@ This pull request may break or change the behavior of this application. Review w
     private async Task<T> SendHttpAndGetJson<T>(string endPoint, HttpMethod method, string patToken)
     {
         var json = await SendHttp(endPoint, method, patToken);
-        var repos = JsonSerializer.Deserialize<T>(json) ?? throw new WebException($"The remote server returned non-json content: '{json}'");
+        var repos = JsonSerializer.Deserialize<T>(json) ??
+                    throw new WebException($"The remote server returned non-json content: '{json}'");
         return repos;
-    }
-
-    public string GetPushPath(Server connectionConfiguration, Repository repo)
-    {
-        var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
-            + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
-        return pushPath;
     }
 }

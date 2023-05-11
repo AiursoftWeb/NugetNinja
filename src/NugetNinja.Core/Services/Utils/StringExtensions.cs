@@ -1,6 +1,4 @@
-﻿
-
-using System.Text;
+﻿using System.Text;
 
 namespace Aiursoft.NugetNinja.Core;
 
@@ -8,10 +6,7 @@ public static class StringExtensions
 {
     public static string GetAbsolutePath(string currentPath, string referencePath)
     {
-        if (Path.IsPathRooted(referencePath))
-        {
-            return referencePath;
-        }
+        if (Path.IsPathRooted(referencePath)) return referencePath;
 
         referencePath = referencePath.Replace('\\', Path.DirectorySeparatorChar);
 

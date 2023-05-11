@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.Core;
@@ -8,11 +6,11 @@ namespace Aiursoft.NugetNinja.Core;
 public class CacheService
 {
     private readonly IMemoryCache _cache;
-    private readonly ILogger<CacheService> _logger;
     private readonly Dictionary<string, Exception> _exceptions = new();
+    private readonly ILogger<CacheService> _logger;
 
     /// <summary>
-    /// Creates a new cache service.
+    ///     Creates a new cache service.
     /// </summary>
     /// <param name="cache">Cache base layer.</param>
     /// <param name="logger">logger.</param>
@@ -25,22 +23,22 @@ public class CacheService
     }
 
     /// <summary>
-    /// Call a method with cache.
+    ///     Call a method with cache.
     /// </summary>
     /// <typeparam name="T">Response type</typeparam>
     /// <param name="cacheKey">Key</param>
     /// <param name="fallback">Fallback method</param>
-    /// <param name="cachedMinutes">Cached minutes. By default, it's 20 minutes. If passed a number less or equal than 0, the cache will not take effect.</param>
+    /// <param name="cachedMinutes">
+    ///     Cached minutes. By default, it's 20 minutes. If passed a number less or equal than 0, the
+    ///     cache will not take effect.
+    /// </param>
     /// <returns>Response</returns>
     public async Task<T> RunWithCache<T>(
         string cacheKey,
         Func<Task<T>> fallback,
         int cachedMinutes = 20)
     {
-        if (_exceptions.TryGetValue(cacheKey, out var exception))
-        {
-            throw exception;
-        }
+        if (_exceptions.TryGetValue(cacheKey, out var exception)) throw exception;
 
         if (!_cache.TryGetValue(cacheKey, out T resultValue) || cachedMinutes <= 0)
         {
@@ -53,6 +51,7 @@ public class CacheService
                 _exceptions.Add(cacheKey, e);
                 throw;
             }
+
             if (cachedMinutes > 0)
             {
                 var cacheEntryOptions = new MemoryCacheEntryOptions()

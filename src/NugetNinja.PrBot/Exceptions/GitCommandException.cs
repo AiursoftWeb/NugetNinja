@@ -1,14 +1,12 @@
-﻿
-
-namespace Aiursoft.NugetNinja.PrBot;
+﻿namespace Aiursoft.NugetNinja.PrBot;
 
 /// <summary>
-/// A git command exception.
+///     A git command exception.
 /// </summary>
 public class GitCommandException : Exception
 {
     /// <summary>
-    /// Creates new GitCommandException
+    ///     Creates new GitCommandException
     /// </summary>
     /// <param name="message">Error message.</param>
     /// <param name="command">Command tried to run</param>
@@ -27,17 +25,17 @@ public class GitCommandException : Exception
     }
 
     /// <summary>
-    /// Command tried to run.
+    ///     Command tried to run.
     /// </summary>
     public string Command { get; }
 
     /// <summary>
-    /// Output.
+    ///     Output.
     /// </summary>
     public string GitOutput { get; }
 
     /// <summary>
-    /// Executing path.
+    ///     Executing path.
     /// </summary>
     public string Path { get; }
 }

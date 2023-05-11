@@ -1,8 +1,6 @@
-﻿
+﻿namespace Aiursoft.NugetNinja.Core;
 
-namespace Aiursoft.NugetNinja.Core;
-
-public abstract class DetectorBasedCommandHandler<T, TS> : ServiceCommandHandler<DetectorStarter<T>, TS> 
+public abstract class DetectorBasedCommandHandler<T, TS> : ServiceCommandHandler<DetectorStarter<T>, TS>
     where T : IActionDetector
     where TS : class, IStartUp, new()
 {

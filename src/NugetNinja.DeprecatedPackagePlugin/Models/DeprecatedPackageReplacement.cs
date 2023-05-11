@@ -1,6 +1,4 @@
-﻿
-
-using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core;
 
 namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin;
 
@@ -19,21 +17,17 @@ public class DeprecatedPackageReplacement : IAction
 
     public string BuildMessage()
     {
-        var alternativeText = Alternative != null ?
-            string.Empty :
-            $"Please consider to replace that to: '{Alternative}'.";
-        return $"The project: '{SourceProject}' referenced a deprecated package: {Package} {Package.Version}! {alternativeText}";
+        var alternativeText =
+            Alternative != null ? string.Empty : $"Please consider to replace that to: '{Alternative}'.";
+        return
+            $"The project: '{SourceProject}' referenced a deprecated package: {Package} {Package.Version}! {alternativeText}";
     }
 
     public async Task TakeActionAsync()
     {
         if (Alternative != null)
-        {
             await SourceProject.ReplacePackageReferenceAsync(Package.Name, Alternative);
-        }
         else
-        {
             await SourceProject.RemovePackageReferenceAsync(Package.Name);
-        }
     }
 }

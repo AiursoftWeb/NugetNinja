@@ -1,6 +1,4 @@
-﻿
-
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 
 namespace Aiursoft.NugetNinja.Core;
 
@@ -16,7 +14,8 @@ public class Project
         Nullable = doc.Descendants(nameof(Nullable)).SingleOrDefault()?.FirstChild?.InnerText;
         ImplicitUsings = doc.Descendants(nameof(ImplicitUsings)).SingleOrDefault()?.FirstChild?.InnerText;
         PackageLicenseFile = doc.Descendants(nameof(PackageLicenseFile)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackageLicenseExpression = doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
+        PackageLicenseExpression =
+            doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
         Description = doc.Descendants(nameof(Description)).SingleOrDefault()?.FirstChild?.InnerText;
         Version = doc.Descendants(nameof(Version)).SingleOrDefault()?.FirstChild?.InnerText;
         Company = doc.Descendants(nameof(Company)).SingleOrDefault()?.FirstChild?.InnerText;
@@ -30,32 +29,6 @@ public class Project
 
     public string PathOnDisk { get; set; }
 
-    #region Framework
-    public string? Sdk { get; set; }
-    public string? OutputType { get; set; }
-    public string? TargetFramework { get; set; }
-    public string? TargetFrameworks { get; set; }
-    #endregion
-
-    #region Features
-    public string? Nullable { get; set; }
-    public string? ImplicitUsings { get; set; }
-    #endregion
-
-    #region Nuget Packaging
-    public string? PackageLicenseFile { get; set; }
-    public string? PackageLicenseExpression { get; set; }
-    public string? Description { get; set; }
-    public string? Version { get; set; }
-    public string? Company { get; set; }
-    public string? Product { get; set; }
-    public string? Authors { get; set; }
-    public string? PackageTags { get; set; }
-    public string? PackageProjectUrl { get; set; }
-    public string? RepositoryUrl { get; set; }
-    public string? RepositoryType { get; set; }
-    #endregion
-
     public List<Project> ProjectReferences { get; init; } = new();
 
     public List<Package> PackageReferences { get; init; } = new();
@@ -64,15 +37,9 @@ public class Project
 
     public string[] GetTargetFrameworks()
     {
-        if (!string.IsNullOrWhiteSpace(TargetFrameworks))
-        {
-            return TargetFrameworks.Split(';');
-        }
+        if (!string.IsNullOrWhiteSpace(TargetFrameworks)) return TargetFrameworks.Split(';');
 
-        if (!string.IsNullOrWhiteSpace(TargetFramework))
-        {
-            return new[] { TargetFramework };
-        }
+        if (!string.IsNullOrWhiteSpace(TargetFramework)) return new[] { TargetFramework };
 
         return Array.Empty<string>();
     }
@@ -89,7 +56,10 @@ public class Project
             PackageReferences.Any(p => p.Name.Contains("xunit", StringComparison.OrdinalIgnoreCase));
     }
 
-    public override string ToString() => Path.GetFileNameWithoutExtension(PathOnDisk);
+    public override string ToString()
+    {
+        return Path.GetFileNameWithoutExtension(PathOnDisk);
+    }
 
     public async Task SetPackageReferenceVersionAsync(string refName, NugetVersion newVersion)
     {
@@ -106,9 +76,8 @@ public class Project
             .FirstOrDefault(d => d.Attributes["Include"].Value == refName);
 
         if (node == null)
-        {
-            throw new InvalidOperationException($"Could remove PackageReference {refName} in project {this} because it was not found!");
-        }
+            throw new InvalidOperationException(
+                $"Could remove PackageReference {refName} in project {this} because it was not found!");
 
         if (node.Attributes["Version"] != null)
         {
@@ -132,9 +101,8 @@ public class Project
             .FirstOrDefault(d => d.Attributes["Include"].Value == refName);
 
         if (node == null)
-        {
-            throw new InvalidOperationException($"Could remove PackageReference {refName} in project {this} because it was not found!");
-        }
+            throw new InvalidOperationException(
+                $"Could remove PackageReference {refName} in project {this} because it was not found!");
 
         node.Attributes["Include"].Value = newPackage.Name;
         node.Attributes["Version"].Value = newPackage.Version.ToString();
@@ -156,9 +124,8 @@ public class Project
             .FirstOrDefault(d => d.Attributes["Include"].Value == refName);
 
         if (node == null)
-        {
-            throw new InvalidOperationException($"Could remove PackageReference {refName} in project {this} because it was not found!");
-        }
+            throw new InvalidOperationException(
+                $"Could remove PackageReference {refName} in project {this} because it was not found!");
 
         await RemoveNode(node, doc);
     }
@@ -166,7 +133,8 @@ public class Project
     public async Task RemoveProjectReference(string absPath)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
-        var contextPath = Path.GetDirectoryName(PathOnDisk) ?? throw new IOException($"Couldn't find the project path based on: '{PathOnDisk}'.");
+        var contextPath = Path.GetDirectoryName(PathOnDisk) ??
+                          throw new IOException($"Couldn't find the project path based on: '{PathOnDisk}'.");
         var doc = new HtmlDocument
         {
             OptionOutputOriginalCase = true
@@ -174,12 +142,12 @@ public class Project
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
             .Descendants("ProjectReference")
-            .FirstOrDefault(p => Equals(absPath, StringExtensions.GetAbsolutePath(contextPath, p.Attributes["Include"].Value)));
+            .FirstOrDefault(p =>
+                Equals(absPath, StringExtensions.GetAbsolutePath(contextPath, p.Attributes["Include"].Value)));
 
         if (node == null)
-        {
-            throw new InvalidOperationException($"Could remove PackageReference {absPath} in project {this} because it was not found!");
-        }
+            throw new InvalidOperationException(
+                $"Could remove PackageReference {absPath} in project {this} because it was not found!");
 
         await RemoveNode(node, doc);
     }
@@ -197,10 +165,7 @@ public class Project
             .Descendants(propertyName)
             .ToArray();
 
-        foreach (var existingNode in existingNodes)
-        {
-            existingNode.Remove();
-        }
+        foreach (var existingNode in existingNodes) existingNode.Remove();
 
         await SaveDocToDisk(doc);
     }
@@ -220,7 +185,6 @@ public class Project
         if (existingNodes.Any())
         {
             foreach (var existingNode in existingNodes)
-            {
                 if (existingNode.FirstChild != null)
                 {
                     existingNode.FirstChild.InnerHtml = propertyValue;
@@ -230,7 +194,6 @@ public class Project
                     var valueNode = HtmlNode.CreateNode(propertyValue);
                     existingNode.AppendChild(valueNode);
                 }
-            }
         }
         else
         {
@@ -272,7 +235,7 @@ public class Project
 
         var reference = doc.CreateElement("FrameworkReference");
         reference.Attributes.Add("Include", frameworkReference);
-        
+
         itemGroup.AppendChild(newline);
         itemGroup.AppendChild(reference);
         itemGroup.AppendChild(newline);
@@ -284,13 +247,9 @@ public class Project
     {
         var parent = node.ParentNode;
         if (!parent.Descendants(0).Where(n => n.NodeType == HtmlNodeType.Element).Except(new[] { node }).Any())
-        {
             parent.Remove();
-        }
         else
-        {
             node.Remove();
-        }
 
         await SaveDocToDisk(doc);
     }
@@ -322,4 +281,36 @@ public class Project
 
         await File.WriteAllTextAsync(PathOnDisk, csprojText);
     }
+
+    #region Framework
+
+    public string? Sdk { get; set; }
+    public string? OutputType { get; set; }
+    public string? TargetFramework { get; set; }
+    public string? TargetFrameworks { get; set; }
+
+    #endregion
+
+    #region Features
+
+    public string? Nullable { get; set; }
+    public string? ImplicitUsings { get; set; }
+
+    #endregion
+
+    #region Nuget Packaging
+
+    public string? PackageLicenseFile { get; set; }
+    public string? PackageLicenseExpression { get; set; }
+    public string? Description { get; set; }
+    public string? Version { get; set; }
+    public string? Company { get; set; }
+    public string? Product { get; set; }
+    public string? Authors { get; set; }
+    public string? PackageTags { get; set; }
+    public string? PackageProjectUrl { get; set; }
+    public string? RepositoryUrl { get; set; }
+    public string? RepositoryType { get; set; }
+
+    #endregion
 }
