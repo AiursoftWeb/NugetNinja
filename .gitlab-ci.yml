@@ -97,6 +97,7 @@ upload_to_nuget:
   dependencies:
     - pack
   script:
+    - echo "$NUGET_API_KEY"
     - |
       for file in $(find . -name "*.nupkg"); do
         dotnet nuget push "$file" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" || exit 1;
