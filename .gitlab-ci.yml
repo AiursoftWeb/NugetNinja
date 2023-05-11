@@ -3,6 +3,7 @@ stages:
   - Linting
   - Testing
   - Publishing
+  - Uploading
 
 before_script:
   - 'export DOTNET_CLI_TELEMETRY_OPTOUT=1'
@@ -87,3 +88,10 @@ pack:
     expire_in: 1 week
     paths:
       - '**/*.nupkg'
+
+upload_to_nuget:
+  stage: Uploading
+  script:
+    - find . -name "*.nupkg" -exec dotnet nuget push {} -k ${NUGET_API_KEY} -s https://api.nuget.org/v3/index.json \;
+  only:
+    - master
