@@ -1,8 +1,8 @@
 # Nuget Ninja
 
 ![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)
-![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/main/pipeline.svg)
-![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/main/coverage.svg)
+![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/pipeline.svg)
+![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/coverage.svg)
 [![NuGet version (Aiursoft.NugetNinja)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.svg?style=flat-square)](https://www.nuget.org/packages/Aiursoft.NugetNinja/)
 [![NuGet version (Aiursoft.NugetNinja.PrBot)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.PrBot.svg?style=flat-square)](https://www.nuget.org/packages/Aiursoft.NugetNinja.PrBot/)
 
