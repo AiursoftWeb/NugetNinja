@@ -91,6 +91,7 @@ pack:
 
 upload_to_nuget:
   stage: Uploading
+  environment: production
   needs:
     - pack
   dependencies:
