@@ -91,6 +91,8 @@ pack:
 
 upload_to_nuget:
   stage: Uploading
+  dependencies:
+    - pack
   script:
     - find . -name "*.nupkg" -exec dotnet nuget push {} -k ${NUGET_API_KEY} -s https://api.nuget.org/v3/index.json \;
   only:
