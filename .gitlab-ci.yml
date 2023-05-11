@@ -94,6 +94,6 @@ upload_to_nuget:
   dependencies:
     - pack
   script:
-    - find . -name "*.nupkg" -exec dotnet nuget push {} -k ${NUGET_API_KEY} -s "https://api.nuget.org/v3/index.json" \;
+    - (find . -name "*.nupkg" -exec dotnet nuget push {} -k ${NUGET_API_KEY} -s "https://api.nuget.org/v3/index.json" \; || exit 1)
   only:
     - master
