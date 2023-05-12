@@ -1,10 +1,10 @@
 # Nuget Ninja
 
-![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)
-![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/pipeline.svg)
-![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/coverage.svg)
-[![NuGet version (Aiursoft.NugetNinja)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.svg?style=flat-square)](https://www.nuget.org/packages/Aiursoft.NugetNinja/)
-[![NuGet version (Aiursoft.NugetNinja.PrBot)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.PrBot.svg?style=flat-square)](https://www.nuget.org/packages/Aiursoft.NugetNinja.PrBot/)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.cn/aiursoft/nugetninja/-/blob/master/LICENSE)
+[![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/pipeline.svg)](https://gitlab.aiursoft.cn/aiursoft/nugetninja/-/pipelines)
+[![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/aiursoft/nugetninja/-/pipelines)
+[![NuGet version (Aiursoft.NugetNinja)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja/)
+[![NuGet version (Aiursoft.NugetNinja.PrBot)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.PrBot.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja.PrBot/)
 
 Nuget Ninjia is a tool for detecting dependencies of .NET projects. It analyzes the dependency structure of .NET projects in a directory and builds a directed acyclic graph. And will give some modification suggestions for Nuget packages, so that the dependencies of the project are as concise and up-to-date as possible.
 
