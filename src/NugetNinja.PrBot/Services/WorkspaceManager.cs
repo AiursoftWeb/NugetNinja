@@ -1,4 +1,5 @@
 ﻿using Aiursoft.NugetNinja.Core;
+using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.PrBot;
 
@@ -8,12 +9,15 @@ namespace Aiursoft.NugetNinja.PrBot;
 public class WorkspaceManager
 {
     private readonly CommandRunner _commandRunner;
+    private readonly ILogger<WorkspaceManager> _logger;
     private readonly RetryEngine _retryEngine;
 
     public WorkspaceManager(
+        ILogger<WorkspaceManager> logger,
         RetryEngine retryEngine,
         CommandRunner commandRunner)
     {
+        _logger = logger;
         _retryEngine = retryEngine;
         _commandRunner = commandRunner;
     }
@@ -164,8 +168,11 @@ public class WorkspaceManager
         try
         {
             var forceString = force ? "--force" : string.Empty;
+
+            var command = $@"push --set-upstream ninja {branch} {forceString}";
+            _logger.LogInformation($"Running git {command}");
             var pushResult =
-                await _commandRunner.RunGit(sourcePath, $@"push --set-upstream ninja {branch} {forceString}");
+                await _commandRunner.RunGit(sourcePath, command);
             return pushResult.Contains("->") || pushResult.Contains("Everything up-to-date");
         }
         catch (GitCommandException e) when (e.GitOutput.Contains("rejected]"))
@@ -173,6 +180,11 @@ public class WorkspaceManager
             // In this case, the remote branch is later than local.
             // So we might have some conflict.
             return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning($"Git push failed to {sourcePath}, branch {branch}, endpoint {endpoint}", ex);
+            throw;
         }
     }
 

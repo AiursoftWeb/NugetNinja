@@ -20,9 +20,13 @@ public class CommandRunner
     /// <param name="arguments">Arguments</param>
     /// <param name="integrateResultInProcess">integrateResultInProcess</param>
     /// <returns>Task</returns>
-    public async Task<string> RunGit(string path, string arguments, bool integrateResultInProcess = true)
+    public async Task<string> RunGit(string path, string arguments, bool integrateResultInProcess = true, TimeSpan? timeout = null)
     {
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        if (timeout == null)
+        {
+            timeout = TimeSpan.FromMinutes(2);
+        }
 
         var process = new Process
         {
@@ -54,7 +58,12 @@ public class CommandRunner
                 path);
         }
 
-        await Task.Run(process.WaitForExit);
+        var executeTask = Task.Run(process.WaitForExit);
+        await Task.WhenAny(Task.Delay(timeout.Value), executeTask);
+        if (!executeTask.IsCompleted)
+        {
+            throw new TimeoutException($@"Execute git command: git {arguments} at {path} was time out! Timeout is {timeout}.");
+        }
 
         if (!integrateResultInProcess) return string.Empty;
 
