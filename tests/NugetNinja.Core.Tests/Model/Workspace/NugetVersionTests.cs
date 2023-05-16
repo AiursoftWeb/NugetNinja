@@ -59,6 +59,14 @@ public class NugetVersionTests
     }
 
     [TestMethod]
+    public void TempTest()
+    {
+        var checker = new VersionCrossChecker();
+        var results = checker.GetDotNetVersionsNumbers();
+
+    }
+
+    [TestMethod]
     public void TestOtherTypeEquals()
     {
         var version1 = new NugetVersion("10.1.0.0-Preview");

@@ -64,6 +64,7 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         services.AddTransient<Extractor>();
         services.AddTransient<ProjectsEnumerator>();
         services.AddTransient<NugetService>();
+        services.AddTransient<VersionCrossChecker>();
         services.Configure<AppSettings>(options =>
         {
             options.AllowCross = allowCross;

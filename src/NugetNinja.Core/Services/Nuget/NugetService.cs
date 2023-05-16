@@ -17,32 +17,47 @@ public class NugetService
     private readonly CacheService _cacheService;
     private readonly HttpClient _httpClient;
     private readonly ILogger<NugetService> _logger;
-    private readonly AppSettings _options;
+    private readonly VersionCrossChecker _versionCrossChecker;
 
     public NugetService(
         CacheService cacheService,
         HttpClient httpClient,
         ILogger<NugetService> logger,
-        IOptions<AppSettings> options)
+        IOptions<AppSettings> options,
+        VersionCrossChecker versionCrossChecker)
     {
+        var optionsValue = options.Value;
+
         _cacheService = cacheService;
         _httpClient = httpClient;
         _logger = logger;
-        _options = options.Value;
-        _allowPreview = _options.AllowPreview;
-        _patToken = _options.PatToken;
-        _allowPackageVersionCrossMicrosoftRuntime = _options.AllowCross;
-        if (!string.IsNullOrWhiteSpace(_options.CustomNugetServer))
+        _versionCrossChecker = versionCrossChecker;
+        _allowPreview = optionsValue.AllowPreview;
+        _patToken = optionsValue.PatToken;
+        _allowPackageVersionCrossMicrosoftRuntime = optionsValue.AllowCross;
+        if (!string.IsNullOrWhiteSpace(optionsValue.CustomNugetServer))
         {
-            _customNugetServer = _options.CustomNugetServer;
+            _customNugetServer = optionsValue.CustomNugetServer;
         }
     }
 
-
-    public async Task<NugetVersion> GetLatestVersion(string packageName)
+    public async Task<NugetVersion> GetLatestVersion(string packageName, string runtimes)
     {
         var all = await GetAllPublishedVersions(packageName);
-        return all.OrderByDescending(t => t).First();
+
+        var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(all);
+        if (_allowPackageVersionCrossMicrosoftRuntime || !likeMsRuntimeVersions)
+        {
+            return all.OrderByDescending(t => t).First();
+        }
+        else
+        {
+            return all.OrderByDescending(t => t).First(v =>
+            {
+                var versionString = $"{v.PrimaryVersion.Major}.{v.PrimaryVersion.Minor}";
+                return runtimes.Contains(versionString);
+            });
+        }
     }
 
     public Task<CatalogInformation> GetPackageDeprecationInfo(Package package)

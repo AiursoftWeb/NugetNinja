@@ -24,7 +24,11 @@ public class PackageReferenceUpgradeDetector : IActionDetector
             NugetVersion? latest;
             try
             {
-                latest = await _nugetService.GetLatestVersion(package.Name);
+                var runtimes = 
+                    !string.IsNullOrWhiteSpace(project.TargetFrameworks) 
+                    ? project.TargetFrameworks 
+                    : project.TargetFramework;
+                latest = await _nugetService.GetLatestVersion(package.Name, runtimes);
             }
             catch (Exception e)
             {
