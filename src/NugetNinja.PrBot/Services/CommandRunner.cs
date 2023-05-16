@@ -19,6 +19,7 @@ public class CommandRunner
     /// <param name="path">Path</param>
     /// <param name="arguments">Arguments</param>
     /// <param name="integrateResultInProcess">integrateResultInProcess</param>
+    /// <param name="timeout">timeout</param>
     /// <returns>Task</returns>
     public async Task<string> RunGit(string path, string arguments, bool integrateResultInProcess = true, TimeSpan? timeout = null)
     {
