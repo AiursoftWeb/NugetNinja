@@ -34,6 +34,11 @@ public static class OptionsProvider
             new[] { "--token" },
             "The PAT token which has privilege to access the nuget server. See: https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate");
 
+    public static readonly Option<bool> AllowPackageVersionCrossMicrosoftRuntime =
+        new(
+            new[] { "--allow-package-version-cross-microsoft-runtime" },
+            "Allow using NuGet package versions for different Microsoft runtime versions. For example, when using runtime 6.0, it will avoid upgrading packages to 7.0.");
+
     private static Option[] GetGlobalOptions()
     {
         return new Option[]
@@ -43,7 +48,8 @@ public static class OptionsProvider
             VerboseOption,
             AllowPreviewOption,
             CustomNugetServer,
-            PatToken
+            PatToken,
+            AllowPackageVersionCrossMicrosoftRuntime
         };
     }
 

@@ -17,18 +17,29 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
             OptionsProvider.VerboseOption,
             OptionsProvider.AllowPreviewOption,
             OptionsProvider.CustomNugetServer,
-            OptionsProvider.PatToken);
+            OptionsProvider.PatToken,
+            OptionsProvider.AllowPackageVersionCrossMicrosoftRuntime);
     }
 
-    public Task Execute(string path, bool dryRun, bool verbose, bool allowPreview, string customNugetServer,
-        string patToken)
+    public Task Execute(
+        string path, 
+        bool dryRun, 
+        bool verbose, 
+        bool allowPreview, 
+        string customNugetServer,
+        string patToken,
+        bool allowCross)
     {
-        var services = BuildServices(verbose, allowPreview, customNugetServer, patToken);
+        var services = BuildServices(verbose, allowPreview, customNugetServer, patToken, allowCross);
         return RunFromServices(services, path, dryRun);
     }
 
-    protected virtual ServiceCollection BuildServices(bool verbose, bool allowPreview, string customNugetServer,
-        string patToken)
+    protected virtual ServiceCollection BuildServices(
+        bool verbose, 
+        bool allowPreview, 
+        string customNugetServer,
+        string patToken,
+        bool allowCross)
     {
         var services = new ServiceCollection();
         services.AddLogging(logging =>
@@ -53,10 +64,15 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         services.AddTransient<Extractor>();
         services.AddTransient<ProjectsEnumerator>();
         services.AddTransient<NugetService>();
+        services.Configure<AppSettings>(options =>
+        {
+            options.AllowCross = allowCross;
+            options.Verbose = verbose;
+            options.AllowPreview = allowPreview;
+            options.CustomNugetServer = customNugetServer;
+            options.PatToken = patToken;
 
-        if (!string.IsNullOrWhiteSpace(customNugetServer)) NugetService.CustomNugetServer = customNugetServer;
-        NugetService.AllowPreview = allowPreview;
-        NugetService.PatToken = patToken;
+        });
 
         startUp.ConfigureServices(services);
         services.AddTransient<TE>();

@@ -3,29 +3,41 @@ using System.Net;
 using System.Text.Json;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Aiursoft.NugetNinja.Core;
 
 public class NugetService
 {
-    public const string DefaultNugetServer = "https://api.nuget.org/v3/index.json";
-
-    public static string CustomNugetServer = DefaultNugetServer;
-    public static string PatToken = string.Empty;
-    public static bool AllowPreview = false;
+    private const string DefaultNugetServer = "https://api.nuget.org/v3/index.json";
+    private readonly string _customNugetServer = DefaultNugetServer;
+    private readonly string _patToken;
+    private readonly bool _allowPreview;
+    private readonly bool _allowPackageVersionCrossMicrosoftRuntime;
     private readonly CacheService _cacheService;
     private readonly HttpClient _httpClient;
     private readonly ILogger<NugetService> _logger;
+    private readonly AppSettings _options;
 
     public NugetService(
         CacheService cacheService,
         HttpClient httpClient,
-        ILogger<NugetService> logger)
+        ILogger<NugetService> logger,
+        IOptions<AppSettings> options)
     {
         _cacheService = cacheService;
         _httpClient = httpClient;
         _logger = logger;
+        _options = options.Value;
+        _allowPreview = _options.AllowPreview;
+        _patToken = _options.PatToken;
+        _allowPackageVersionCrossMicrosoftRuntime = _options.AllowCross;
+        if (!string.IsNullOrWhiteSpace(_options.CustomNugetServer))
+        {
+            _customNugetServer = _options.CustomNugetServer;
+        }
     }
+
 
     public async Task<NugetVersion> GetLatestVersion(string packageName)
     {
@@ -47,7 +59,7 @@ public class NugetService
 
     public Task<NugetServerEndPoints> GetApiEndpoint(string? overrideServer = null)
     {
-        var server = overrideServer ?? CustomNugetServer;
+        var server = overrideServer ?? _customNugetServer;
         return _cacheService.RunWithCache($"nuget-server-{server}-endpoint-cache",
             () => GetApiEndpointFromNuget(server));
     }
@@ -60,12 +72,12 @@ public class NugetService
 
     private async Task<NugetServerEndPoints> GetApiEndpointFromNuget(string? overrideServer = null)
     {
-        var serverRoot = overrideServer ?? CustomNugetServer;
+        var serverRoot = overrideServer ?? _customNugetServer;
         if (serverRoot.EndsWith("/")) serverRoot = serverRoot.TrimEnd('/');
         if (!serverRoot.EndsWith("index.json")) serverRoot += "/index.json";
         if (!serverRoot.EndsWith("v3/index.json")) serverRoot += "/v3/index.json";
 
-        var responseModel = await HttpGetJson<NugetServerIndex>(serverRoot, PatToken);
+        var responseModel = await HttpGetJson<NugetServerIndex>(serverRoot, _patToken);
         var packageBaseAddress = responseModel
                                      .Resources
                                      ?.FirstOrDefault(r => r.Type.StartsWith("PackageBaseAddress"))
@@ -86,11 +98,11 @@ public class NugetService
     {
         var apiEndpoint = await GetApiEndpoint();
         var requestUrl = $"{apiEndpoint.PackageBaseAddress.TrimEnd('/')}/{packageName.ToLower()}/index.json";
-        var responseModel = await HttpGetJson<GetAllPublishedVersionsResponseModel>(requestUrl, PatToken);
+        var responseModel = await HttpGetJson<GetAllPublishedVersionsResponseModel>(requestUrl, _patToken);
         return responseModel
                    .Versions
                    ?.Select(v => new NugetVersion(v))
-                   .Where(v => AllowPreview || !v.IsPreviewVersion())
+                   .Where(v => _allowPreview || !v.IsPreviewVersion())
                    .ToList()
                    .AsReadOnly()
                ?? throw new WebException($"Couldn't find a valid version from Nuget with package: '{packageName}'!");
@@ -99,8 +111,8 @@ public class NugetService
     private async Task<CatalogInformation> GetPackageDeprecationInfoFromNuget(Package package,
         string? overrideServer = null, string? overridePat = null)
     {
-        var server = overrideServer ?? CustomNugetServer;
-        var pat = overridePat ?? PatToken;
+        var server = overrideServer ?? _customNugetServer;
+        var pat = overridePat ?? _patToken;
         try
         {
             var apiEndpoint = await GetApiEndpoint(server);
@@ -126,7 +138,7 @@ public class NugetService
         var apiEndpoint = await GetApiEndpoint();
         var requestUrl =
             $"{apiEndpoint.PackageBaseAddress.TrimEnd('/')}/{package.Name.ToLower()}/{package.Version}/{package.Name.ToLower()}.nuspec";
-        var nuspec = await HttpGetString(requestUrl, PatToken);
+        var nuspec = await HttpGetString(requestUrl, _patToken);
         var doc = new HtmlDocument();
         doc.LoadHtml(nuspec);
         var packageReferences = doc.DocumentNode
