@@ -5,7 +5,18 @@ public class VersionCrossChecker
 {
     public static readonly string[] netVersions = new string[]
     {
-        "netcoreapp1.0", "netcoreapp1.1", "netcoreapp3.0", "netcoreapp3.1", "net5.0", "net6.0", "net7.0"
+        "netcoreapp1.0", 
+        "netcoreapp1.1", 
+        "netcoreapp2.0", 
+        "netcoreapp2.1", 
+        "netcoreapp2.2",
+        "netcoreapp3.0", 
+        "netcoreapp3.1", 
+        "net5.0", 
+        "net6.0", 
+        "net7.0",
+        "net8.0",
+        "net9.0",
     };
 
     public bool LikeRuntimeVersions(IEnumerable<NugetVersion> inputList)

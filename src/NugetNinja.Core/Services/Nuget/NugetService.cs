@@ -41,7 +41,7 @@ public class NugetService
         }
     }
 
-    public async Task<NugetVersion> GetLatestVersion(string packageName, string runtimes)
+    public async Task<NugetVersion> GetLatestVersion(string packageName, string[] runtimes)
     {
         var all = await GetAllPublishedVersions(packageName);
 
@@ -52,11 +52,13 @@ public class NugetService
         }
         else
         {
-            return all.OrderByDescending(t => t).First(v =>
+            var latest = all.OrderByDescending(t => t).FirstOrDefault(v =>
             {
                 var versionString = $"{v.PrimaryVersion.Major}.{v.PrimaryVersion.Minor}";
-                return runtimes.Contains(versionString);
+                return runtimes.Any(r => r.Contains(versionString));
             });
+
+            return latest != null ? latest : all.OrderByDescending(t => t).First();
         }
     }
 
