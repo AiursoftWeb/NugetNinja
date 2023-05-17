@@ -43,8 +43,8 @@ public class GitLabService : IVersionControlService
 
             foreach (var repo in currentPageItems) yield return new Repository
             {
-                Name = repo.Name,
-                FullName = repo.NameWithNameSpace,
+                Name = repo.Path,
+                FullName = repo.PathWithNameSpace,
                 Archived = repo.Archived,
                 DefaultBranch = repo.DefaultBranch,
                 CloneUrl = repo.HttpUrlToRepo,
@@ -162,11 +162,11 @@ public class GitLabProject
     [JsonPropertyName("id")]
     public int Id { get; set; }
 
-    [JsonPropertyName("name")]
-    public string? Name { get; set; }
+    [JsonPropertyName("path")]
+    public string? Path { get; set; }
 
-    [JsonPropertyName("name_with_namespace")]
-    public string? NameWithNameSpace { get; set; }
+    [JsonPropertyName("path_with_namespace")]
+    public string? PathWithNameSpace { get; set; }
 
     [JsonPropertyName("http_url_to_repo")]
     public string? HttpUrlToRepo { get; set; }
