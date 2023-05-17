@@ -4,10 +4,10 @@ using Microsoft.Extensions.Logging;
 
 public class GitLabService : IVersionControlService
 {
-    private readonly HttpWrap _httpClient;
+    private readonly HttpWrapper _httpClient;
     private readonly ILogger<GitLabService> _logger;
 
-    public GitLabService(HttpWrap httpClient, ILogger<GitLabService> logger)
+    public GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger)
     {
         _httpClient = httpClient;
         _logger = logger;

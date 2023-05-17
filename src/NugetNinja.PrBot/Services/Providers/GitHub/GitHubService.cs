@@ -4,11 +4,11 @@ namespace Aiursoft.NugetNinja.PrBot;
 
 public class GitHubService : IVersionControlService
 {
-    private readonly HttpWrap _httpClient;
+    private readonly HttpWrapper _httpClient;
     private readonly ILogger<GitHubService> _logger;
 
     public GitHubService(
-        HttpWrap httpClient,
+        HttpWrapper httpClient,
         ILogger<GitHubService> logger)
     {
         _httpClient = httpClient;

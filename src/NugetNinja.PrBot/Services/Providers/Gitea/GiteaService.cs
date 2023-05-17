@@ -4,11 +4,11 @@ namespace Aiursoft.NugetNinja.PrBot;
 
 public class GiteaService : IVersionControlService
 {
-    private readonly HttpWrap _httpClient;
+    private readonly HttpWrapper _httpClient;
     private readonly ILogger<GiteaService> _logger;
 
     public GiteaService(
-        HttpWrap httpClient,
+        HttpWrapper httpClient,
         ILogger<GiteaService> logger)
     {
         _httpClient = httpClient;
