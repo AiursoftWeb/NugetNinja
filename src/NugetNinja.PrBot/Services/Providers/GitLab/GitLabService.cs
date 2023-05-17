@@ -1,15 +1,13 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Aiursoft.NugetNinja.PrBot;
 using Microsoft.Extensions.Logging;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 public class GitLabService : IVersionControlService
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpWrap _httpClient;
     private readonly ILogger<GitLabService> _logger;
 
-    public GitLabService(HttpClient httpClient, ILogger<GitLabService> logger)
+    public GitLabService(HttpWrap httpClient, ILogger<GitLabService> logger)
     {
         _httpClient = httpClient;
         _logger = logger;
@@ -23,7 +21,7 @@ public class GitLabService : IVersionControlService
         try
         {
             var endpoint = $"{endPoint}/api/v4/projects/{orgName}%2F{repoName}";
-            await SendHttp(endpoint, HttpMethod.Get, patToken);
+            await _httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
             return true;
         }
         catch
@@ -38,7 +36,7 @@ public class GitLabService : IVersionControlService
         for (var i = 1; ; i++)
         {
             var endpoint = $"{endPoint}/api/v4/users/{userName}/starred_projects?per_page=100&page={i}";
-            var currentPageItems = await SendHttpAndGetJson<List<GitLabProject>>(endpoint, HttpMethod.Get, patToken);
+            var currentPageItems = await _httpClient.SendHttpAndGetJson<List<GitLabProject>>(endpoint, HttpMethod.Get, patToken);
             if (!currentPageItems.Any()) yield break;
 
             foreach (var repo in currentPageItems) yield return new Repository
@@ -60,14 +58,14 @@ public class GitLabService : IVersionControlService
     {
         _logger.LogInformation($"Forking repository in GitLab: {org}/{repo}...");
         var endpoint = $"{endPoint}/api/v4/projects/{org}%2F{repo}/fork";
-        await SendHttp(endpoint, HttpMethod.Post, patToken);
+        await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 
     public async Task<IEnumerable<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head, string patToken)
     {
         _logger.LogInformation($"Getting pull requests in GitLab: {org}/{repo}...");
         var endpoint = $"{endPoint}/api/v4/projects/{org}%2F{repo}/merge_requests?state=opened&source_branch={head.Split(':').Last()}";
-        var gitlabPrs = await SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
+        var gitlabPrs = await _httpClient.SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
         return gitlabPrs.Select(p => new PullRequest
         {
             User = new User
@@ -85,7 +83,7 @@ public class GitLabService : IVersionControlService
         var project = await this.GetProject(endPoint, org, repo, patToken);
         _logger.LogInformation($"Creating a new pull request in GitLab: {org}/{repo}...");
         var endpoint = $"{endPoint}/api/v4/projects/{myName}%2F{repo}/merge_requests";
-        await SendHttp(endpoint, HttpMethod.Post, patToken, new
+        await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken, new
         {
             title = "Auto dependencies upgrade by bot.",
             description = @"
@@ -103,7 +101,7 @@ This pull request may break or change the behavior of this application. Review w
     private async Task<GitLabProject> GetProject(string endpoint, string org, string repo, string patToken)
     {
         //https://gitlab.aiursoft.cn/api/v4/projects/aiursoft%2fscanner
-        return await SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{org}%2f{repo}", HttpMethod.Get, patToken);
+        return await _httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{org}%2f{repo}", HttpMethod.Get, patToken);
     }
 
     public string GetPushPath(Server connectionConfiguration, Repository repo)
@@ -112,42 +110,6 @@ This pull request may break or change the behavior of this application. Review w
                            $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
                        + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
-    }
-
-    private async Task<string> SendHttp(string endPoint, HttpMethod method, string patToken, object? body = null)
-    {
-        var request = new HttpRequestMessage(method, endPoint)
-        {
-            Content = body != null
-                ? JsonContent.Create(body)
-                : null
-        };
-
-        request.Headers.Add("Authorization", $"Bearer {patToken}");
-        request.Headers.Add("accept", "application/json");
-
-        var response = await _httpClient.SendAsync(request);
-        try
-        {
-            response.EnsureSuccessStatusCode();
-        }
-        catch
-        {
-            var error = await response.Content.ReadAsStringAsync();
-            _logger.LogCritical(error);
-            throw;
-        }
-
-        var json = await response.Content.ReadAsStringAsync();
-        return json;
-    }
-
-    private async Task<T> SendHttpAndGetJson<T>(string endPoint, HttpMethod method, string patToken)
-    {
-        var json = await SendHttp(endPoint, method, patToken);
-        var repos = JsonSerializer.Deserialize<T>(json) ??
-                    throw new InvalidOperationException($"The remote server returned non-json content: '{json}'");
-        return repos;
     }
 }
 

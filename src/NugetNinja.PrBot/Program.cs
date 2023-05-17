@@ -40,6 +40,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<IVersionControlService, GiteaService>();
             services.AddTransient<IVersionControlService, AzureDevOpsService>();
             services.AddTransient<IVersionControlService, GitLabService>();
+            services.AddTransient<HttpWrapper>();
             services.AddTransient<NugetService>();
             services.AddTransient<VersionCrossChecker>();
             services.AddTransient<CommandRunner>();

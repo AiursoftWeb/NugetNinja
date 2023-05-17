@@ -1,18 +1,14 @@
-﻿using System.Net;
-using System.Text;
-using System.Text.Json;
-using Aiursoft.NugetNinja.Core;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.PrBot;
 
 public class GitHubService : IVersionControlService
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpWrap _httpClient;
     private readonly ILogger<GitHubService> _logger;
 
     public GitHubService(
-        HttpClient httpClient,
+        HttpWrap httpClient,
         ILogger<GitHubService> logger)
     {
         _httpClient = httpClient;
@@ -30,7 +26,7 @@ public class GitHubService : IVersionControlService
         try
         {
             var endpoint = $@"{endPoint}/repos/{orgName}/{repoName}";
-            await SendHttp(endpoint, HttpMethod.Get, patToken);
+            await _httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
             return true;
         }
         catch
@@ -45,7 +41,7 @@ public class GitHubService : IVersionControlService
         for (var i = 1;; i++)
         {
             var endpoint = $@"{endPoint}/users/{userName}/starred?page={i}";
-            var currentPageItems = await SendHttpAndGetJson<List<Repository>>(endpoint, HttpMethod.Get, patToken);
+            var currentPageItems = await _httpClient.SendHttpAndGetJson<List<Repository>>(endpoint, HttpMethod.Get, patToken);
             if (!currentPageItems.Any()) yield break;
 
             foreach (var repo in currentPageItems) yield return repo;
@@ -57,7 +53,7 @@ public class GitHubService : IVersionControlService
         _logger.LogInformation($"Forking repository on GitHub with org: {org}, repo: {repo}...");
 
         var endpoint = $@"{endPoint}/repos/{org}/{repo}/forks";
-        await SendHttp(endpoint, HttpMethod.Post, patToken);
+        await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 
     public async Task<IEnumerable<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
@@ -66,7 +62,7 @@ public class GitHubService : IVersionControlService
         _logger.LogInformation($"Getting pull requests on GitHub with org: {org}, repo: {repo}...");
 
         var endpoint = $@"{endPoint}/repos/{org}/{repo}/pulls?head={head}";
-        return await SendHttpAndGetJson<List<PullRequest>>(endpoint, HttpMethod.Get, patToken);
+        return await _httpClient.SendHttpAndGetJson<List<PullRequest>>(endpoint, HttpMethod.Get, patToken);
     }
 
     public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string @base,
@@ -75,7 +71,7 @@ public class GitHubService : IVersionControlService
         _logger.LogInformation($"Creating a new pull request on GitHub with org: {org}, repo: {repo}...");
 
         var endpoint = $@"{endPoint}/repos/{org}/{repo}/pulls";
-        await SendHttp(endpoint, HttpMethod.Post, patToken, new
+        await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken, new
         {
             title = "Auto dependencies upgrade by bot.",
             body = @"
@@ -95,42 +91,5 @@ This pull request may break or change the behavior of this application. Review w
                            $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
                        + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
-    }
-
-    private async Task<string> SendHttp(string endPoint, HttpMethod method, string patToken, object? body = null)
-    {
-        var request = new HttpRequestMessage(method, endPoint)
-        {
-            Content = body != null
-                ? new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-                : new FormUrlEncodedContent(new Dictionary<string, string>())
-        };
-
-        if (!string.IsNullOrWhiteSpace(patToken)) request.Headers.Add("Authorization", $"token {patToken}");
-
-        request.Headers.Add("accept", "application/json");
-        request.Headers.Add("User-Agent", $"Aiursoft.NugetNinja {Helper.AppVersion}");
-
-        var response = await _httpClient.SendAsync(request);
-        try
-        {
-            response.EnsureSuccessStatusCode();
-        }
-        catch (HttpRequestException e)
-        {
-            var resultContent = e.Message + await response.Content.ReadAsStringAsync();
-            throw new WebException(resultContent);
-        }
-
-        var json = await response.Content.ReadAsStringAsync();
-        return json;
-    }
-
-    private async Task<T> SendHttpAndGetJson<T>(string endPoint, HttpMethod method, string patToken)
-    {
-        var json = await SendHttp(endPoint, method, patToken);
-        var repos = JsonSerializer.Deserialize<T>(json) ??
-                    throw new WebException($"The remote server returned non-json content: '{json}'");
-        return repos;
     }
 }
