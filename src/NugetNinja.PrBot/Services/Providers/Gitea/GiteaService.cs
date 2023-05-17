@@ -60,7 +60,7 @@ public class GiteaService : IVersionControlService
         await SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 
-    public async Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
+    public async Task<IEnumerable<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
         string patToken)
     {
         _logger.LogInformation($"Getting pull requests on Gitea with org: {org}, repo: {repo}...");
@@ -95,13 +95,6 @@ This pull request may break or change the behavior of this application. Review w
                            $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
                        + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
-    }
-
-    public async Task<Repository> GetRepo(string endPoint, string orgName, string repoName, string patToken)
-    {
-        _logger.LogInformation($"Getting repository details based on org: {orgName}, repo: {repoName}...");
-        var endpoint = $@"{endPoint}/repos/{orgName}/{repoName}";
-        return await SendHttpAndGetJson<Repository>(endpoint, HttpMethod.Get, patToken);
     }
 
     private async Task<string> SendHttp(string endPoint, HttpMethod method, string patToken, object? body = null)

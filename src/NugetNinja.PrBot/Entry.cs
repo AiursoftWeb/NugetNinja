@@ -58,12 +58,12 @@ public class Entry
         foreach (var repo in myStars)
             try
             {
-                _logger.LogInformation($"Processing repository {repo.FullName}...");
+                _logger.LogInformation($"Processing repository {repo}...");
                 await ProcessRepository(repo, server, versionControl);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Crashed when processing repo: {repo.FullName}!");
+                _logger.LogError(e, $"Crashed when processing repo: {repo}!");
             }
             finally
             {
@@ -77,15 +77,15 @@ public class Entry
         IVersionControlService versionControl)
     {
         if (string.IsNullOrWhiteSpace(repo.Owner?.Login) || string.IsNullOrWhiteSpace(repo.Name))
-            throw new InvalidDataException($"The repo with path: {repo.FullName} is having invalid data!");
+            throw new InvalidDataException($"The repo with path: {repo} is having invalid data!");
 
         // Clone locally.
         var workPath = Path.Combine(_workspaceFolder, $"{repo.Id}-{repo.Name}");
         _logger.LogInformation($"Cloning repository: {repo.Name} to {workPath}...");
         await _workspaceManager.ResetRepo(
             workPath,
-            repo.DefaultBranch ?? throw new NullReferenceException($"The default branch of {repo.Name} is null!"),
-            repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo.Name} is null!"));
+            repo.DefaultBranch ?? throw new NullReferenceException($"The default branch of {repo} is null!"),
+            repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo} is null!"));
 
         // Run all plugins.
         await _runAllOfficialPluginsService.OnServiceStartedAsync(workPath, true);

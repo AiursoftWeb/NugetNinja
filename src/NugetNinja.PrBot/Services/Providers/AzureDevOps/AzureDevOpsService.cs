@@ -58,7 +58,6 @@ This pull request may break or change the behavior of this application. Review w
                 {
                     Name = repo.Name,
                     FullName = repo.Name,
-                    Archived = false,
                     Owner = new User
                     {
                         Login = repo.ProjectReference.Name
@@ -77,7 +76,7 @@ This pull request may break or change the behavior of this application. Review w
         return "AzureDevOps";
     }
 
-    public async Task<List<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
+    public async Task<IEnumerable<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
         string patToken)
     {
         await foreach (var azureDevOpsRepo in GetGitRepositories(endPoint, patToken))

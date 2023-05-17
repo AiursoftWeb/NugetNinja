@@ -27,7 +27,5 @@ public class DeprecatedPackageReplacement : IAction
     {
         if (Alternative != null)
             await SourceProject.ReplacePackageReferenceAsync(Package.Name, Alternative);
-        else
-            await SourceProject.RemovePackageReferenceAsync(Package.Name);
     }
 }
