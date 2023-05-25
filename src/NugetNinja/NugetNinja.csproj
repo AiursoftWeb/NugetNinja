@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<!--Build and code-->
 		<OutputType>Exe</OutputType>
-		<Version>0.0.5</Version>
+		<Version>0.0.6</Version>
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>ninja</AssemblyName>
 		<RootNamespace>Aiursoft.NugetNinja</RootNamespace>

@@ -43,7 +43,9 @@ public class NugetService
 
     public async Task<NugetVersion> GetLatestVersion(string packageName, string[] runtimes)
     {
-        var all = await GetAllPublishedVersions(packageName);
+        var all = (await GetAllPublishedVersions(packageName))
+            .OrderByDescending(t => t)
+            .Take(20); // Only take latest 20 versions.
 
         var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(all);
         if (_allowPackageVersionCrossMicrosoftRuntime || !likeMsRuntimeVersions)
