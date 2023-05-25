@@ -43,24 +43,25 @@ public class NugetService
 
     public async Task<NugetVersion> GetLatestVersion(string packageName, string[] runtimes)
     {
-        var all = (await GetAllPublishedVersions(packageName))
+        var orderedPublishedVersions = (await GetAllPublishedVersions(packageName))
             .OrderByDescending(t => t)
-            .Take(20); // Only take latest 20 versions.
+            .Take(30)
+            .ToList(); // Only take latest 30 versions.
 
-        var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(all);
+        var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(orderedPublishedVersions);
         if (_allowPackageVersionCrossMicrosoftRuntime || !likeMsRuntimeVersions)
         {
-            return all.OrderByDescending(t => t).First();
+            return orderedPublishedVersions.First();
         }
         else
         {
-            var latest = all.OrderByDescending(t => t).FirstOrDefault(v =>
+            var latest = orderedPublishedVersions.FirstOrDefault(v =>
             {
                 var versionString = $"{v.PrimaryVersion.Major}.{v.PrimaryVersion.Minor}";
                 return runtimes.Any(r => r.Contains(versionString));
             });
 
-            return latest != null ? latest : all.OrderByDescending(t => t).First();
+            return latest != null ? latest : orderedPublishedVersions.First();
         }
     }
 
