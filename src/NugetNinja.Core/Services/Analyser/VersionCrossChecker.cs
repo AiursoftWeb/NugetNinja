@@ -12,6 +12,10 @@ public class VersionCrossChecker
         "netcoreapp2.2",
         "netcoreapp3.0", 
         "netcoreapp3.1", 
+        "netframework4.8",
+        "netframework4.7",
+        "netframework4.6",
+        "netframework4.5",
         "net5.0", 
         "net6.0", 
         "net7.0",
@@ -22,19 +26,12 @@ public class VersionCrossChecker
     public bool LikeRuntimeVersions(IEnumerable<NugetVersion> inputList)
     {
         var dotnetVersions = GetDotNetVersionsNumbers();
-        foreach (var inputVersion in inputList)
-        {
-            var firstTwoVersion = new Version(inputVersion.PrimaryVersion.Major, inputVersion.PrimaryVersion.Minor);
-            if (!dotnetVersions.Contains(firstTwoVersion))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return inputList
+            .Select(inputVersion => new Version(inputVersion.PrimaryVersion.Major, inputVersion.PrimaryVersion.Minor))
+            .All(firstTwoVersion => dotnetVersions.Contains(firstTwoVersion));
     }
 
-    public List<Version> GetDotNetVersionsNumbers()
+    private List<Version> GetDotNetVersionsNumbers()
     {
         var versionsList = new List<Version>();
         var regex = new Regex(@"\d([.\d]+)?");
@@ -43,13 +40,11 @@ public class VersionCrossChecker
         {
             var matches = regex.Matches(version);
 
-            if (matches.Count > 0)
+            if (matches.Count <= 0) continue;
+            var matchedVersion = matches[0].Value;
+            if (Version.TryParse(matchedVersion, out var parsedVersion))
             {
-                var matchedVersion = matches[0].Value;
-                if (Version.TryParse(matchedVersion, out var parsedVersion))
-                {
-                    versionsList.Add(parsedVersion);
-                }
+                versionsList.Add(parsedVersion);
             }
         }
 

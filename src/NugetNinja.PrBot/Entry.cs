@@ -42,7 +42,7 @@ public class Entry
         }
     }
 
-    public async Task RunServerAsync(Server server, IVersionControlService versionControl)
+    private async Task RunServerAsync(Server server, IVersionControlService versionControl)
     {
         var myStars = await versionControl
             .GetMyStars(server.EndPoint, server.UserName, server.Token)

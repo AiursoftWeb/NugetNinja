@@ -27,7 +27,7 @@ public class WorkspaceManager
     /// </summary>
     /// <param name="path">Path</param>
     /// <returns>Current branch.</returns>
-    public async Task<string> GetBranch(string path)
+    private async Task<string> GetBranch(string path)
     {
         var gitBranchOutput = await _commandRunner.RunGit(path, "rev-parse --abbrev-ref HEAD");
         return gitBranchOutput
@@ -36,7 +36,7 @@ public class WorkspaceManager
             .Trim();
     }
 
-    public async Task SwitchToBranch(string sourcePath, string targetBranch, bool fromCurrent)
+    private async Task SwitchToBranch(string sourcePath, string targetBranch, bool fromCurrent)
     {
         var currentBranch = await GetBranch(sourcePath);
         if (string.Equals(currentBranch, targetBranch, StringComparison.OrdinalIgnoreCase)) return;
@@ -64,7 +64,7 @@ public class WorkspaceManager
     /// </summary>
     /// <param name="path">Path.</param>
     /// <returns>Remote URL.</returns>
-    public async Task<string> GetRemoteUrl(string path)
+    private async Task<string> GetRemoteUrl(string path)
     {
         var gitRemoteOutput = await _commandRunner.RunGit(path, "remote -v");
         return gitRemoteOutput
@@ -83,7 +83,7 @@ public class WorkspaceManager
     /// <param name="branch">Init branch.</param>
     /// <param name="endPoint">Endpoint. Used for Git clone.</param>
     /// <returns>Task</returns>
-    public async Task Clone(string path, string branch, string endPoint)
+    private async Task Clone(string path, string branch, string endPoint)
     {
         await _commandRunner.RunGit(path, $"clone -b {branch} {endPoint} .");
     }
@@ -152,7 +152,7 @@ public class WorkspaceManager
     /// <param name="endpoint">Endpoint</param>
     /// <param name="force">Force</param>
     /// <returns>Pushed.</returns>
-    public async Task<bool> Push(string sourcePath, string branch, string endpoint, bool force = false)
+    public async Task Push(string sourcePath, string branch, string endpoint, bool force = false)
     {
         // Set origin url.
         try
@@ -171,15 +171,12 @@ public class WorkspaceManager
 
             var command = $@"push --set-upstream ninja {branch} {forceString}";
             _logger.LogInformation($"Running git {command}");
-            var pushResult =
-                await _commandRunner.RunGit(sourcePath, command);
-            return pushResult.Contains("->") || pushResult.Contains("Everything up-to-date");
+            await _commandRunner.RunGit(sourcePath, command);
         }
         catch (GitCommandException e) when (e.GitOutput.Contains("rejected]"))
         {
             // In this case, the remote branch is later than local.
             // So we might have some conflict.
-            return false;
         }
         catch (Exception ex)
         {

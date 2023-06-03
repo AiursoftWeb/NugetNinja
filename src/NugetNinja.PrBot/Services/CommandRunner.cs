@@ -24,10 +24,7 @@ public class CommandRunner
     public async Task<string> RunGit(string path, string arguments, bool integrateResultInProcess = true, TimeSpan? timeout = null)
     {
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-        if (timeout == null)
-        {
-            timeout = TimeSpan.FromMinutes(2);
-        }
+        timeout ??= TimeSpan.FromMinutes(2);
 
         var process = new Process
         {
