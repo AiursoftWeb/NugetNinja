@@ -45,8 +45,8 @@ public class NugetService
     {
         var orderedPublishedVersions = (await GetAllPublishedVersions(packageName))
             .OrderByDescending(t => t)
-            .Take(30)
-            .ToList(); // Only take latest 30 versions.
+            .Take(5)
+            .ToList(); // Only take latest 5 versions.
 
         var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(orderedPublishedVersions);
         if (_allowPackageVersionCrossMicrosoftRuntime || !likeMsRuntimeVersions)
