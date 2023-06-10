@@ -43,25 +43,27 @@ public class NugetService
 
     public async Task<NugetVersion> GetLatestVersion(string packageName, string[] runtimes)
     {
-        var orderedPublishedVersions = (await GetAllPublishedVersions(packageName))
+        var allVersions = (await GetAllPublishedVersions(packageName))
             .OrderByDescending(t => t)
+            .ToList();
+        var first5Versions = allVersions 
             .Take(5)
             .ToList(); // Only take latest 5 versions.
 
-        var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(orderedPublishedVersions);
+        var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(first5Versions);
         if (_allowPackageVersionCrossMicrosoftRuntime || !likeMsRuntimeVersions)
         {
-            return orderedPublishedVersions.First();
+            return allVersions.First();
         }
         else
         {
-            var latest = orderedPublishedVersions.FirstOrDefault(v =>
+            var latest = allVersions.FirstOrDefault(v =>
             {
                 var versionString = $"{v.PrimaryVersion.Major}.{v.PrimaryVersion.Minor}";
                 return runtimes.Any(r => r.Contains(versionString));
             });
 
-            return latest != null ? latest : orderedPublishedVersions.First();
+            return latest != null ? latest : allVersions.First();
         }
     }
 
@@ -180,7 +182,7 @@ public class NugetService
 
     private async Task<string> HttpGetString(string url, string patToken)
     {
-        _logger.LogTrace($"Sending request to: {url}...");
+        _logger.LogTrace("Sending request to: {Url}...", url);
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         if (!string.IsNullOrWhiteSpace(patToken))
             request.Headers.Add("Authorization", StringExtensions.PatToHeader(patToken));
@@ -190,8 +192,8 @@ public class NugetService
             var isGZipEncoded = response.Content.Headers.ContentEncoding.Contains("gzip");
             if (isGZipEncoded)
             {
-                using var stream = await response.Content.ReadAsStreamAsync();
-                using var decompressionStream = new GZipStream(stream, CompressionMode.Decompress);
+                await using var stream = await response.Content.ReadAsStreamAsync();
+                await using var decompressionStream = new GZipStream(stream, CompressionMode.Decompress);
                 using var reader = new StreamReader(decompressionStream);
                 var text = await reader.ReadToEndAsync();
                 return text;
