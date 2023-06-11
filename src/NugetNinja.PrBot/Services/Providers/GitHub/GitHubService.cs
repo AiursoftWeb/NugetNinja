@@ -22,7 +22,7 @@ public class GitHubService : IVersionControlService
 
     public async Task<bool> RepoExists(string endPoint, string orgName, string repoName, string patToken)
     {
-        _logger.LogInformation($"Getting if repository exists based on org: {orgName}, repo: {repoName}...");
+        _logger.LogInformation("Getting if repository exists based on org: {OrgName}, repo: {RepoName}...", orgName, repoName);
         try
         {
             var endpoint = $@"{endPoint}/repos/{orgName}/{repoName}";
@@ -37,7 +37,7 @@ public class GitHubService : IVersionControlService
 
     public async IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken)
     {
-        _logger.LogInformation($"Listing all stared repositories based on user's name: {userName}...");
+        _logger.LogInformation("Listing all stared repositories based on user\'s name: {UserName}...", userName);
         for (var i = 1;; i++)
         {
             var endpoint = $@"{endPoint}/users/{userName}/starred?page={i}";
@@ -50,7 +50,7 @@ public class GitHubService : IVersionControlService
 
     public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
     {
-        _logger.LogInformation($"Forking repository on GitHub with org: {org}, repo: {repo}...");
+        _logger.LogInformation("Forking repository on GitHub with org: {Org}, repo: {Repo}...", org, repo);
 
         var endpoint = $@"{endPoint}/repos/{org}/{repo}/forks";
         await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken);
@@ -59,7 +59,7 @@ public class GitHubService : IVersionControlService
     public async Task<IEnumerable<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head,
         string patToken)
     {
-        _logger.LogInformation($"Getting pull requests on GitHub with org: {org}, repo: {repo}...");
+        _logger.LogInformation("Getting pull requests on GitHub with org: {Org}, repo: {Repo}...", org, repo);
 
         var endpoint = $@"{endPoint}/repos/{org}/{repo}/pulls?head={head}";
         return await _httpClient.SendHttpAndGetJson<List<PullRequest>>(endpoint, HttpMethod.Get, patToken);
@@ -68,7 +68,7 @@ public class GitHubService : IVersionControlService
     public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string @base,
         string patToken)
     {
-        _logger.LogInformation($"Creating a new pull request on GitHub with org: {org}, repo: {repo}...");
+        _logger.LogInformation("Creating a new pull request on GitHub with org: {Org}, repo: {Repo}...", org, repo);
 
         var endpoint = $@"{endPoint}/repos/{org}/{repo}/pulls";
         await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken, new

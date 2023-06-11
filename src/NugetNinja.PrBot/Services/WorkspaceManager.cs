@@ -170,7 +170,7 @@ public class WorkspaceManager
             var forceString = force ? "--force" : string.Empty;
 
             var command = $@"push --set-upstream ninja {branch} {forceString}";
-            _logger.LogInformation($"Running git {command}");
+            _logger.LogInformation("Running git {Command}", command);
             await _commandRunner.RunGit(sourcePath, command);
         }
         catch (GitCommandException e) when (e.GitOutput.Contains("rejected]"))
@@ -180,7 +180,7 @@ public class WorkspaceManager
         }
         catch (Exception ex)
         {
-            _logger.LogWarning($"Git push failed to {sourcePath}, branch {branch}, endpoint {endpoint}", ex);
+            _logger.LogWarning(ex, "Git push failed to {SourcePath}, branch {Branch}, endpoint {Endpoint}", sourcePath, branch, endpoint);
             throw;
         }
     }

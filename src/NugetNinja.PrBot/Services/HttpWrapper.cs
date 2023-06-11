@@ -26,9 +26,10 @@ public class HttpWrapper
         };
 
         request.Headers.Add("Authorization", $"Bearer {patToken}");
+        request.Headers.Add("User-Agent", $"curl/7.76.1");
         request.Headers.Add("accept", "application/json");
 
-        _logger.LogTrace($"{method.Method}: to endpoint: {endPoint}...");
+        _logger.LogTrace("{Method}: to endpoint: {EndPoint}...", method.Method, endPoint);
 
         var response = await _httpClient.SendAsync(request);
         try
@@ -38,7 +39,7 @@ public class HttpWrapper
         catch
         {
             var error = await response.Content.ReadAsStringAsync();
-            _logger.LogWarning($"Endpoint: {endPoint} respond error: {error}.");
+            _logger.LogWarning("Endpoint: {EndPoint} respond error: {Error}", endPoint, error);
             throw;
         }
 

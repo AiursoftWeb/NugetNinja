@@ -36,7 +36,7 @@ public class Entry
 
         foreach (var server in _servers)
         {
-            _logger.LogInformation($"Processing server: {server.Provider}...");
+            _logger.LogInformation("Processing server: {ServerProvider}...", server.Provider);
             var serviceProvider = _versionControls.First(v => v.GetName() == server.Provider);
             await RunServerAsync(server, serviceProvider);
         }
@@ -50,20 +50,19 @@ public class Entry
             .Where(r => r.Owner?.Login != server.UserName)
             .ToListAsync();
 
-        _logger.LogInformation(
-            $"Got {myStars.Count} stared repositories as registered to create pull requests automatically.");
+        _logger.LogInformation("Got {MyStarsCount} stared repositories as registered to create pull requests automatically", myStars.Count);
         _logger.LogInformation("\r\n\r\n");
         _logger.LogInformation("================================================================");
         _logger.LogInformation("\r\n\r\n");
         foreach (var repo in myStars)
             try
             {
-                _logger.LogInformation($"Processing repository {repo}...");
+                _logger.LogInformation("Processing repository {Repo}...", repo);
                 await ProcessRepository(repo, server, versionControl);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Crashed when processing repo: {repo}!");
+                _logger.LogError(e, "Crashed when processing repo: {Repo}!", repo);
             }
             finally
             {
@@ -81,7 +80,7 @@ public class Entry
 
         // Clone locally.
         var workPath = Path.Combine(_workspaceFolder, $"{repo.Id}-{repo.Name}");
-        _logger.LogInformation($"Cloning repository: {repo.Name} to {workPath}...");
+        _logger.LogInformation("Cloning repository: {RepoName} to {WorkPath}...", repo.Name, workPath);
         await _workspaceManager.ResetRepo(
             workPath,
             repo.DefaultBranch ?? throw new NullReferenceException($"The default branch of {repo} is null!"),
@@ -93,18 +92,18 @@ public class Entry
         // Consider changes...
         if (!await _workspaceManager.PendingCommit(workPath))
         {
-            _logger.LogInformation($"{repo} has no suggestion that we can make. Ignore.");
+            _logger.LogInformation("{Repo} has no suggestion that we can make. Ignore", repo);
             return;
         }
 
-        _logger.LogInformation($"{repo} is pending some fix. We will try to create\\update related pull request.");
+        _logger.LogInformation("{Repo} is pending some fix. We will try to create\\\\update related pull request", repo);
         await _workspaceManager.SetUserConfig(workPath, connectionConfiguration.DisplayName,
             connectionConfiguration.UserEmail);
         var saved = await _workspaceManager.CommitToBranch(workPath, "Auto csproj fix and update by bot.",
             connectionConfiguration.ContributionBranch);
         if (!saved)
         {
-            _logger.LogInformation($"{repo} has no suggestion that we can make. Ignore.");
+            _logger.LogInformation("{Repo} has no suggestion that we can make. Ignore", repo);
             return;
         }
 
@@ -158,6 +157,6 @@ public class Entry
                 repo.DefaultBranch,
                 connectionConfiguration.Token);
         else
-            _logger.LogInformation($"Skipped creating new pull request for {repo} because there already exists.");
+            _logger.LogInformation("Skipped creating new pull request for {Repo} because there already exists", repo);
     }
 }
