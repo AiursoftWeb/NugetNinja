@@ -1,4 +1,4 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.Canon;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.PrBot;
@@ -199,7 +199,7 @@ public class WorkspaceManager
 
     private Task Fetch(string path)
     {
-        return _retryEngine.RunWithTry(
+        return _retryEngine.RunWithRetry(
             async attempt =>
             {
                 var workJob = _commandRunner.RunGit(path, "fetch --verbose",

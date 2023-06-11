@@ -1,4 +1,4 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.Canon;
 using Microsoft.Extensions.Logging;
 using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -108,15 +108,15 @@ This pull request may break or change the behavior of this application. Review w
         return repo.CloneUrl ?? throw new Exception($"Repo {repo}'s clone Url is null!");
     }
 
-    private Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken, bool allowCache = true)
+    private async Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken, bool allowCache = true)
     {
-        return _cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", async () =>
+        return await _cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", async () =>
         {
             var credentials = new VssBasicCredential(string.Empty, patToken);
             var connection = new VssConnection(new Uri(endPoint), credentials);
             await connection.ConnectAsync();
             return connection;
-        }, allowCache ? 20 : 0);
+        }, cachedMinutes: allowCache ? 20 : 0) ?? throw new InvalidOperationException($"Failed to connect to Azure devops server: {endPoint}");
     }
 
     private async IAsyncEnumerable<GitRepository> GetGitRepositories(string endPoint, string patToken)

@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Net;
 using System.Text.Json;
+using Aiursoft.Canon;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,50 +44,57 @@ public class NugetService
 
     public async Task<NugetVersion> GetLatestVersion(string packageName, string[] runtimes)
     {
-        var allVersions = (await GetAllPublishedVersions(packageName))
+        var allVersions = (await GetAllPublishedVersions(packageName) ?? throw new InvalidOperationException($"No version found with package: '{packageName}'."))
             .OrderByDescending(t => t)
             .ToList();
         var first5Versions = allVersions 
             .Take(5)
             .ToList(); // Only take latest 5 versions.
 
-        var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(first5Versions);
-        if (_allowPackageVersionCrossMicrosoftRuntime || !likeMsRuntimeVersions)
+        
+        if (_allowPackageVersionCrossMicrosoftRuntime)
         {
             return allVersions.First();
         }
         else
         {
+            var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(first5Versions);
+            if (!likeMsRuntimeVersions)
+            {
+                return allVersions.First();
+            }
+            
+            _logger.LogTrace("The package {PackageName}'s first 5 versions look like matching MS runtime versions",
+                packageName);
             var latest = allVersions.FirstOrDefault(v =>
             {
                 var versionString = $"{v.PrimaryVersion.Major}.{v.PrimaryVersion.Minor}";
                 return runtimes.Any(r => r.Contains(versionString));
             });
-
             return latest != null ? latest : allVersions.First();
         }
     }
 
-    public Task<CatalogInformation> GetPackageDeprecationInfo(Package package)
+    public Task<CatalogInformation?> GetPackageDeprecationInfo(Package package)
     {
         return _cacheService.RunWithCache($"nuget-deprecation-info-{package}-version-{package.Version}-cache",
             () => GetPackageDeprecationInfoFromNuget(package));
     }
 
-    public Task<IReadOnlyCollection<NugetVersion>> GetAllPublishedVersions(string packageName)
+    public Task<IReadOnlyCollection<NugetVersion>?> GetAllPublishedVersions(string packageName)
     {
         return _cacheService.RunWithCache($"all-nuget-published-versions-package-{packageName}-preview-cache",
             () => GetAllPublishedVersionsFromNuget(packageName));
     }
 
-    public Task<NugetServerEndPoints> GetApiEndpoint(string? overrideServer = null)
+    public Task<NugetServerEndPoints?> GetApiEndpoint(string? overrideServer = null)
     {
         var server = overrideServer ?? _customNugetServer;
         return _cacheService.RunWithCache($"nuget-server-{server}-endpoint-cache",
             () => GetApiEndpointFromNuget(server));
     }
 
-    public Task<Package[]> GetPackageDependencies(Package package)
+    public Task<Package[]?> GetPackageDependencies(Package package)
     {
         return _cacheService.RunWithCache($"nuget-package-{package.Name}-dependencies-{package.Version}-cache",
             () => GetPackageDependenciesFromNuget(package));
@@ -118,7 +126,7 @@ public class NugetService
 
     private async Task<IReadOnlyCollection<NugetVersion>> GetAllPublishedVersionsFromNuget(string packageName)
     {
-        var apiEndpoint = await GetApiEndpoint();
+        var apiEndpoint = await GetApiEndpoint() ?? throw new InvalidOperationException("Can NOT locate a valid nuget API endpoint!");
         var requestUrl = $"{apiEndpoint.PackageBaseAddress.TrimEnd('/')}/{packageName.ToLower()}/index.json";
         var responseModel = await HttpGetJson<GetAllPublishedVersionsResponseModel>(requestUrl, _patToken);
         return responseModel
@@ -137,7 +145,7 @@ public class NugetService
         var pat = overridePat ?? _patToken;
         try
         {
-            var apiEndpoint = await GetApiEndpoint(server);
+            var apiEndpoint = await GetApiEndpoint(server) ?? throw new InvalidOperationException("Can NOT locate a valid nuget API endpoint!");
             var requestUrl =
                 $"{apiEndpoint.RegistrationsBaseUrl.TrimEnd('/')}/{package.Name.ToLower()}/{package.Version.ToString().ToLower()}.json";
             var packageContext = await HttpGetJson<RegistrationIndex>(requestUrl, pat);
@@ -157,7 +165,7 @@ public class NugetService
 
     private async Task<Package[]> GetPackageDependenciesFromNuget(Package package)
     {
-        var apiEndpoint = await GetApiEndpoint();
+        var apiEndpoint = await GetApiEndpoint() ?? throw new InvalidOperationException("Can NOT locate a valid nuget API endpoint!");
         var requestUrl =
             $"{apiEndpoint.PackageBaseAddress.TrimEnd('/')}/{package.Name.ToLower()}/{package.Version}/{package.Name.ToLower()}.nuspec";
         var nuspec = await HttpGetString(requestUrl, _patToken);

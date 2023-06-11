@@ -20,10 +20,10 @@ public class DetectorStarter<T> : IEntryService where T : IActionDetector
 
     public async Task OnServiceStartedAsync(string path, bool shouldTakeAction)
     {
-        _logger.LogInformation($"Parsing files to build project structure based on path: '{path}'...");
+        _logger.LogInformation("Parsing files to build project structure based on path: \'{Path}\'...", path);
         var model = await _extractor.Parse(path);
 
-        _logger.LogInformation($"Analysing possible actions via {typeof(T).Name}");
+        _logger.LogInformation("Analysing possible actions via {Name}", typeof(T).Name);
         var actions = _detector.AnalyzeAsync(model);
         await foreach (var action in actions)
         {

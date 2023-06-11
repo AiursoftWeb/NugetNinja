@@ -1,4 +1,5 @@
-﻿using Aiursoft.NugetNinja.AllOfficialsPlugin;
+﻿using Aiursoft.Canon;
+using Aiursoft.NugetNinja.AllOfficialsPlugin;
 using Aiursoft.NugetNinja.Core;
 using Aiursoft.NugetNinja.PrBot;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,8 +33,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddMemoryCache();
             services.AddHttpClient();
             services.Configure<List<Server>>(context.Configuration.GetSection("Servers"));
-            services.AddSingleton<CacheService>();
-            services.AddTransient<RetryEngine>();
+            services.AddTaskCanon();
             services.AddTransient<Extractor>();
             services.AddTransient<ProjectsEnumerator>();
             services.AddTransient<IVersionControlService, GitHubService>();

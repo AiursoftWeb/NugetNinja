@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using Aiursoft.Canon;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -59,8 +60,7 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         var startUp = new TS();
         services.AddMemoryCache();
         services.AddHttpClient();
-        services.AddSingleton<CacheService>();
-        services.AddTransient<RetryEngine>();
+        services.AddTaskCanon();
         services.AddTransient<Extractor>();
         services.AddTransient<ProjectsEnumerator>();
         services.AddTransient<NugetService>();
@@ -87,7 +87,7 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         var logger = serviceProvider.GetRequiredService<ILogger<TE>>();
 
         var fullPath = Path.GetFullPath(path);
-        logger.LogTrace($"Starting service: '{typeof(TE).Name}'. Full path is: '{fullPath}', Dry run is: '{dryRun}'.");
+        logger.LogTrace(@"Starting service: '{Name}'. Full path is: '{FullPath}', Dry run is: '{DryRun}'", typeof(TE).Name, fullPath, dryRun);
         return service.OnServiceStartedAsync(fullPath, !dryRun);
     }
 }
