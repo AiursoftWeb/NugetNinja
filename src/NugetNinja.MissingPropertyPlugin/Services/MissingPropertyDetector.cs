@@ -62,14 +62,13 @@ public class MissingPropertyDetector : IActionDetector
             // Skip executable programs.
             if (project.Executable())
             {
-                _logger.LogTrace($"Skip scanning properties for project: '{project}' because it's an executable.");
+                _logger.LogTrace("Skip scanning properties for project: \'{Project}\' because it\'s an executable", project);
                 continue;
             }
 
             if (project.IsTest())
             {
-                _logger.LogTrace(
-                    $"Skip scanning properties for project: '{project}' because it's an unit test project.");
+                _logger.LogTrace("Skip scanning properties for project: \'{Project}\' because it\'s an unit test project", project);
                 continue;
             }
 

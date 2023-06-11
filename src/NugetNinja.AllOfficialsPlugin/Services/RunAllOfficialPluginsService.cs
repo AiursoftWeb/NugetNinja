@@ -39,15 +39,15 @@ public class RunAllOfficialPluginsService : IEntryService
     {
         foreach (var plugin in _pluginDetectors)
         {
-            _logger.LogTrace($"Parsing files to build project structure based on path: '{path}'...");
+            _logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", path);
             var model = await _extractor.Parse(path);
 
-            _logger.LogInformation($"Analyzing possible actions via {plugin.GetType().Name}...");
+            _logger.LogInformation("Analyzing possible actions via {Name}...", plugin.GetType().Name);
             var actions = plugin.AnalyzeAsync(model);
 
             await foreach (var action in actions)
             {
-                _logger.LogWarning(action.BuildMessage());
+                _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", action.GetType().Name, action.BuildMessage());
                 if (shouldTakeAction) await action.TakeActionAsync();
             }
         }

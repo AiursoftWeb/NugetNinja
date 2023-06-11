@@ -28,12 +28,12 @@ public class DeprecatedPackageDetector : IActionDetector
             }
             catch (Exception e)
             {
-                _logger.LogTrace(e, $"Failed to get package deprecation info by name: '{package}'.");
-                _logger.LogCritical($"Failed to get package deprecation info by name: '{package}'.");
+                _logger.LogTrace(e, "Failed to get package deprecation info by name: \'{Package}\'", package);
+                _logger.LogCritical("Failed to get package deprecation info by name: \'{Package}\'", package);
                 continue;
             }
 
-            if (catalogInformation.Deprecation != null)
+            if (catalogInformation?.Deprecation != null)
             {
                 Package? alternative = null;
                 if (!string.IsNullOrWhiteSpace(catalogInformation.Deprecation.AlternatePackage?.Id))
@@ -48,7 +48,7 @@ public class DeprecatedPackageDetector : IActionDetector
                     package,
                     alternative);
             }
-            else if (catalogInformation.Vulnerabilities?.Any() == true)
+            else if (catalogInformation?.Vulnerabilities?.Any() == true)
             {
                 yield return new VulnerablePackageReplacement(project, package);
             }

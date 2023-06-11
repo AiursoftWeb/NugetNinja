@@ -21,7 +21,7 @@ public class Extractor
 
         foreach (var csprojPath in csprojs)
         {
-            _logger.LogTrace($"Parsing {csprojPath}...");
+            _logger.LogTrace("Parsing project {CsprojPath}", csprojPath);
             await model.IncludeProject(csprojPath);
         }
 

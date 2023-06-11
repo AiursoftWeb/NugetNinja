@@ -17,7 +17,7 @@ public class GitLabService : IVersionControlService
 
     public async Task<bool> RepoExists(string endPoint, string orgName, string repoName, string patToken)
     {
-        _logger.LogInformation($"Checking if repository exists in GitLab: {orgName}/{repoName}...");
+        _logger.LogInformation("Checking if repository exists in GitLab: {OrgName}/{RepoName}...", orgName, repoName);
         try
         {
             var endpoint = $"{endPoint}/api/v4/projects/{orgName}%2F{repoName}";
@@ -32,7 +32,7 @@ public class GitLabService : IVersionControlService
 
     public async IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken)
     {
-        _logger.LogInformation($"Listing all starred repositories for user: {userName} in GitLab...");
+        _logger.LogInformation("Listing all starred repositories for user: {UserName} in GitLab...", userName);
         for (var i = 1; ; i++)
         {
             var endpoint = $"{endPoint}/api/v4/users/{userName}/starred_projects?per_page=100&page={i}";
@@ -56,14 +56,14 @@ public class GitLabService : IVersionControlService
 
     public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
     {
-        _logger.LogInformation($"Forking repository in GitLab: {org}/{repo}...");
+        _logger.LogInformation("Forking repository in GitLab: {Org}/{Repo}...", org, repo);
         var endpoint = $"{endPoint}/api/v4/projects/{org}%2F{repo}/fork";
         await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 
     public async Task<IEnumerable<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head, string patToken)
     {
-        _logger.LogInformation($"Getting pull requests in GitLab: {org}/{repo}...");
+        _logger.LogInformation("Getting pull requests in GitLab: {Org}/{Repo}...", org, repo);
         var endpoint = $"{endPoint}/api/v4/projects/{org}%2F{repo}/merge_requests?state=opened&source_branch={head.Split(':').Last()}";
         var gitlabPrs = await _httpClient.SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
         return gitlabPrs.Select(p => new PullRequest
@@ -80,8 +80,8 @@ public class GitLabService : IVersionControlService
     {
         var myName = head.Split(':').First();
         var myBranch = head.Split(":").Last();
-        var project = await this.GetProject(endPoint, org, repo, patToken);
-        _logger.LogInformation($"Creating a new pull request in GitLab: {org}/{repo}...");
+        var project = await GetProject(endPoint, org, repo, patToken);
+        _logger.LogInformation("Creating a new pull request in GitLab: {Org}/{Repo}...", org, repo);
         var endpoint = $"{endPoint}/api/v4/projects/{myName}%2F{repo}/merge_requests";
         await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken, new
         {

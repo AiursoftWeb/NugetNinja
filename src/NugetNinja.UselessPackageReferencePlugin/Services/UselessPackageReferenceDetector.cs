@@ -37,12 +37,15 @@ public class UselessPackageReferenceDetector : IActionDetector
                 try
                 {
                     var recursivePackagesBroughtUp = await _nugetService.GetPackageDependencies(package);
-                    accessiblePackages.AddRange(recursivePackagesBroughtUp);
+                    if (recursivePackagesBroughtUp != null)
+                    {
+                        accessiblePackages.AddRange(recursivePackagesBroughtUp);
+                    }
                 }
                 catch (Exception e)
                 {
-                    _logger.LogTrace(e, $"Failed to get package dependencies by name: '{package}'.");
-                    _logger.LogCritical($"Failed to get package dependencies by name: '{package}'.");
+                    _logger.LogTrace(e, "Failed to get package dependencies by name: \'{Package}\'", package);
+                    _logger.LogCritical("Failed to get package dependencies by name: \'{Package}\'", package);
                 }
         }
 
@@ -53,12 +56,15 @@ public class UselessPackageReferenceDetector : IActionDetector
                 try
                 {
                     var references = await _nugetService.GetPackageDependencies(otherDirectReference);
-                    accessiblePackagesForThisProject.AddRange(references);
+                    if (references != null)
+                    {
+                        accessiblePackagesForThisProject.AddRange(references);
+                    }
                 }
                 catch (Exception e)
                 {
-                    _logger.LogTrace(e, $"Failed to get package dependencies by name: '{otherDirectReference}'.");
-                    _logger.LogCritical($"Failed to get package dependencies by name: '{otherDirectReference}'.");
+                    _logger.LogTrace(e, "Failed to get package dependencies by name: \'{OtherDirectReference}\'", otherDirectReference);
+                    _logger.LogCritical("Failed to get package dependencies by name: \'{OtherDirectReference}\'", otherDirectReference);
                 }
 
             if (accessiblePackagesForThisProject.Any(pa => pa.Name == directReference.Name))

@@ -27,7 +27,7 @@ public class DetectorStarter<T> : IEntryService where T : IActionDetector
         var actions = _detector.AnalyzeAsync(model);
         await foreach (var action in actions)
         {
-            _logger.LogWarning(action.BuildMessage());
+            _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", action.GetType().Name, action.BuildMessage());
             if (shouldTakeAction) await action.TakeActionAsync();
         }
     }

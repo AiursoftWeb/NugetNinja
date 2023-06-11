@@ -17,7 +17,7 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult Index()
     {
-        _logger.LogInformation("A user accessed the index page.");
+        _logger.LogInformation("A user accessed the index page");
 
         var model = new IndexViewModel();
         return View(model);
@@ -61,7 +61,7 @@ public class HomeController : Controller
     [HttpPost]
     public IActionResult Unsubscribe([FromForm] [Required] [Url] string githubUrl)
     {
-        _logger.LogInformation($"A user unsubscribed the repo: {githubUrl}");
+        _logger.LogInformation("A user unsubscribed the repo: {GithubUrl}", githubUrl);
 
         // Really unsubscribe.
         return RedirectToAction(nameof(SuccessfullyUnSubscribed));
