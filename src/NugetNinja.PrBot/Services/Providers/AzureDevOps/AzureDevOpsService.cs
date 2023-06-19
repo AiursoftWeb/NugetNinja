@@ -108,7 +108,7 @@ This pull request may break or change the behavior of this application. Review w
         return repo.CloneUrl ?? throw new Exception($"Repo {repo}'s clone Url is null!");
     }
 
-    private async Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken, bool allowCache = true)
+    private async Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken)
     {
         return await _cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", async () =>
         {
