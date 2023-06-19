@@ -116,7 +116,7 @@ This pull request may break or change the behavior of this application. Review w
             var connection = new VssConnection(new Uri(endPoint), credentials);
             await connection.ConnectAsync();
             return connection;
-        }, cachedMinutes: allowCache ? 20 : 0) ?? throw new InvalidOperationException($"Failed to connect to Azure devops server: {endPoint}");
+        }) ?? throw new InvalidOperationException($"Failed to connect to Azure devops server: {endPoint}");
     }
 
     private async IAsyncEnumerable<GitRepository> GetGitRepositories(string endPoint, string patToken)
