@@ -1,8 +1,9 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.CommandFramework.Abstracts;
+using Aiursoft.CommandFramework.Framework;
 
 namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 
-public class UselessPackageReferencePlugin : INinjaPlugin
+public class UselessPackageReferencePlugin : IPlugin
 {
     public CommandHandler[] Install()
     {

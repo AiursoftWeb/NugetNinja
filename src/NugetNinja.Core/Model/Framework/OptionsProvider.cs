@@ -59,12 +59,4 @@ public static class OptionsProvider
         foreach (var option in options) command.AddGlobalOption(option);
         return command;
     }
-
-    public static RootCommand AddPlugins(this RootCommand command, params INinjaPlugin[] pluginInstallers)
-    {
-        foreach (var plugin in pluginInstallers)
-        foreach (var pluginFeature in plugin.Install())
-            command.Add(pluginFeature.BuildAsCommand());
-        return command;
-    }
 }

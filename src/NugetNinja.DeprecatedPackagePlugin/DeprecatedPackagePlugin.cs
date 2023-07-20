@@ -1,8 +1,9 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.CommandFramework.Abstracts;
+using Aiursoft.CommandFramework.Framework;
 
 namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin;
 
-public class DeprecatedPackagePlugin : INinjaPlugin
+public class DeprecatedPackagePlugin : IPlugin
 {
     public CommandHandler[] Install()
     {

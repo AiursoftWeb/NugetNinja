@@ -1,4 +1,4 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.CommandFramework.Abstracts;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin;

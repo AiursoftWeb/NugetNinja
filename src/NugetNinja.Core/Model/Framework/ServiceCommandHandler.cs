@@ -1,5 +1,8 @@
 ﻿using System.CommandLine;
 using Aiursoft.Canon;
+using Aiursoft.CommandFramework.Abstracts;
+using Aiursoft.CommandFramework.Framework;
+using Aiursoft.CommandFramework.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -42,22 +45,7 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         string patToken,
         bool allowCross)
     {
-        var services = new ServiceCollection();
-        services.AddLogging(logging =>
-        {
-            logging
-                .AddFilter("Microsoft.Extensions", LogLevel.Warning)
-                .AddFilter("System", LogLevel.Warning);
-            logging.AddSimpleConsole(options =>
-            {
-                options.IncludeScopes = verbose;
-                options.SingleLine = true;
-                options.TimestampFormat = "mm:ss ";
-            });
-            logging.SetMinimumLevel(verbose ? LogLevel.Trace : LogLevel.Warning);
-        });
-
-        var startUp = new TS();
+        var services = ServiceBuilder.BuildServices<TS>(verbose);
         services.AddMemoryCache();
         services.AddHttpClient();
         services.AddTaskCanon();
@@ -74,8 +62,6 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
             options.PatToken = patToken;
 
         });
-
-        startUp.ConfigureServices(services);
         services.AddTransient<TE>();
         return services;
     }

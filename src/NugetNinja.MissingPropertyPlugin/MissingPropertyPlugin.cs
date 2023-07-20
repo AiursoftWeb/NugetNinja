@@ -1,8 +1,9 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.CommandFramework.Abstracts;
+using Aiursoft.CommandFramework.Framework;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
 
-public class MissingPropertyPlugin : INinjaPlugin
+public class MissingPropertyPlugin : IPlugin
 {
     public CommandHandler[] Install()
     {
