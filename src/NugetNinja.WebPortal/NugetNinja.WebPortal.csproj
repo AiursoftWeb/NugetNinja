@@ -2,7 +2,6 @@
 	<PropertyGroup>
 		<!--Build and code-->
 		<OutputType>Exe</OutputType>
-		<Version>0.0.2</Version>
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>ninja.webportal</AssemblyName>
 		<RootNamespace>Aiursoft.NugetNinja.WebPortal</RootNamespace>
