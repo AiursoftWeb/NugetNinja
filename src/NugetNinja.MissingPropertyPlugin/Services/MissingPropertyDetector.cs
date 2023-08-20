@@ -104,16 +104,16 @@ public class MissingPropertyDetector : IActionDetector
             }
             
             // GeneratePackageOnBuild
-            if (projectInfo.ShouldPackAsNugetLibrary && project.GeneratePackageOnBuild != true.ToString().ToLower())
+            if (projectInfo.ShouldPackAsNugetLibrary && project.GeneratePackageOnBuild.IsFalse())
             {
                 _logger.LogTrace("Project {Project} is missing property GeneratePackageOnBuild", project);
-                yield return new MissingProperty(project, nameof(project.GeneratePackageOnBuild), projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower());
+                yield return new MissingProperty(project, nameof(project.GeneratePackageOnBuild), true.ToString().ToLower());
             }
 
             if (projectInfo.ShouldPackAsNugetTool)
             {
                 // Pack as tool
-                if (project.PackAsTool != true.ToString().ToLower())
+                if (project.PackAsTool.IsFalse())
                 {
                     _logger.LogTrace("Project {Project} is missing property PackAsTool", project);
                     yield return new MissingProperty(project, nameof(project.PackAsTool), projectInfo.ShouldPackAsNugetTool.ToString().ToLower());
@@ -129,7 +129,7 @@ public class MissingPropertyDetector : IActionDetector
             }
             
             // Implicit using
-            if (project.ImplicitUsings != true.ToString().ToLower())
+            if (project.ImplicitUsings.IsFalse())
             {
                 _logger.LogTrace("Project {Project} is missing property Implicit using", project);
                 yield return new MissingProperty(project, nameof(project.ImplicitUsings), "enable");

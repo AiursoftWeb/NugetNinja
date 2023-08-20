@@ -17,14 +17,13 @@ public class ProjectTypeDetector
         var isWebProject = project.Sdk?.ToLower().EndsWith("web") ?? false;
         _logger.LogTrace("Project {Project} is web project status is {UseWeb}", project, isWebProject);
 
-        var hasWindows = project.UseWindowsForms?.Trim().ToLower() == true.ToString().ToLower() ||
-                         project.UseWPF?.Trim().ToLower() == true.ToString().ToLower();
+        var hasWindows = project.UseWindowsForms.IsTrue() || project.UseWPF.IsTrue(); 
         _logger.LogTrace("Project {Project} has Windows features status is {HasWindows}", project, hasWindows);
-        
-        var hasUtFeatures = project.ContainsTestLibrary() || project.IsTestProject == true.ToString();
+
+        var hasUtFeatures = project.ContainsTestLibrary() || project.IsTestProject.IsTrue();
         _logger.LogTrace("Project {Project} has UT features status is {HasUtFeatures}", project, hasUtFeatures);
 
-        var packAsTool = project.PackAsTool == true.ToString();
+        var packAsTool = project.PackAsTool.IsTrue();
         _logger.LogTrace("Project {Project} pack as tool status is {PackAsTool}", project, packAsTool);
         
         var hasVersion = !string.IsNullOrWhiteSpace(project.Version);
