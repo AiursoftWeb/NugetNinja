@@ -3,6 +3,7 @@ using Aiursoft.Canon;
 using Aiursoft.CommandFramework.Abstracts;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Services;
+using Aiursoft.NugetNinja.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -51,6 +52,7 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         services.AddTaskCanon();
         services.AddTransient<Extractor>();
         services.AddTransient<ProjectsEnumerator>();
+        services.AddTransient<CsprojWriter>();
         services.AddTransient<NugetService>();
         services.AddTransient<VersionCrossChecker>();
         services.Configure<AppSettings>(options =>

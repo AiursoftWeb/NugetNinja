@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using Aiursoft.NugetNinja.Core.Services;
+using HtmlAgilityPack;
 
 namespace Aiursoft.NugetNinja.Core;
 
@@ -58,7 +59,7 @@ public class Project
     ///   Microsoft.NET.Sdk.Worker
     ///   Microsoft.NET.Sdk.WindowsDesktop
     /// </summary>
-    public string? Sdk { get; set; }
+    public string? Sdk { get; init; }
 
     public List<Project> ProjectReferences { get; init; } = new();
 
@@ -113,7 +114,7 @@ public class Project
         if (node.Attributes["Version"] != null)
         {
             node.Attributes["Version"].Value = newVersion.ToString();
-            await SaveDocToDisk(doc);
+            await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
         }
     }
 
@@ -137,7 +138,7 @@ public class Project
 
         node.Attributes["Include"].Value = newPackage.Name;
         node.Attributes["Version"].Value = newPackage.Version.ToString();
-        await SaveDocToDisk(doc);
+        await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
 
     public async Task RemovePackageReferenceAsync(string refName)
@@ -198,7 +199,7 @@ public class Project
 
         foreach (var existingNode in existingNodes) existingNode.Remove();
 
-        await SaveDocToDisk(doc);
+        await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
 
     public async Task AddOrUpdateProperty(string propertyName, string propertyValue)
@@ -240,7 +241,7 @@ public class Project
             propertyGroup.AppendChild(newline);
         }
 
-        await SaveDocToDisk(doc);
+        await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
 
     public async Task AddFrameworkReference(string frameworkReference)
@@ -271,7 +272,7 @@ public class Project
         itemGroup.AppendChild(reference);
         itemGroup.AppendChild(newline);
 
-        await SaveDocToDisk(doc);
+        await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
 
     private async Task RemoveNodeAndSaveToDisk(HtmlNode node, HtmlDocument doc)
@@ -281,37 +282,11 @@ public class Project
             parent.Remove();
         else
             node.Remove();
-
-        await SaveDocToDisk(doc);
+        
+        await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
 
-    private async Task SaveDocToDisk(HtmlDocument doc)
-    {
-        var memoryStream = new MemoryStream();
-        doc.Save(memoryStream);
-        memoryStream.Seek(0, SeekOrigin.Begin);
-        var csprojText = await new StreamReader(memoryStream).ReadToEndAsync();
-        csprojText = csprojText
-            .Replace(@"></PackageReference>", " />")
-            .Replace(@"></ProjectReference>", " />")
-            .Replace(@"></FrameworkReference>", " />")
-            .Replace(@"></Compile>", " />")
-            .Replace(@"></Content>", " />")
-            .Replace(@"></None>", " />")
-            .Replace(@"></Exec>", " />")
-            .Replace(@"></Output>", " />")
-            .Replace(@"></Message>", " />")
-            .Replace(@"></Watch>", " />")
-            .Replace(@"></Resource>", " />")
-            .Replace(@"></Folder>", " />")
-            .Replace(@"></AdditionalFiles>", " />")
-            .Replace(@"></UserProperties>", " />")
-            .Replace(@"></EmbeddedResource>", " />")
-            .Replace(@"></ServiceWorker>", " />")
-            .Replace(@"></Using>", " />");
-
-        await File.WriteAllTextAsync(PathOnDisk, csprojText);
-    }
+   
 
     #region Build and code
 
@@ -322,26 +297,26 @@ public class Project
     ///   Exe
     ///   WinExe
     /// </summary>
-    public string? OutputType { get; set; }
-    public string? Version { get; set; }
-    public string? TargetFramework { get; set; }
-    public string? TargetFrameworks { get; set; }
-    public string? AssemblyName { get; set; }
-    public string? RootNamespace { get; set; }
-    public string? IsTestProject { get; set; }
+    public string? OutputType { get; init; }
+    public string? Version { get; init; }
+    public string? TargetFramework { get; init; }
+    public string? TargetFrameworks { get; init; }
+    public string? AssemblyName { get; init; }
+    public string? RootNamespace { get; init; }
+    public string? IsTestProject { get; init; }
     #endregion
     
     #region Tool
-    public string? IsPackable { get; set; }
-    public string? PackAsTool { get; set; }
-    public string? ToolCommandName { get; set; }
+    public string? IsPackable { get; init; }
+    public string? PackAsTool { get; init; }
+    public string? ToolCommandName { get; init; }
 
     #endregion
 
     #region Best practice
 
-    public string? ImplicitUsings { get; set; }
-    public string? Nullable { get; set; }
+    public string? ImplicitUsings { get; init; }
+    public string? Nullable { get; init; }
     public string? SelfContained { get; set; }
     public string? PublishTrimmed { get; set; }
     public string? PublishReadyToRun { get; set; }
@@ -351,12 +326,12 @@ public class Project
 
     #region Nuget Packaging
 
-    public string? Company { get; set; }
-    public string? Product { get; set; }
+    public string? Company { get; init; }
+    public string? Product { get; init; }
     public string? Authors { get; set; }
-    public string? Description { get; set; }
-    public string? PackageId { get; set; }
-    public string? PackageTags { get; set; }
+    public string? Description { get; init; }
+    public string? PackageId { get; init; }
+    public string? PackageTags { get; init; }
     public string? PackageLicenseExpression { get; set; }
     public string? PackageProjectUrl { get; set; }
     public string? RepositoryType { get; set; }
