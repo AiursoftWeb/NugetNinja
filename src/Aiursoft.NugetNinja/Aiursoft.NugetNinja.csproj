@@ -20,7 +20,7 @@
         <Product>NugetNinja</Product>
         <Authors>anduin2017 codgician</Authors>
         <Description>A tool for detecting dependencies of .NET projects.</Description>
-        <PackageId>NugetNinja</PackageId>
+        <PackageId>Aiursoft.NugetNinja</PackageId>
         <PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</PackageProjectUrl>
@@ -28,6 +28,6 @@
         <RepositoryUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</RepositoryUrl>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\NugetNinja.AllOfficialsPlugin\NugetNinja.AllOfficialsPlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
     </ItemGroup>
 </Project>

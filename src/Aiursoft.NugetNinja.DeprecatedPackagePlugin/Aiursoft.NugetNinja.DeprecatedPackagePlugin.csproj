@@ -2,14 +2,14 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
-        <AssemblyName>NugetNinja.UselessProjectReferencePlugin</AssemblyName>
-        <RootNamespace>Aiursoft.NugetNinja.UselessProjectReferencePlugin</RootNamespace>
+        <RootNamespace>Aiursoft.NugetNinja.DeprecatedPackagePlugin</RootNamespace>
         <IsTestProject>false</IsTestProject>
         <IsPackable>false</IsPackable>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>Aiursoft.NugetNinja.DeprecatedPackagePlugin</PackageId>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\NugetNinja.Core\NugetNinja.Core.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj" />
     </ItemGroup>
 </Project>

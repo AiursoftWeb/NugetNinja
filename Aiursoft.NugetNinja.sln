@@ -3,33 +3,33 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja", "src\NugetNinja\NugetNinja.csproj", "{1214F871-4ADC-44BD-8805-E88098F31FA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja", "src\Aiursoft.NugetNinja\Aiursoft.NugetNinja.csproj", "{1214F871-4ADC-44BD-8805-E88098F31FA3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.Core", "src\NugetNinja.Core\NugetNinja.Core.csproj", "{3F917B91-7B86-45B2-BD18-9A0F289E99BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.Core", "src\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj", "{3F917B91-7B86-45B2-BD18-9A0F289E99BF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.UselessPackageReferencePlugin", "src\NugetNinja.UselessPackageReferencePlugin\NugetNinja.UselessPackageReferencePlugin.csproj", "{32D0EDB1-AECB-42E4-8D85-FE977AED343D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.UselessPackageReferencePlugin", "src\Aiursoft.NugetNinja.UselessPackageReferencePlugin\Aiursoft.NugetNinja.UselessPackageReferencePlugin.csproj", "{32D0EDB1-AECB-42E4-8D85-FE977AED343D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.UselessProjectReferencePlugin", "src\NugetNinja.UselessProjectReferencePlugin\NugetNinja.UselessProjectReferencePlugin.csproj", "{D44046E7-54E5-4625-A033-AF5202695A0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.UselessProjectReferencePlugin", "src\Aiursoft.NugetNinja.UselessProjectReferencePlugin\Aiursoft.NugetNinja.UselessProjectReferencePlugin.csproj", "{D44046E7-54E5-4625-A033-AF5202695A0A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.PossiblePackageUpgradePlugin", "src\NugetNinja.PossiblePackageUpgradePlugin\NugetNinja.PossiblePackageUpgradePlugin.csproj", "{6717E4B2-4A4F-49A0-B694-E264257E77B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.PossiblePackageUpgradePlugin", "src\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.csproj", "{6717E4B2-4A4F-49A0-B694-E264257E77B6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EE324A7A-86D4-4B7D-ADC5-3E6504738413}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{54B33DDA-6F88-4557-BF10-9833A4C45862}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.Core.Tests", "tests\NugetNinja.Core.Tests\NugetNinja.Core.Tests.csproj", "{A788519C-3C01-49FB-B996-957F3C370D26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.Core.Tests", "tests\Aiursoft.NugetNinja.Core.Tests\Aiursoft.NugetNinja.Core.Tests.csproj", "{A788519C-3C01-49FB-B996-957F3C370D26}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.DeprecatedPackagePlugin", "src\NugetNinja.DeprecatedPackagePlugin\NugetNinja.DeprecatedPackagePlugin.csproj", "{C5040371-61FC-4A13-BE84-89FF8E1A0DA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.DeprecatedPackagePlugin", "src\Aiursoft.NugetNinja.DeprecatedPackagePlugin\Aiursoft.NugetNinja.DeprecatedPackagePlugin.csproj", "{C5040371-61FC-4A13-BE84-89FF8E1A0DA5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugins", "plugins", "{0EEF3C9A-9684-4642-9A66-8CD819EC6235}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.AllOfficialsPlugin", "src\NugetNinja.AllOfficialsPlugin\NugetNinja.AllOfficialsPlugin.csproj", "{D2D68A5F-3283-4001-840F-3E14A9B372E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.AllOfficialsPlugin", "src\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj", "{D2D68A5F-3283-4001-840F-3E14A9B372E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.MissingPropertyPlugin", "src\NugetNinja.MissingPropertyPlugin\NugetNinja.MissingPropertyPlugin.csproj", "{335BE82E-E650-4E62-8107-B6BBD34E3107}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.MissingPropertyPlugin", "src\Aiursoft.NugetNinja.MissingPropertyPlugin\Aiursoft.NugetNinja.MissingPropertyPlugin.csproj", "{335BE82E-E650-4E62-8107-B6BBD34E3107}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.PrBot", "src\NugetNinja.PrBot\NugetNinja.PrBot.csproj", "{FF24D161-7796-4CA2-A652-061DBEE89626}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.PrBot", "src\Aiursoft.NugetNinja.PrBot\Aiursoft.NugetNinja.PrBot.csproj", "{FF24D161-7796-4CA2-A652-061DBEE89626}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NugetNinja.WebPortal", "src\NugetNinja.WebPortal\NugetNinja.WebPortal.csproj", "{D706BE4B-8B54-48C0-A32B-CF8D52B41473}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.WebPortal", "src\Aiursoft.NugetNinja.WebPortal\Aiursoft.NugetNinja.WebPortal.csproj", "{D706BE4B-8B54-48C0-A32B-CF8D52B41473}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

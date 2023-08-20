@@ -20,7 +20,7 @@
         <Product>NugetNinja Bot</Product>
         <Authors>anduin2017 codgician</Authors>
         <Description>A bot for detecting dependencies of .NET projects and create pull requests automatically.</Description>
-        <PackageId>NugetNinja.PrBot</PackageId>
+        <PackageId>Aiursoft.NugetNinja.PrBot</PackageId>
         <PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninjaa</PackageProjectUrl>
@@ -43,6 +43,6 @@
         <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.205.1" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\NugetNinja.AllOfficialsPlugin\NugetNinja.AllOfficialsPlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
     </ItemGroup>
 </Project>

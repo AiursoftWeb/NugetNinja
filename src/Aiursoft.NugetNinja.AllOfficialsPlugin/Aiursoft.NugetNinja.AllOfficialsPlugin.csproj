@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <RootNamespace>Aiursoft.NugetNinja.AllOfficialsPlugin</RootNamespace>
+        <IsTestProject>false</IsTestProject>
+        <IsPackable>false</IsPackable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>Aiursoft.NugetNinja.AllOfficialsPlugin</PackageId>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Aiursoft.NugetNinja.DeprecatedPackagePlugin\Aiursoft.NugetNinja.DeprecatedPackagePlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.MissingPropertyPlugin\Aiursoft.NugetNinja.MissingPropertyPlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.UselessPackageReferencePlugin\Aiursoft.NugetNinja.UselessPackageReferencePlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.UselessProjectReferencePlugin\Aiursoft.NugetNinja.UselessProjectReferencePlugin.csproj" />
+    </ItemGroup>
+</Project>

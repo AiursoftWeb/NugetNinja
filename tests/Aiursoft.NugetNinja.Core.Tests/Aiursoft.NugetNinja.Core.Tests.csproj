@@ -19,6 +19,6 @@
         <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\src\NugetNinja.Core\NugetNinja.Core.csproj" />
+        <ProjectReference Include="..\..\src\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj" />
     </ItemGroup>
 </Project>

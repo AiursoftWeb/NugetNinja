@@ -2,12 +2,12 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
-        <AssemblyName>NugetNinja.Core</AssemblyName>
         <RootNamespace>Aiursoft.NugetNinja.Core</RootNamespace>
         <IsTestProject>false</IsTestProject>
         <IsPackable>false</IsPackable>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>Aiursoft.NugetNinja.Core</PackageId>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Aiursoft.Canon" Version="6.0.13" />
