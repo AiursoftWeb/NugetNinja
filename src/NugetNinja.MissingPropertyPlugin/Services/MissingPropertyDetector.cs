@@ -76,7 +76,7 @@ public class MissingPropertyDetector : IActionDetector
             // Assembly name.
             if (string.IsNullOrWhiteSpace(project.AssemblyName) && !projectInfo.IsUnitTest)
             {
-                var assemblyName = projectInfo.IsExecutable ? GenerateExecutableFileName(project.FileName) : project.FileName;
+                var assemblyName = projectInfo.ShouldPackAsNugetTool ? GenerateExecutableFileName(project.FileName) : project.FileName;
                 _logger.LogTrace("Project {Project} is missing property AssemblyName", project);
                 yield return new MissingProperty(project, nameof(project.AssemblyName), assemblyName);
             }
@@ -122,7 +122,7 @@ public class MissingPropertyDetector : IActionDetector
                 // Tool command name
                 if (project.ToolCommandName != project.AssemblyName)
                 {
-                    var assemblyName = projectInfo.IsExecutable ? GenerateExecutableFileName(project.FileName) : project.FileName;
+                    var assemblyName = GenerateExecutableFileName(project.FileName);
                     _logger.LogTrace("Project {Project} is missing property ToolCommandName", project);
                     yield return new MissingProperty(project, nameof(project.ToolCommandName), assemblyName);
                 }
