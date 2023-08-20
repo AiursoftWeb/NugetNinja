@@ -33,19 +33,20 @@ public class Project
         PublishSingleFile = doc.Descendants(nameof(PublishSingleFile)).SingleOrDefault()?.FirstChild?.InnerText;
         
         // Nuget
-        PackageLicenseFile = doc.Descendants(nameof(PackageLicenseFile)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackageLicenseExpression = doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
-        Description = doc.Descendants(nameof(Description)).SingleOrDefault()?.FirstChild?.InnerText;
         Company = doc.Descendants(nameof(Company)).SingleOrDefault()?.FirstChild?.InnerText;
         Product = doc.Descendants(nameof(Product)).SingleOrDefault()?.FirstChild?.InnerText;
         Authors = doc.Descendants(nameof(Authors)).SingleOrDefault()?.FirstChild?.InnerText;
+        Description = doc.Descendants(nameof(Description)).SingleOrDefault()?.FirstChild?.InnerText;
+        PackageId = doc.Descendants(nameof(PackageId)).SingleOrDefault()?.FirstChild?.InnerText;
         PackageTags = doc.Descendants(nameof(PackageTags)).SingleOrDefault()?.FirstChild?.InnerText;
+        PackageLicenseExpression = doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
         PackageProjectUrl = doc.Descendants(nameof(PackageProjectUrl)).SingleOrDefault()?.FirstChild?.InnerText;
-        RepositoryUrl = doc.Descendants(nameof(RepositoryUrl)).SingleOrDefault()?.FirstChild?.InnerText;
         RepositoryType = doc.Descendants(nameof(RepositoryType)).SingleOrDefault()?.FirstChild?.InnerText;
+        RepositoryUrl = doc.Descendants(nameof(RepositoryUrl)).SingleOrDefault()?.FirstChild?.InnerText;
     }
 
     public string PathOnDisk { get; set; }
+    public string FileName => Path.GetFileNameWithoutExtension(PathOnDisk);
     
     /// <summary>
     /// Usually can be one of the followings:
@@ -79,7 +80,7 @@ public class Project
         return Sdk?.EndsWith("Web") ?? OutputType?.ToLower().EndsWith("exe") ?? false;
     }
 
-    public bool IsTest()
+    public bool ContainsTestLibrary()
     {
         return
             PackageReferences.Any(p => p.Name.Contains("test", StringComparison.OrdinalIgnoreCase)) ||
@@ -314,6 +315,13 @@ public class Project
 
     #region Build and code
 
+    /// <summary>
+    /// Can be one of the followings:
+    ///
+    ///   Library
+    ///   Exe
+    ///   WinExe
+    /// </summary>
     public string? OutputType { get; set; }
     public string? Version { get; set; }
     public string? TargetFramework { get; set; }
@@ -343,16 +351,16 @@ public class Project
 
     #region Nuget Packaging
 
-    public string? PackageLicenseFile { get; set; }
-    public string? PackageLicenseExpression { get; set; }
-    public string? Description { get; set; }
     public string? Company { get; set; }
     public string? Product { get; set; }
     public string? Authors { get; set; }
+    public string? Description { get; set; }
+    public string? PackageId { get; set; }
     public string? PackageTags { get; set; }
+    public string? PackageLicenseExpression { get; set; }
     public string? PackageProjectUrl { get; set; }
-    public string? RepositoryUrl { get; set; }
     public string? RepositoryType { get; set; }
+    public string? RepositoryUrl { get; set; }
 
     #endregion
 }

@@ -7,7 +7,7 @@ public class MissingPropertyDetector : IActionDetector
 {
     private readonly bool _enforceImplicitUsings = false;
     private readonly bool _enforceNullable = false;
-    private readonly bool _fillInOutputType = false;
+    private readonly ProjectTypeDetector _projectTypeDetector;
     private readonly ILogger<MissingPropertyDetector> _logger;
 
     private readonly string[] _notSupportedRuntimes =
@@ -24,8 +24,10 @@ public class MissingPropertyDetector : IActionDetector
     private readonly string _suggestedRuntime = "net6.0";
 
     public MissingPropertyDetector(
+        ProjectTypeDetector projectTypeDetector,
         ILogger<MissingPropertyDetector> logger)
     {
+        _projectTypeDetector = projectTypeDetector;
         _logger = logger;
     }
 
@@ -34,14 +36,12 @@ public class MissingPropertyDetector : IActionDetector
         await Task.CompletedTask;
         foreach (var project in context.AllProjects)
         {
-            var versionSuggestion = AnalyzeVersion(project);
-            if (versionSuggestion != null) yield return versionSuggestion;
-
             if (string.IsNullOrWhiteSpace(project.Nullable) && _enforceNullable)
                 yield return new MissingProperty(project, nameof(project.Nullable), "enable");
             if (string.IsNullOrWhiteSpace(project.ImplicitUsings) && _enforceImplicitUsings)
                 yield return new MissingProperty(project, nameof(project.ImplicitUsings), "enable");
 
+            // Help upgrade old web projects.
             if (
                 project.PackageReferences.Any(p => p.Name == "Microsoft.AspNetCore.App") ||
                 project.PackageReferences.Any(p => p.Name == "Microsoft.AspNetCore.All") // Is an old Web Project.
@@ -59,42 +59,39 @@ public class MissingPropertyDetector : IActionDetector
                     yield return new InsertFrameworkReference(project, "Microsoft.AspNetCore.App");
             }
 
-            // Skip executable programs.
-            if (project.Executable())
+            var projectInfo = _projectTypeDetector.Detect(project);
+
+            // Output type.
+            if (string.IsNullOrWhiteSpace(project.OutputType) && !projectInfo.IsUnitTest)
             {
-                _logger.LogTrace("Skip scanning properties for project: \'{Project}\' because it\'s an executable", project);
-                continue;
+                // TODO: Use WinExe for win forms and wpf.
+                var outputType = projectInfo.IsExecutable ? "Exe" : "Library";
+                yield return new MissingProperty(project, nameof(project.OutputType), outputType);
             }
 
-            if (project.IsTest())
+            // Target framework.
+            var versionSuggestion = AnalyzeVersion(project);
+            if (versionSuggestion != null) yield return versionSuggestion;
+
+            // Assembly name.
+            if (string.IsNullOrWhiteSpace(project.AssemblyName) && !projectInfo.IsUnitTest)
             {
-                _logger.LogTrace("Skip scanning properties for project: \'{Project}\' because it\'s an unit test project", project);
-                continue;
+                var assemblyName = projectInfo.IsExecutable ? GenerateFileName(project.FileName) : project.FileName;
+                yield return new MissingProperty(project, nameof(project.AssemblyName), assemblyName);
+            }
+            
+            // Root namespace.
+            if (string.IsNullOrWhiteSpace(project.RootNamespace))
+            {
+                var rootNamespace = project.FileName.Replace("-", string.Empty);
+                yield return new MissingProperty(project, nameof(project.RootNamespace), rootNamespace);
             }
 
-            // Fill in properties for class lib.
-            if (string.IsNullOrWhiteSpace(project.OutputType) && _fillInOutputType)
-                yield return new MissingProperty(project, nameof(project.OutputType), "Library");
-
-            // To do: Load those properties from GitHub API.
-            //if (string.IsNullOrWhiteSpace(project.PackageLicenseExpression) && string.IsNullOrWhiteSpace(project.PackageLicenseFile))
-            //    yield return new MissingProperty(project, nameof(project.PackageLicenseExpression), "MIT");
-            //if (string.IsNullOrWhiteSpace(project.Description))
-            //    yield return new MissingProperty(project, nameof(project.Description), "A library that shared to nuget.");
-            //if (string.IsNullOrWhiteSpace(project.Company))
-            //    yield return new MissingProperty(project, nameof(project.Company), "Contoso");
-            //if (string.IsNullOrWhiteSpace(project.Product))
-            //    yield return new MissingProperty(project, nameof(project.Product), project.ToString());
-            //if (string.IsNullOrWhiteSpace(project.Authors))
-            //    yield return new MissingProperty(project, nameof(project.Authors), $"{project}Team");
-            //if (string.IsNullOrWhiteSpace(project.PackageTags))
-            //    yield return new MissingProperty(project, nameof(project.PackageTags), $"nuget tools extensions");
-            //if (string.IsNullOrWhiteSpace(project.PackageProjectUrl))
-            //    yield return new MissingProperty(project, nameof(project.PackageProjectUrl), $"https://github.com/Microsoft/Nugetninja");
-            //if (string.IsNullOrWhiteSpace(project.RepositoryUrl))
-            //    yield return new MissingProperty(project, nameof(project.RepositoryUrl), $"https://github.com/Microsoft/Nugetninja");
-            //if (string.IsNullOrWhiteSpace(project.RepositoryType))
-            //    yield return new MissingProperty(project, nameof(project.RepositoryType), $"git");
+            // Is test project
+            if (string.IsNullOrWhiteSpace(project.IsTestProject))
+            {
+                yield return new MissingProperty(project, nameof(project.IsTestProject), projectInfo.IsUnitTest.ToString().ToLower());
+            }
         }
     }
 
@@ -113,5 +110,31 @@ public class MissingPropertyDetector : IActionDetector
         if (deprecatedCount > 0 || insertedCount > 0)
             return new ResetRuntime(project, cleanedRuntimes, insertedCount, deprecatedCount);
         return null;
+    }
+
+    private static string GenerateFileName(string projectName)
+    {
+        string[] nameParts = projectName.Split('.');
+        string lastName = nameParts[nameParts.Length - 1];
+
+        string fileName = "";
+        for (int i = 0; i < lastName.Length; i++)
+        {
+            if (char.IsUpper(lastName[i]))
+            {
+                if (i > 0)
+                {
+                    fileName += "-";
+                }
+
+                fileName += char.ToLower(lastName[i]);
+            }
+            else
+            {
+                fileName += lastName[i];
+            }
+        }
+
+        return fileName;
     }
 }

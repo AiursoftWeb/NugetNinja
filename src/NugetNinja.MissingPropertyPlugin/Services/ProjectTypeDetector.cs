@@ -12,17 +12,27 @@ public class ProjectTypeDetector
         _logger = logger;
     }
     
-    public ProjectType Detect(Project project)
+    public ProjectInfo Detect(Project project)
     {
-
-        var sdk = project.Sdk;
-        var output = project.OutputType;
-
-        if (project.IsTest())
-        {
-            return ProjectType.UnitTest;
-        }
+        var useWeb = project.Sdk?.ToLower().EndsWith("web") ?? false;
+        _logger.LogTrace("Project {Project} use web status is {UseWeb}", project, useWeb);
         
-        if (project.PackageLicenseFile)
+        var hasUtFeatures = project.ContainsTestLibrary() || project.IsTestProject == true.ToString();
+        _logger.LogTrace("Project {Project} has UT features status is {HasUtFeatures}", project, hasUtFeatures);
+
+        var packAsTool = project.PackAsTool == true.ToString();
+        _logger.LogTrace("Project {Project} pack as tool status is {PackAsTool}", project, packAsTool);
+        
+        var hasVersion = !string.IsNullOrWhiteSpace(project.Version);
+        _logger.LogTrace("Project {Project} built has version status is {HasVersion}", project, hasVersion);
+
+        return new ProjectInfo
+        {
+            IsExecutable = packAsTool || (project.OutputType?.EndsWith("exe") ?? false),
+            IsHttpServer = useWeb,
+            IsUnitTest = hasUtFeatures,
+            ShouldPackAsNugetTool = !hasUtFeatures && (hasVersion && packAsTool),
+            ShouldPackAsNugetLibrary = !hasUtFeatures && (hasVersion || packAsTool)
+        };
     }
 }
