@@ -1,36 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<!--Build and code-->
-		<OutputType>Exe</OutputType>
-		<Version>0.0.17</Version>
-		<TargetFramework>net6.0</TargetFramework>
-		<AssemblyName>ninja</AssemblyName>
-		<RootNamespace>Aiursoft.NugetNinja</RootNamespace>
-		<!--Tool-->
-		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>ninja</ToolCommandName>
-		<!--Best practice-->
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<SelfContained>false</SelfContained>
-		<PublishTrimmed>false</PublishTrimmed>
-		<PublishReadyToRun>false</PublishReadyToRun>
-		<PublishSingleFile>false</PublishSingleFile>
-		<!--Nuget--> 
-		<Company>Aiursoft</Company>
-		<Product>NugetNinja</Product>
-		<Authors>anduin2017 codgician</Authors>
-		<Description>A tool for detecting dependencies of .NET projects.</Description>
-		<PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
-		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</RepositoryUrl>
-		<PackageId>Aiursoft.NugetNinja</PackageId>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</PackageProjectUrl>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\NugetNinja.AllOfficialsPlugin\NugetNinja.AllOfficialsPlugin.csproj" />
-	</ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <Version>0.0.17</Version>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>ninja</AssemblyName>
+        <RootNamespace>Aiursoft.NugetNinja</RootNamespace>
+        <IsTestProject>false</IsTestProject>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IsPackable>true</IsPackable>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>ninja</ToolCommandName>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <SelfContained>false</SelfContained>
+        <PublishTrimmed>false</PublishTrimmed>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <PublishSingleFile>false</PublishSingleFile>
+        <Company>Aiursoft</Company>
+        <Product>NugetNinja</Product>
+        <Authors>anduin2017 codgician</Authors>
+        <Description>A tool for detecting dependencies of .NET projects.</Description>
+        <PackageId>NugetNinja</PackageId>
+        <PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</RepositoryUrl>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\NugetNinja.AllOfficialsPlugin\NugetNinja.AllOfficialsPlugin.csproj" />
+    </ItemGroup>
 </Project>
