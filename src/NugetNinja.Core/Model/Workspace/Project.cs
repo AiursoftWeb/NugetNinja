@@ -6,18 +6,36 @@ public class Project
 {
     public Project(string pathOnDisk, HtmlNode doc)
     {
+        // Global
         PathOnDisk = pathOnDisk;
         Sdk = doc.ChildNodes["Project"].Attributes[nameof(Sdk)]?.Value;
+        
+        // Build and code
         OutputType = doc.Descendants(nameof(OutputType)).SingleOrDefault()?.FirstChild?.InnerText;
+        Version = doc.Descendants(nameof(Version)).SingleOrDefault()?.FirstChild?.InnerText;
         TargetFramework = doc.Descendants(nameof(TargetFramework)).SingleOrDefault()?.FirstChild?.InnerText;
         TargetFrameworks = doc.Descendants(nameof(TargetFrameworks)).SingleOrDefault()?.FirstChild?.InnerText;
-        Nullable = doc.Descendants(nameof(Nullable)).SingleOrDefault()?.FirstChild?.InnerText;
+        AssemblyName = doc.Descendants(nameof(AssemblyName)).SingleOrDefault()?.FirstChild?.InnerText;
+        RootNamespace = doc.Descendants(nameof(RootNamespace)).SingleOrDefault()?.FirstChild?.InnerText;
+        IsTestProject = doc.Descendants(nameof(IsTestProject)).SingleOrDefault()?.FirstChild?.InnerText;
+
+        // Tool
+        IsPackable = doc.Descendants(nameof(IsPackable)).SingleOrDefault()?.FirstChild?.InnerText;
+        PackAsTool = doc.Descendants(nameof(PackAsTool)).SingleOrDefault()?.FirstChild?.InnerText;
+        ToolCommandName = doc.Descendants(nameof(ToolCommandName)).SingleOrDefault()?.FirstChild?.InnerText;
+
+        // Best practice
         ImplicitUsings = doc.Descendants(nameof(ImplicitUsings)).SingleOrDefault()?.FirstChild?.InnerText;
+        Nullable = doc.Descendants(nameof(Nullable)).SingleOrDefault()?.FirstChild?.InnerText;
+        SelfContained = doc.Descendants(nameof(SelfContained)).SingleOrDefault()?.FirstChild?.InnerText;
+        PublishTrimmed = doc.Descendants(nameof(PublishTrimmed)).SingleOrDefault()?.FirstChild?.InnerText;
+        PublishReadyToRun = doc.Descendants(nameof(PublishReadyToRun)).SingleOrDefault()?.FirstChild?.InnerText;
+        PublishSingleFile = doc.Descendants(nameof(PublishSingleFile)).SingleOrDefault()?.FirstChild?.InnerText;
+        
+        // Nuget
         PackageLicenseFile = doc.Descendants(nameof(PackageLicenseFile)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackageLicenseExpression =
-            doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
+        PackageLicenseExpression = doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
         Description = doc.Descendants(nameof(Description)).SingleOrDefault()?.FirstChild?.InnerText;
-        Version = doc.Descendants(nameof(Version)).SingleOrDefault()?.FirstChild?.InnerText;
         Company = doc.Descendants(nameof(Company)).SingleOrDefault()?.FirstChild?.InnerText;
         Product = doc.Descendants(nameof(Product)).SingleOrDefault()?.FirstChild?.InnerText;
         Authors = doc.Descendants(nameof(Authors)).SingleOrDefault()?.FirstChild?.InnerText;
@@ -28,6 +46,18 @@ public class Project
     }
 
     public string PathOnDisk { get; set; }
+    
+    /// <summary>
+    /// Usually can be one of the followings:
+    /// 
+    ///   Microsoft.NET.Sdk
+    ///   Microsoft.NET.Sdk.Web
+    ///   Microsoft.NET.Sdk.BlazorWebAssembly
+    ///   Microsoft.NET.Sdk.Razor
+    ///   Microsoft.NET.Sdk.Worker
+    ///   Microsoft.NET.Sdk.WindowsDesktop
+    /// </summary>
+    public string? Sdk { get; set; }
 
     public List<Project> ProjectReferences { get; init; } = new();
 
@@ -127,7 +157,7 @@ public class Project
             throw new InvalidOperationException(
                 $"Could remove PackageReference {refName} in project {this} because it was not found!");
 
-        await RemoveNode(node, doc);
+        await RemoveNodeAndSaveToDisk(node, doc);
     }
 
     public async Task RemoveProjectReference(string absPath)
@@ -149,7 +179,7 @@ public class Project
             throw new InvalidOperationException(
                 $"Could remove PackageReference {absPath} in project {this} because it was not found!");
 
-        await RemoveNode(node, doc);
+        await RemoveNodeAndSaveToDisk(node, doc);
     }
 
     public async Task RemoveProperty(string propertyName)
@@ -243,7 +273,7 @@ public class Project
         await SaveDocToDisk(doc);
     }
 
-    private async Task RemoveNode(HtmlNode node, HtmlDocument doc)
+    private async Task RemoveNodeAndSaveToDisk(HtmlNode node, HtmlDocument doc)
     {
         var parent = node.ParentNode;
         if (!parent.Descendants(0).Where(n => n.NodeType == HtmlNodeType.Element).Except(new[] { node }).Any())
@@ -282,19 +312,32 @@ public class Project
         await File.WriteAllTextAsync(PathOnDisk, csprojText);
     }
 
-    #region Framework
+    #region Build and code
 
-    public string? Sdk { get; set; }
     public string? OutputType { get; set; }
+    public string? Version { get; set; }
     public string? TargetFramework { get; set; }
     public string? TargetFrameworks { get; set; }
+    public string? AssemblyName { get; set; }
+    public string? RootNamespace { get; set; }
+    public string? IsTestProject { get; set; }
+    #endregion
+    
+    #region Tool
+    public string? IsPackable { get; set; }
+    public string? PackAsTool { get; set; }
+    public string? ToolCommandName { get; set; }
 
     #endregion
 
-    #region Features
+    #region Best practice
 
-    public string? Nullable { get; set; }
     public string? ImplicitUsings { get; set; }
+    public string? Nullable { get; set; }
+    public string? SelfContained { get; set; }
+    public string? PublishTrimmed { get; set; }
+    public string? PublishReadyToRun { get; set; }
+    public string? PublishSingleFile { get; set; }
 
     #endregion
 
@@ -303,7 +346,6 @@ public class Project
     public string? PackageLicenseFile { get; set; }
     public string? PackageLicenseExpression { get; set; }
     public string? Description { get; set; }
-    public string? Version { get; set; }
     public string? Company { get; set; }
     public string? Product { get; set; }
     public string? Authors { get; set; }
