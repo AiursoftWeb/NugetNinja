@@ -14,6 +14,7 @@ public class CsprojWriter
         "AssemblyName",
         "RootNamespace",
         "IsTestProject",
+        "GeneratePackageOnBuild",
         "IsPackable",
         "PackAsTool",
         "ToolCommandName",
