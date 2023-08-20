@@ -60,10 +60,11 @@ public class MissingPropertyDetector : IActionDetector
             var projectInfo = _projectTypeDetector.Detect(project);
 
             // Output type.
-            if (string.IsNullOrWhiteSpace(project.OutputType) && !projectInfo.IsUnitTest)
+            var outputType = 
+                projectInfo.IsWindowsExecutable ? "WinExe" :
+                projectInfo.IsExecutable ? "Exe" : "Library";
+            if (project.OutputType != outputType)
             {
-                // TODO: Use WinExe for win forms and wpf.
-                var outputType = projectInfo.IsExecutable ? "Exe" : "Library";
                 _logger.LogTrace("Project {Project} is missing property OutputType", project);
                 yield return new MissingProperty(project, nameof(project.OutputType), outputType);
             }
@@ -75,7 +76,7 @@ public class MissingPropertyDetector : IActionDetector
             // Assembly name.
             if (string.IsNullOrWhiteSpace(project.AssemblyName) && !projectInfo.IsUnitTest)
             {
-                var assemblyName = projectInfo.IsExecutable ? GenerateFileName(project.FileName) : project.FileName;
+                var assemblyName = projectInfo.IsExecutable ? GenerateExecutableFileName(project.FileName) : project.FileName;
                 _logger.LogTrace("Project {Project} is missing property AssemblyName", project);
                 yield return new MissingProperty(project, nameof(project.AssemblyName), assemblyName);
             }
@@ -89,21 +90,21 @@ public class MissingPropertyDetector : IActionDetector
             }
 
             // Is test project
-            if (string.IsNullOrWhiteSpace(project.IsTestProject))
+            if (project.IsTestProject != projectInfo.IsUnitTest.ToString().ToLower())
             {
                 _logger.LogTrace("Project {Project} is missing property IsTestProject", project);
                 yield return new MissingProperty(project, nameof(project.IsTestProject), projectInfo.IsUnitTest.ToString().ToLower());
             }
             
             // Is Packable
-            if (string.IsNullOrWhiteSpace(project.IsPackable))
+            if (project.IsPackable != projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower())
             {
                 _logger.LogTrace("Project {Project} is missing property IsPackable", project);
                 yield return new MissingProperty(project, nameof(project.IsPackable), projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower());
             }
             
             // GeneratePackageOnBuild
-            if (string.IsNullOrWhiteSpace(project.GeneratePackageOnBuild) && projectInfo.ShouldPackAsNugetLibrary)
+            if (projectInfo.ShouldPackAsNugetLibrary && project.GeneratePackageOnBuild != true.ToString().ToLower())
             {
                 _logger.LogTrace("Project {Project} is missing property GeneratePackageOnBuild", project);
                 yield return new MissingProperty(project, nameof(project.GeneratePackageOnBuild), projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower());
@@ -112,23 +113,23 @@ public class MissingPropertyDetector : IActionDetector
             if (projectInfo.ShouldPackAsNugetTool)
             {
                 // Pack as tool
-                if (string.IsNullOrWhiteSpace(project.PackAsTool))
+                if (project.PackAsTool != true.ToString().ToLower())
                 {
                     _logger.LogTrace("Project {Project} is missing property PackAsTool", project);
                     yield return new MissingProperty(project, nameof(project.PackAsTool), projectInfo.ShouldPackAsNugetTool.ToString().ToLower());
                 }
             
                 // Tool command name
-                if (string.IsNullOrWhiteSpace(project.ToolCommandName))
+                if (project.ToolCommandName != project.AssemblyName)
                 {
-                    var assemblyName = projectInfo.IsExecutable ? GenerateFileName(project.FileName) : project.FileName;
+                    var assemblyName = projectInfo.IsExecutable ? GenerateExecutableFileName(project.FileName) : project.FileName;
                     _logger.LogTrace("Project {Project} is missing property ToolCommandName", project);
                     yield return new MissingProperty(project, nameof(project.ToolCommandName), assemblyName);
                 }
             }
             
             // Implicit using
-            if (string.IsNullOrWhiteSpace(project.ImplicitUsings))
+            if (project.ImplicitUsings != true.ToString().ToLower())
             {
                 _logger.LogTrace("Project {Project} is missing property Implicit using", project);
                 yield return new MissingProperty(project, nameof(project.ImplicitUsings), "enable");
@@ -162,7 +163,7 @@ public class MissingPropertyDetector : IActionDetector
                 }
                 
                 // PackageId
-                if (string.IsNullOrWhiteSpace(project.PackageId))
+                if (project.PackageId != project.FileName)
                 {
                     _logger.LogTrace("Project {Project} is missing property PackageId", project);
                     yield return new MissingProperty(project, nameof(project.PackageId), project.FileName);
@@ -202,7 +203,7 @@ public class MissingPropertyDetector : IActionDetector
         return null;
     }
 
-    private static string GenerateFileName(string projectName)
+    private static string GenerateExecutableFileName(string projectName)
     {
         string[] nameParts = projectName.Split('.');
         string lastName = nameParts[^1];

@@ -14,8 +14,12 @@ public class ProjectTypeDetector
     
     public ProjectInfo Detect(Project project)
     {
-        var useWeb = project.Sdk?.ToLower().EndsWith("web") ?? false;
-        _logger.LogTrace("Project {Project} use web status is {UseWeb}", project, useWeb);
+        var isWebProject = project.Sdk?.ToLower().EndsWith("web") ?? false;
+        _logger.LogTrace("Project {Project} is web project status is {UseWeb}", project, isWebProject);
+
+        var hasWindows = project.UseWindowsForms?.Trim().ToLower() == true.ToString().ToLower() ||
+                         project.UseWPF?.Trim().ToLower() == true.ToString().ToLower();
+        _logger.LogTrace("Project {Project} has Windows features status is {HasWindows}", project, hasWindows);
         
         var hasUtFeatures = project.ContainsTestLibrary() || project.IsTestProject == true.ToString();
         _logger.LogTrace("Project {Project} has UT features status is {HasUtFeatures}", project, hasUtFeatures);
@@ -28,8 +32,9 @@ public class ProjectTypeDetector
 
         return new ProjectInfo
         {
-            IsExecutable = packAsTool || (project.OutputType?.EndsWith("exe") ?? false),
-            IsHttpServer = useWeb,
+            IsExecutable = hasWindows || packAsTool || isWebProject || (project.OutputType?.EndsWith("exe") ?? false),
+            IsWindowsExecutable = hasWindows,
+            IsHttpServer = isWebProject,
             IsUnitTest = hasUtFeatures,
             ShouldPackAsNugetTool = !hasUtFeatures && (hasVersion && packAsTool),
             ShouldPackAsNugetLibrary = !hasUtFeatures && (hasVersion || packAsTool)

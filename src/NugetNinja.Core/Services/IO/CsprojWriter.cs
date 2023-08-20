@@ -13,6 +13,8 @@ public class CsprojWriter
         "TargetFramework",
         "AssemblyName",
         "RootNamespace",
+        "UseWPF",
+        "UseWindowsForms",
         "IsTestProject",
         "GeneratePackageOnBuild",
         "IsPackable",

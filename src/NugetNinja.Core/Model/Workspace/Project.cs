@@ -13,6 +13,8 @@ public class Project
         
         // Build and code
         OutputType = doc.Descendants(nameof(OutputType)).SingleOrDefault()?.FirstChild?.InnerText;
+        UseWPF = doc.Descendants(nameof(UseWPF)).SingleOrDefault()?.FirstChild?.InnerText;
+        UseWindowsForms = doc.Descendants(nameof(UseWindowsForms)).SingleOrDefault()?.FirstChild?.InnerText;
         Version = doc.Descendants(nameof(Version)).SingleOrDefault()?.FirstChild?.InnerText;
         TargetFramework = doc.Descendants(nameof(TargetFramework)).SingleOrDefault()?.FirstChild?.InnerText;
         TargetFrameworks = doc.Descendants(nameof(TargetFrameworks)).SingleOrDefault()?.FirstChild?.InnerText;
@@ -299,6 +301,8 @@ public class Project
     ///   WinExe
     /// </summary>
     public string? OutputType { get; init; }
+    public string? UseWPF { get; init; }
+    public string? UseWindowsForms { get; init; }
     public string? Version { get; init; }
     public string? TargetFramework { get; init; }
     public string? TargetFrameworks { get; init; }
