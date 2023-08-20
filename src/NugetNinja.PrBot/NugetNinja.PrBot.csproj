@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<!--Build and code-->
 		<OutputType>Exe</OutputType>
-		<Version>0.0.16</Version>
+		<Version>0.0.17</Version>
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>ninja-bot</AssemblyName>
 		<RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
