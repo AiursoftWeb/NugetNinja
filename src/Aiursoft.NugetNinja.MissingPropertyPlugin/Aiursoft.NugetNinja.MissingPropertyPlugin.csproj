@@ -2,6 +2,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>Aiursoft.NugetNinja.MissingPropertyPlugin</AssemblyName>
         <RootNamespace>Aiursoft.NugetNinja.MissingPropertyPlugin</RootNamespace>
         <IsTestProject>false</IsTestProject>
         <IsPackable>false</IsPackable>

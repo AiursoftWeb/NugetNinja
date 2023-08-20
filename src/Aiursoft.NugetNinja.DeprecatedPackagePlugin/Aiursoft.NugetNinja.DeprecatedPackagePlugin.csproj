@@ -2,6 +2,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>Aiursoft.NugetNinja.DeprecatedPackagePlugin</AssemblyName>
         <RootNamespace>Aiursoft.NugetNinja.DeprecatedPackagePlugin</RootNamespace>
         <IsTestProject>false</IsTestProject>
         <IsPackable>false</IsPackable>
