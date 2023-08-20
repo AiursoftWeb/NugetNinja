@@ -1,4 +1,5 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.CSTools.Tools;
+using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin;

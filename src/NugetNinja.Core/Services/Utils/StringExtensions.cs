@@ -18,14 +18,4 @@ public static class StringExtensions
         var token = Convert.ToBase64String(Encoding.UTF8.GetBytes($":{patToken}"));
         return $"Basic {token}";
     }
-
-    public static bool IsTrue(this string? input)
-    {
-        return string.Equals(input?.Trim(), true.ToString(), StringComparison.OrdinalIgnoreCase);
-    }
-    
-    public static bool IsFalse(this string? input)
-    {
-        return !input.IsTrue();
-    }
 }
