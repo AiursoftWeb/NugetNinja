@@ -130,7 +130,7 @@ public class MissingPropertyDetector : IActionDetector
             }
             
             // Implicit using
-            if (project.ImplicitUsings.IsFalse())
+            if (project.ImplicitUsings != "enable")
             {
                 _logger.LogTrace("Project {Project} is missing property Implicit using", project);
                 yield return new MissingProperty(project, nameof(project.ImplicitUsings), "enable");
