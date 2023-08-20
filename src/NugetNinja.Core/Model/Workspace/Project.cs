@@ -22,6 +22,7 @@ public class Project
 
         // Tool
         IsPackable = doc.Descendants(nameof(IsPackable)).SingleOrDefault()?.FirstChild?.InnerText;
+        GeneratePackageOnBuild = doc.Descendants(nameof(GeneratePackageOnBuild)).SingleOrDefault()?.FirstChild?.InnerText;
         PackAsTool = doc.Descendants(nameof(PackAsTool)).SingleOrDefault()?.FirstChild?.InnerText;
         ToolCommandName = doc.Descendants(nameof(ToolCommandName)).SingleOrDefault()?.FirstChild?.InnerText;
 
@@ -308,6 +309,7 @@ public class Project
     
     #region Tool
     public string? IsPackable { get; init; }
+    public string? GeneratePackageOnBuild { get; init; }
     public string? PackAsTool { get; init; }
     public string? ToolCommandName { get; init; }
 

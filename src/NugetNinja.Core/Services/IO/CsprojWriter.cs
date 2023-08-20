@@ -74,13 +74,12 @@ public class CsprojWriter
             {
                 Indent = true,
                 IndentChars = "    ",
-                OmitXmlDeclaration = false
+                OmitXmlDeclaration = true
             };
             var sw = new StringWriter();
             using (var writer = XmlWriter.Create(sw, settings))
             {
                 doc.Save(writer);
-                writer.WriteEndDocument();
             }
 
             return sw.ToString();

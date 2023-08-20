@@ -101,6 +101,13 @@ public class MissingPropertyDetector : IActionDetector
                 _logger.LogTrace("Project {Project} is missing property IsPackable", project);
                 yield return new MissingProperty(project, nameof(project.IsPackable), projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower());
             }
+            
+            // GeneratePackageOnBuild
+            if (string.IsNullOrWhiteSpace(project.GeneratePackageOnBuild) && projectInfo.ShouldPackAsNugetLibrary)
+            {
+                _logger.LogTrace("Project {Project} is missing property GeneratePackageOnBuild", project);
+                yield return new MissingProperty(project, nameof(project.GeneratePackageOnBuild), projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower());
+            }
 
             if (projectInfo.ShouldPackAsNugetTool)
             {
