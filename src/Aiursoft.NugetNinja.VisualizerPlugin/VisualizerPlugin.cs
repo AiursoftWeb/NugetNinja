@@ -25,12 +25,26 @@ public sealed class VisualizerHandler : CommandHandler
 
     private static readonly Option<int> DepthOption = new(
         new[] { "--depth", "-d" },
-        () => 1,
+        () => int.MaxValue,
         "Depth for package reference");
+    
+    private static readonly Option<string> ExcludeOption = new(
+        new[] { "--excludes" },
+        "Packages to exclude from the chart. Seperated by ','. For example: 'Microsoft,System,Test' to ignore system packages.");
+    
+    private static readonly Option<bool> LocalOnly = new(
+        new[] { "--local", "-l" },
+        () => false,
+        "Only show local project references. (Ignore package references.)");
     
     public override Option[] GetCommandOptions()
     {
-        return new Option[] { DepthOption };
+        return new Option[]
+        {
+            DepthOption,
+            ExcludeOption,
+            LocalOnly
+        };
     }
 
     public override void OnCommandBuilt(Command command)
@@ -39,6 +53,8 @@ public sealed class VisualizerHandler : CommandHandler
             Execute,
             OptionsProvider.PathOptions,
             DepthOption,
+            ExcludeOption,
+            LocalOnly,
             OptionsProvider.VerboseOption,
             OptionsProvider.CustomNugetServer,
             OptionsProvider.PatToken);
@@ -47,12 +63,19 @@ public sealed class VisualizerHandler : CommandHandler
     private Task Execute(
         string path, 
         int depth,
+        string? excludes,
+        bool localOnly,
         bool verbose,
         string customNugetServer,
         string patToken)
     {
         var services = BuildServices(verbose, customNugetServer, patToken);
-        return RunFromServices(services, path, depth);
+        var excludesArray = excludes?
+            .Split(',')
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Distinct()
+            .ToArray() ?? Array.Empty<string>();
+        return RunFromServices(services, path, depth, excludesArray, localOnly);
     }
 
     private ServiceCollection BuildServices(
@@ -78,7 +101,7 @@ public sealed class VisualizerHandler : CommandHandler
         return services;
     }
 
-    private Task RunFromServices(ServiceCollection services, string path, int depth)
+    private Task RunFromServices(ServiceCollection services, string path, int depth, string[] excludes, bool localOnly)
     {
         var serviceProvider = services.BuildServiceProvider();
         var service = serviceProvider.GetRequiredService<Entry>();
@@ -86,6 +109,6 @@ public sealed class VisualizerHandler : CommandHandler
 
         var fullPath = Path.GetFullPath(path);
         logger.LogTrace(@"Starting service: '{Name}'. Full path is: '{FullPath}'", nameof(Entry), fullPath);
-        return service.OnServiceStartedAsync(fullPath, depth);
+        return service.OnServiceStartedAsync(fullPath, depth, excludes, localOnly);
     }
 }
