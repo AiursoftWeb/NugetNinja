@@ -8,7 +8,6 @@
         <IsPackable>false</IsPackable>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageId>Aiursoft.NugetNinja.UselessProjectReferencePlugin</PackageId>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj" />

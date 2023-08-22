@@ -29,5 +29,6 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.VisualizerPlugin\Aiursoft.NugetNinja.VisualizerPlugin.csproj" />
     </ItemGroup>
 </Project>
