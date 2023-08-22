@@ -22,11 +22,12 @@ public sealed class VisualizerHandler : CommandHandler
     public override string Name => "visualize";
 
     public override string Description => "The command to visualize the dependency relationship, with mermaid markdown.";
-    
-    public static readonly Option<int> DepthOption = new(
-        new[] { "--depth", "-d" },
-        "Depth for package reference");
 
+    private static readonly Option<int> DepthOption = new(
+        new[] { "--depth", "-d" },
+        () => 1,
+        "Depth for package reference");
+    
     public override Option[] GetCommandOptions()
     {
         return new Option[] { DepthOption };

@@ -18,6 +18,12 @@ public class Entry
 
     public async Task OnServiceStartedAsync(string path, int depth)
     {
+        Console.WriteLine(@"
+---
+title: Project dependency diagram
+---
+stateDiagram-v2
+");
         var model = await _extractor.Parse(path);
         await foreach (var result in GenerateRelationships(model, depth).Distinct())
         {
