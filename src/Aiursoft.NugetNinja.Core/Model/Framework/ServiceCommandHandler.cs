@@ -26,7 +26,7 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
             OptionsProvider.AllowPackageVersionCrossMicrosoftRuntime);
     }
 
-    public Task Execute(
+    private Task Execute(
         string path, 
         bool dryRun, 
         bool verbose, 
@@ -62,7 +62,6 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
             options.AllowPreview = allowPreview;
             options.CustomNugetServer = customNugetServer;
             options.PatToken = patToken;
-
         });
         services.AddTransient<TE>();
         return services;

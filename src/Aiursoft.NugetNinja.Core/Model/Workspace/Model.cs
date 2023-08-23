@@ -1,4 +1,6 @@
 ﻿using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace Aiursoft.NugetNinja.Core;
 
@@ -10,7 +12,7 @@ public class Model
 
     public List<Package> AllPackages { get; set; } = new();
 
-    public async Task<Project> IncludeProject(string path)
+    public async Task<Project> IncludeProject(string path, ILogger logger)
     {
         var projectInDatabaes = AllProjects.FirstOrDefault(p => p.PathOnDisk == path);
         if (projectInDatabaes != null)
@@ -19,13 +21,14 @@ public class Model
             return projectInDatabaes;
         }
 
-        var builtProject = await BuildNewProject(path);
+        logger.LogTrace("Inserting new project: {Path}", path);
+        var builtProject = await BuildNewProject(path, logger);
         AllProjects.Add(builtProject);
         RootProjects.Add(builtProject);
         return builtProject;
     }
 
-    private async Task<Project> BuildNewProject(string csprojPath)
+    private async Task<Project> BuildNewProject(string csprojPath, ILogger logger)
     {
         var csprojFolder = new FileInfo(csprojPath).Directory?.FullName
                            ?? throw new IOException(
@@ -40,10 +43,11 @@ public class Model
         var subProjectReferenceObjects = new List<Project>();
         foreach (var projectReference in projectReferences)
         {
-            var projectObject = await IncludeProject(projectReference);
+            var projectObject = await IncludeProject(projectReference, logger);
             subProjectReferenceObjects.Add(projectObject);
         }
 
+        logger.LogTrace("Parsing new project: {Path}", csprojPath);
         var project = new Project(csprojPath, csprojDoc.DocumentNode)
         {
             PackageReferences = packageReferences.ToList(),
@@ -58,7 +62,7 @@ public class Model
         var packageReferences = doc.DocumentNode
             .Descendants("PackageReference")
             .Select(p => new Package(
-                p.Attributes["Include"].Value,
+                p.Attributes["Include"]?.Value ?? p.Attributes["Update"]?.Value ?? "Unknown",
                 p.Attributes["Version"]?.Value ?? "0.0.1"))
             .ToArray();
 

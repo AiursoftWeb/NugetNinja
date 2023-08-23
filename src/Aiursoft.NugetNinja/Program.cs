@@ -7,6 +7,7 @@ using Aiursoft.NugetNinja.MissingPropertyPlugin;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
 using Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 using Aiursoft.NugetNinja.UselessProjectReferencePlugin;
+using Aiursoft.NugetNinja.VisualizerPlugin;
 
 var description = "Nuget Ninja, a tool for detecting dependencies of .NET projects.";
 
@@ -18,7 +19,8 @@ var program = new RootCommand(description)
         new DeprecatedPackagePlugin(),
         new PossiblePackageUpgradePlugin(),
         new UselessPackageReferencePlugin(),
-        new UselessProjectReferencePlugin()
+        new UselessProjectReferencePlugin(),
+        new VisualizerPlugin()
     );
 
 return await program.InvokeAsync(args);

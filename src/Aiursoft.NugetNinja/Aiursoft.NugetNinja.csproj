@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <Version>0.0.20</Version>
+        <Version>0.0.21</Version>
         <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>ninja</AssemblyName>
         <RootNamespace>Aiursoft.NugetNinja</RootNamespace>
@@ -29,5 +29,6 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.VisualizerPlugin\Aiursoft.NugetNinja.VisualizerPlugin.csproj" />
     </ItemGroup>
 </Project>
