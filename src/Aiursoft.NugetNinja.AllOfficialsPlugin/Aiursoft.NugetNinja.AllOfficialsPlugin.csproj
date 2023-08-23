@@ -8,7 +8,6 @@
         <IsPackable>false</IsPackable>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageId>Aiursoft.NugetNinja.AllOfficialsPlugin</PackageId>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Aiursoft.NugetNinja.DeprecatedPackagePlugin\Aiursoft.NugetNinja.DeprecatedPackagePlugin.csproj" />
