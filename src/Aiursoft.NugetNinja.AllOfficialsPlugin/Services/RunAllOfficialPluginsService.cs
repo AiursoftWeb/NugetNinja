@@ -64,7 +64,7 @@ public class RunAllOfficialPluginsService : IEntryService
             if (!string.IsNullOrWhiteSpace(projectTakenActions.Version))
             {
                 var increasedVersion = Increase(projectTakenActions.Version);
-                var increaseVersionAction = new IncreaseVersionAction(projectTakenActions, increasedVersion)
+                var increaseVersionAction = new IncreaseVersionAction(projectTakenActions, increasedVersion);
                 _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", increaseVersionAction.GetType().Name, increaseVersionAction.BuildMessage());
                 if (shouldTakeAction) await increaseVersionAction.TakeActionAsync();
             }
