@@ -4,14 +4,15 @@ namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
 
 public class MissingProperty : IAction
 {
-    private readonly Project _csproj;
     private readonly string? _currentValue;
     private readonly string _propertyName;
     private readonly string _suggestedValue;
 
+    public Project SourceProject { get; }
+
     public MissingProperty(Project csproj, string propertyName, string suggestedValue, string? currentValue = null)
     {
-        _csproj = csproj;
+        SourceProject = csproj;
         _propertyName = propertyName;
         _suggestedValue = suggestedValue;
         _currentValue = currentValue;
@@ -24,11 +25,11 @@ public class MissingProperty : IAction
             if (string.IsNullOrWhiteSpace(_currentValue))
             {
                 return
-                    $"The project: '{_csproj}' lacks of property '{_propertyName}'. You can possibly set that to: '{_suggestedValue}'.";
+                    $"The project: '{SourceProject}' lacks of property '{_propertyName}'. You can possibly set that to: '{_suggestedValue}'.";
             }
             else
             {
-                return $"The project: '{_csproj}' property '{_propertyName}' with value '{_currentValue}' was not suggested. You can possibly set that to: '{_suggestedValue}'.";
+                return $"The project: '{SourceProject}' property '{_propertyName}' with value '{_currentValue}' was not suggested. You can possibly set that to: '{_suggestedValue}'.";
             }
         }
 
@@ -37,6 +38,6 @@ public class MissingProperty : IAction
 
     public Task TakeActionAsync()
     {
-        return _csproj.AddOrUpdateProperty(_propertyName, _suggestedValue);
+        return SourceProject.AddOrUpdateProperty(_propertyName, _suggestedValue);
     }
 }

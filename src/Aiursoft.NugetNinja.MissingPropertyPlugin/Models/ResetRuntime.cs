@@ -15,31 +15,31 @@ public class ResetRuntime : IAction
     {
         _inserted = inserted;
         _deprecated = deprecated;
-        Project = project;
+        SourceProject = project;
         NewRuntimes = newRuntimes;
     }
 
-    public Project Project { get; }
+    public Project SourceProject { get; }
     public string[] NewRuntimes { get; }
 
     public string BuildMessage()
     {
         return
-            $"The project: '{Project}' with runtimes: '{string.Join(',', Project.GetTargetFrameworks())}' should insert {_inserted} runtime(s) and deprecate {_deprecated} runtime(s) to '{string.Join(',', NewRuntimes)}'.";
+            $"The project: '{SourceProject}' with runtimes: '{string.Join(',', SourceProject.GetTargetFrameworks())}' should insert {_inserted} runtime(s) and deprecate {_deprecated} runtime(s) to '{string.Join(',', NewRuntimes)}'.";
     }
 
     public async Task TakeActionAsync()
     {
         if (NewRuntimes.Length > 1)
         {
-            await Project.AddOrUpdateProperty(nameof(Project.TargetFrameworks), string.Join(';', NewRuntimes));
-            await Project.RemoveProperty(nameof(Project.TargetFramework));
+            await SourceProject.AddOrUpdateProperty(nameof(SourceProject.TargetFrameworks), string.Join(';', NewRuntimes));
+            await SourceProject.RemoveProperty(nameof(SourceProject.TargetFramework));
         }
         else
         {
-            await Project.AddOrUpdateProperty(nameof(Project.TargetFramework),
+            await SourceProject.AddOrUpdateProperty(nameof(SourceProject.TargetFramework),
                 NewRuntimes.FirstOrDefault() ?? string.Empty);
-            await Project.RemoveProperty(nameof(Project.TargetFrameworks));
+            await SourceProject.RemoveProperty(nameof(SourceProject.TargetFrameworks));
         }
     }
 }

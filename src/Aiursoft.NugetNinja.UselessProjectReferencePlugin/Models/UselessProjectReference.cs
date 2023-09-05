@@ -6,21 +6,21 @@ public class UselessProjectReference : IAction
 {
     public UselessProjectReference(Project source, Project target)
     {
-        SourceProjectName = source;
-        TargetProjectName = target;
+        SourceProject = source;
+        TargetProject = target;
     }
 
-    public Project SourceProjectName { get; set; }
-    public Project TargetProjectName { get; set; }
+    public Project SourceProject { get; set; }
+    public Project TargetProject { get; set; }
 
     public string BuildMessage()
     {
         return
-            $"The project: '{SourceProjectName}' don't have to reference project '{TargetProjectName}' because it already has its access via another path!";
+            $"The project: '{SourceProject}' don't have to reference project '{TargetProject}' because it already has its access via another path!";
     }
 
     public Task TakeActionAsync()
     {
-        return SourceProjectName.RemoveProjectReference(TargetProjectName.PathOnDisk);
+        return SourceProject.RemoveProjectReference(TargetProject.PathOnDisk);
     }
 }

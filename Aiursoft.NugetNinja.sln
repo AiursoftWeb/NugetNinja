@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.PrBot",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.WebPortal", "src\Aiursoft.NugetNinja.WebPortal\Aiursoft.NugetNinja.WebPortal.csproj", "{D706BE4B-8B54-48C0-A32B-CF8D52B41473}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aiursoft.NugetNinja.VisualizerPlugin", "src\Aiursoft.NugetNinja.VisualizerPlugin\Aiursoft.NugetNinja.VisualizerPlugin.csproj", "{37079134-B4A6-4DC7-9D64-1BF452A08517}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NugetNinja.VisualizerPlugin", "src\Aiursoft.NugetNinja.VisualizerPlugin\Aiursoft.NugetNinja.VisualizerPlugin.csproj", "{37079134-B4A6-4DC7-9D64-1BF452A08517}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

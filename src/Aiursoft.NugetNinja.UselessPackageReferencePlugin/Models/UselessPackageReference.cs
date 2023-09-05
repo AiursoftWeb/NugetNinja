@@ -6,21 +6,21 @@ public class UselessPackageReference : IAction
 {
     public UselessPackageReference(Project source, Package target)
     {
-        SourceProjectName = source;
+        SourceProject = source;
         TargetPackage = target;
     }
 
-    public Project SourceProjectName { get; set; }
+    public Project SourceProject { get; set; }
     public Package TargetPackage { get; set; }
 
     public string BuildMessage()
     {
         return
-            $"The project: '{SourceProjectName}' don't have to reference package '{TargetPackage}' because it already has its access via another path!";
+            $"The project: '{SourceProject}' don't have to reference package '{TargetPackage}' because it already has its access via another path!";
     }
 
     public Task TakeActionAsync()
     {
-        return SourceProjectName.RemovePackageReferenceAsync(TargetPackage.Name);
+        return SourceProject.RemovePackageReferenceAsync(TargetPackage.Name);
     }
 }

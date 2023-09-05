@@ -6,16 +6,16 @@ public class ResetSdkLevel : IAction
 {
     public ResetSdkLevel(Project project, string newSdk)
     {
-        Project = project;
+        SourceProject = project;
         NewSdk = newSdk;
     }
 
-    public Project Project { get; }
+    public Project SourceProject { get; }
     public string NewSdk { get; }
 
     public string BuildMessage()
     {
-        return $"The project: '{Project}' with SDK: '{Project.Sdk}' should be changed to '{NewSdk}'.";
+        return $"The project: '{SourceProject}' with SDK: '{SourceProject.Sdk}' should be changed to '{NewSdk}'.";
     }
 
     public Task TakeActionAsync()

@@ -6,23 +6,23 @@ public class PossiblePackageUpgrade : IAction
 {
     public PossiblePackageUpgrade(Project source, Package target, NugetVersion newVersion)
     {
-        SourceProjectName = source;
+        SourceProject = source;
         Package = target;
         NewVersion = newVersion;
     }
 
-    public Project SourceProjectName { get; }
+    public Project SourceProject { get; }
     public Package Package { get; }
     public NugetVersion NewVersion { get; }
 
     public string BuildMessage()
     {
         return
-            $"The project: '{SourceProjectName}' should upgrade the package '{Package}' from '{Package.SourceVersionText}' to '{NewVersion}'.";
+            $"The project: '{SourceProject}' should upgrade the package '{Package}' from '{Package.SourceVersionText}' to '{NewVersion}'.";
     }
 
     public Task TakeActionAsync()
     {
-        return SourceProjectName.SetPackageReferenceVersionAsync(Package.Name, NewVersion);
+        return SourceProject.SetPackageReferenceVersionAsync(Package.Name, NewVersion);
     }
 }

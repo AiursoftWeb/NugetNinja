@@ -1,4 +1,5 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.AllOfficialsPlugin.Models;
+using Aiursoft.NugetNinja.Core;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin;
 using Aiursoft.NugetNinja.MissingPropertyPlugin;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
@@ -37,6 +38,7 @@ public class RunAllOfficialPluginsService : IEntryService
 
     public async Task OnServiceStartedAsync(string path, bool shouldTakeAction)
     {
+        var allActions = new List<IAction>();
         foreach (var plugin in _pluginDetectors)
         {
             _logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", path);
@@ -47,9 +49,35 @@ public class RunAllOfficialPluginsService : IEntryService
 
             await foreach (var action in actions)
             {
+                allActions.Add(action);
                 _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", action.GetType().Name, action.BuildMessage());
                 if (shouldTakeAction) await action.TakeActionAsync();
             }
         }
+
+        var projectsTakenActions = allActions
+            .GroupBy(a => a.SourceProject.PathOnDisk)
+            .Select(g => g.First().SourceProject);
+
+        foreach (var projectTakenActions in projectsTakenActions)
+        {
+            if (!string.IsNullOrWhiteSpace(projectTakenActions.Version))
+            {
+                var increasedVersion = Increase(projectTakenActions.Version);
+                var increaseVersionAction = new IncreaseVersionAction(projectTakenActions, increasedVersion)
+                _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", increaseVersionAction.GetType().Name, increaseVersionAction.BuildMessage());
+                if (shouldTakeAction) await increaseVersionAction.TakeActionAsync();
+            }
+        }
+    }
+
+    private NugetVersion Increase(string versionInProject)
+    {
+        var parsedVersion = new NugetVersion(versionInProject);
+        parsedVersion.PrimaryVersion = new Version(
+            major: parsedVersion.PrimaryVersion.Major,
+            minor: parsedVersion.PrimaryVersion.Minor,
+            build: parsedVersion.PrimaryVersion.Build + 1);
+        return parsedVersion;
     }
 }

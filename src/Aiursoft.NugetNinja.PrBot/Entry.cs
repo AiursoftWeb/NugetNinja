@@ -1,4 +1,5 @@
 ﻿using Aiursoft.NugetNinja.AllOfficialsPlugin;
+using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -7,7 +8,7 @@ namespace Aiursoft.NugetNinja.PrBot;
 public class Entry
 {
     private readonly ILogger<Entry> _logger;
-    private readonly RunAllOfficialPluginsService _runAllOfficialPluginsService;
+    private readonly IEntryService _runAllOfficialPluginsService;
     private readonly List<Server> _servers;
     private readonly IEnumerable<IVersionControlService> _versionControls;
 
