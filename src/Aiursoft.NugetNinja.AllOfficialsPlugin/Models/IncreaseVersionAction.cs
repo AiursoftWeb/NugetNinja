@@ -16,7 +16,7 @@ public class IncreaseVersionAction : IAction
     public string BuildMessage()
     {
         return
-            $"The project: '{SourceProject}' should release a new version because it is updated!";
+            $"The project: '{SourceProject}' should release a new version because it was updated!";
     }
 
     public Task TakeActionAsync()

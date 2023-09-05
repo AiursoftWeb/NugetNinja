@@ -38,7 +38,7 @@ public class RunAllOfficialPluginsService : IEntryService
 
     public async Task OnServiceStartedAsync(string path, bool shouldTakeAction)
     {
-        var allActions = new List<IAction>();
+        var allActionsTaken = new List<IAction>();
         foreach (var plugin in _pluginDetectors)
         {
             _logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", path);
@@ -49,13 +49,13 @@ public class RunAllOfficialPluginsService : IEntryService
 
             await foreach (var action in actions)
             {
-                allActions.Add(action);
+                allActionsTaken.Add(action);
                 _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", action.GetType().Name, action.BuildMessage());
                 if (shouldTakeAction) await action.TakeActionAsync();
             }
         }
 
-        var projectsTakenActions = allActions
+        var projectsTakenActions = allActionsTaken
             .GroupBy(a => a.SourceProject.PathOnDisk)
             .Select(g => g.First().SourceProject);
 
