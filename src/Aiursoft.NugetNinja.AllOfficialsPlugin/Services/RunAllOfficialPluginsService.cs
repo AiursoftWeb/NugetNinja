@@ -55,6 +55,7 @@ public class RunAllOfficialPluginsService : IEntryService
             }
         }
 
+        // If any action taken on a project, we should upgrade it's version.
         var projectsTakenActions = allActionsTaken
             .GroupBy(a => a.SourceProject.PathOnDisk)
             .Select(g => g.First().SourceProject);
@@ -71,7 +72,7 @@ public class RunAllOfficialPluginsService : IEntryService
         }
     }
 
-    private NugetVersion Increase(string versionInProject)
+    private static NugetVersion Increase(string versionInProject)
     {
         var parsedVersion = new NugetVersion(versionInProject);
         parsedVersion.PrimaryVersion = new Version(
