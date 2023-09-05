@@ -75,10 +75,11 @@ public class RunAllOfficialPluginsService : IEntryService
     private static NugetVersion Increase(string versionInProject)
     {
         var parsedVersion = new NugetVersion(versionInProject);
-        parsedVersion.PrimaryVersion = new Version(
+        var addedVersion = new Version(
             major: parsedVersion.PrimaryVersion.Major,
             minor: parsedVersion.PrimaryVersion.Minor,
             build: parsedVersion.PrimaryVersion.Build + 1);
-        return parsedVersion;
+        var increasedVersion = new NugetVersion($"{addedVersion}-{parsedVersion.AdditionalText}".TrimEnd('-'));
+        return increasedVersion;
     }
 }

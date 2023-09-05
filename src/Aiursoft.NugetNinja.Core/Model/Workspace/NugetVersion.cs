@@ -17,8 +17,8 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
         }
     }
 
-    public string SourceString { get; set; }
-    public Version PrimaryVersion { get; set; }
+    public string SourceString { get; }
+    public Version PrimaryVersion { get; }
     public string AdditionalText { get; } = string.Empty;
 
     public object Clone()
