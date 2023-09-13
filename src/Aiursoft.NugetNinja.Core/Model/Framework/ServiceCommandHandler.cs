@@ -5,6 +5,7 @@ using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Services;
 using Aiursoft.NugetNinja.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.Core;
@@ -35,41 +36,44 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         string patToken,
         bool allowCross)
     {
-        var services = BuildServices(verbose, allowPreview, customNugetServer, patToken, allowCross);
-        return RunFromServices(services, path, dryRun);
+        var host = BuildHost(verbose, allowPreview, customNugetServer, patToken, allowCross);
+        return RunFromHost(host, path, dryRun);
     }
 
-    protected virtual ServiceCollection BuildServices(
+    protected virtual IHost BuildHost(
         bool verbose, 
         bool allowPreview, 
         string customNugetServer,
         string patToken,
         bool allowCross)
     {
-        var services = ServiceBuilder.BuildServices<TS>(verbose);
-        services.AddMemoryCache();
-        services.AddHttpClient();
-        services.AddTaskCanon();
-        services.AddTransient<Extractor>();
-        services.AddTransient<ProjectsEnumerator>();
-        services.AddTransient<CsprojWriter>();
-        services.AddTransient<NugetService>();
-        services.AddTransient<VersionCrossChecker>();
-        services.Configure<AppSettings>(options =>
+        var hostBuilder = ServiceBuilder.BuildHost<TS>(verbose);
+        hostBuilder.ConfigureServices(services => 
         {
-            options.AllowCross = allowCross;
-            options.Verbose = verbose;
-            options.AllowPreview = allowPreview;
-            options.CustomNugetServer = customNugetServer;
-            options.PatToken = patToken;
+            services.AddMemoryCache();
+            services.AddHttpClient();
+            services.AddTaskCanon();
+            services.AddTransient<Extractor>();
+            services.AddTransient<ProjectsEnumerator>();
+            services.AddTransient<CsprojWriter>();
+            services.AddTransient<NugetService>();
+            services.AddTransient<VersionCrossChecker>();
+            services.Configure<AppSettings>(options =>
+            {
+                options.AllowCross = allowCross;
+                options.Verbose = verbose;
+                options.AllowPreview = allowPreview;
+                options.CustomNugetServer = customNugetServer;
+                options.PatToken = patToken;
+            });
+            services.AddTransient<TE>();
         });
-        services.AddTransient<TE>();
-        return services;
+        return hostBuilder.Build();
     }
 
-    protected virtual Task RunFromServices(ServiceCollection services, string path, bool dryRun)
+    protected virtual Task RunFromHost(IHost host, string path, bool dryRun)
     {
-        var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = host.Services;
         var service = serviceProvider.GetRequiredService<TE>();
         var logger = serviceProvider.GetRequiredService<ILogger<TE>>();
 

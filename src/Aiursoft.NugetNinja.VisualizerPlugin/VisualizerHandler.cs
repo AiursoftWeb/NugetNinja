@@ -3,6 +3,7 @@ using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Services;
 using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
 
@@ -60,42 +61,45 @@ public sealed class VisualizerHandler : CommandHandler
         string customNugetServer,
         string patToken)
     {
-        var services = BuildServices(verbose, customNugetServer, patToken);
+        var host = BuildHost(verbose, customNugetServer, patToken);
         var excludesArray = excludes?
             .Split(',')
             .Where(t => !string.IsNullOrWhiteSpace(t))
             .Select(t => t.Trim())
             .Distinct()
             .ToArray() ?? Array.Empty<string>();
-        return RunFromServices(services, path, depth, excludesArray, localOnly);
+        return RunFromHost(host, path, depth, excludesArray, localOnly);
     }
 
-    private ServiceCollection BuildServices(
+    private IHost BuildHost(
         bool verbose,
         string customNugetServer,
         string patToken)
     {
-        var services = ServiceBuilder.BuildServices<StartUp>(verbose);
-        services.AddMemoryCache();
-        services.AddHttpClient();
-        services.AddTaskCanon();
-        services.AddTransient<Extractor>();
-        services.AddTransient<ProjectsEnumerator>();
-        services.AddTransient<NugetService>();
-        services.AddTransient<VersionCrossChecker>();
-        services.Configure<AppSettings>(options =>
+        var host = ServiceBuilder.BuildHost<StartUp>(verbose);
+        host.ConfigureServices(services =>
         {
-            options.Verbose = verbose;
-            options.CustomNugetServer = customNugetServer;
-            options.PatToken = patToken;
+            services.AddMemoryCache();
+            services.AddHttpClient();
+            services.AddTaskCanon();
+            services.AddTransient<Extractor>();
+            services.AddTransient<ProjectsEnumerator>();
+            services.AddTransient<NugetService>();
+            services.AddTransient<VersionCrossChecker>();
+            services.Configure<AppSettings>(options =>
+            {
+                options.Verbose = verbose;
+                options.CustomNugetServer = customNugetServer;
+                options.PatToken = patToken;
+            });
+            services.AddTransient<Entry>();
         });
-        services.AddTransient<Entry>();
-        return services;
+        return host.Build();
     }
 
-    private Task RunFromServices(ServiceCollection services, string path, int depth, string[] excludes, bool localOnly)
+    private Task RunFromHost(IHost host, string path, int depth, string[] excludes, bool localOnly)
     {
-        var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = host.Services;
         var service = serviceProvider.GetRequiredService<Entry>();
         var logger = serviceProvider.GetRequiredService<ILogger<Entry>>();
 
