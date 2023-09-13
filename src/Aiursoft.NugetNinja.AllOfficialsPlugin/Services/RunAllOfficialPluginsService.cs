@@ -54,13 +54,11 @@ public class RunAllOfficialPluginsService : IEntryService
                 if (shouldTakeAction) await action.TakeActionAsync();
             }
         }
+        
+        var finalModel = await _extractor.Parse(path);
+        var projectsShouldUpgrade = finalModel.AllProjects.Where(project => HasActionTaken(project, allActionsTaken)).ToList();
 
-        // If any action taken on a project, we should upgrade it's version.
-        var projectsTakenActions = allActionsTaken
-            .GroupBy(a => a.SourceProject.PathOnDisk)
-            .Select(g => g.First().SourceProject);
-
-        foreach (var projectTakenActions in projectsTakenActions)
+        foreach (var projectTakenActions in projectsShouldUpgrade)
         {
             if (!string.IsNullOrWhiteSpace(projectTakenActions.Version))
             {
@@ -81,5 +79,12 @@ public class RunAllOfficialPluginsService : IEntryService
             build: parsedVersion.PrimaryVersion.Build + 1);
         var increasedVersion = new NugetVersion($"{addedVersion}-{parsedVersion.AdditionalText}".TrimEnd('-'));
         return increasedVersion;
+    }
+
+    private bool HasActionTaken(Project project, List<IAction> allActions)
+    {
+        return 
+            allActions.Any(a => a.SourceProject.PathOnDisk == project.PathOnDisk) || 
+            project.ProjectReferences.Any(projectReference => HasActionTaken(projectReference, allActions));
     }
 }
