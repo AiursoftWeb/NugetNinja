@@ -56,7 +56,10 @@ public class RunAllOfficialPluginsService : IEntryService
         }
         
         var finalModel = await _extractor.Parse(path);
-        var projectsShouldUpgrade = finalModel.AllProjects.Where(project => HasActionTaken(project, allActionsTaken)).ToList();
+        var projectsShouldUpgrade = finalModel.AllProjects
+            .Where(project => !string.IsNullOrWhiteSpace(project.Version))
+            .Where(project => HasActionTaken(project, allActionsTaken))
+            .ToList();
 
         foreach (var projectTakenActions in projectsShouldUpgrade)
         {
