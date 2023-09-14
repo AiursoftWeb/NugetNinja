@@ -1,5 +1,4 @@
 ﻿using Aiursoft.NugetNinja.AllOfficialsPlugin;
-using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -88,7 +87,7 @@ public class Entry
             repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo} is null!"));
 
         // Run all plugins.
-        await _runAllOfficialPluginsService.OnServiceStartedAsync(workPath, true, onlyUpdate: connectionConfiguration.OnlyUpdate);
+        await _runAllOfficialPluginsService.RunAllPlugins(workPath, true, onlyRunUpdatePlugin: connectionConfiguration.OnlyUpdate);
 
         // Consider changes...
         if (!await _workspaceManager.PendingCommit(workPath))

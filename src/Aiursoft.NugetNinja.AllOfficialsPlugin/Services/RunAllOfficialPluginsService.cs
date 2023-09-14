@@ -36,14 +36,14 @@ public class RunAllOfficialPluginsService : IEntryService
         };
     }
 
-    public Task OnServiceStartedAsync(string path, bool shouldTakeAction) => OnServiceStartedAsync(path, shouldTakeAction, false);
+    public Task OnServiceStartedAsync(string path, bool shouldTakeAction) => RunAllPlugins(path, shouldTakeAction, false);
 
-    public async Task OnServiceStartedAsync(string path, bool shouldTakeAction, bool onlyUpdate = false)
+    public async Task RunAllPlugins(string path, bool shouldTakeAction, bool onlyRunUpdatePlugin)
     {
         var allActionsTaken = new List<IAction>();
         foreach (var plugin in _pluginDetectors)
         {
-            if (onlyUpdate && plugin.GetType() != typeof(PackageReferenceUpgradeDetector))
+            if (onlyRunUpdatePlugin && plugin.GetType() != typeof(PackageReferenceUpgradeDetector))
             {
                 continue;
             }
