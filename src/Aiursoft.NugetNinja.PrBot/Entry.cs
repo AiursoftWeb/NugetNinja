@@ -8,7 +8,7 @@ namespace Aiursoft.NugetNinja.PrBot;
 public class Entry
 {
     private readonly ILogger<Entry> _logger;
-    private readonly IEntryService _runAllOfficialPluginsService;
+    private readonly RunAllOfficialPluginsService _runAllOfficialPluginsService;
     private readonly List<Server> _servers;
     private readonly IEnumerable<IVersionControlService> _versionControls;
 
@@ -88,7 +88,7 @@ public class Entry
             repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo} is null!"));
 
         // Run all plugins.
-        await _runAllOfficialPluginsService.OnServiceStartedAsync(workPath, true);
+        await _runAllOfficialPluginsService.OnServiceStartedAsync(workPath, true, onlyUpdate: connectionConfiguration.OnlyUpdate);
 
         // Consider changes...
         if (!await _workspaceManager.PendingCommit(workPath))

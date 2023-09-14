@@ -36,11 +36,18 @@ public class RunAllOfficialPluginsService : IEntryService
         };
     }
 
-    public async Task OnServiceStartedAsync(string path, bool shouldTakeAction)
+    public Task OnServiceStartedAsync(string path, bool shouldTakeAction) => OnServiceStartedAsync(path, shouldTakeAction, false);
+
+    public async Task OnServiceStartedAsync(string path, bool shouldTakeAction, bool onlyUpdate = false)
     {
         var allActionsTaken = new List<IAction>();
         foreach (var plugin in _pluginDetectors)
         {
+            if (onlyUpdate && plugin.GetType() != typeof(PackageReferenceUpgradeDetector))
+            {
+                continue;
+            }
+
             _logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", path);
             var model = await _extractor.Parse(path);
 

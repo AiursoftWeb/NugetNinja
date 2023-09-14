@@ -10,4 +10,6 @@ public class Server
     public string UserEmail { get; set; } = string.Empty;
     public string ContributionBranch { get; set; } = string.Empty;
     public string Token { get; set; } = string.Empty;
+
+    public bool OnlyUpdate { get; set; } = false;
 }
