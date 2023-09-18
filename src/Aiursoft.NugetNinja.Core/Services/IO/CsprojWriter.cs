@@ -76,7 +76,7 @@ public class CsprojWriter
             var settings = new XmlWriterSettings
             {
                 Indent = true,
-                IndentChars = "    ",
+                IndentChars = "  ",
                 OmitXmlDeclaration = true
             };
             var sw = new StringWriter();
