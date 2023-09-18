@@ -17,8 +17,8 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
         }
     }
 
-    public string SourceString { get; }
-    public Version PrimaryVersion { get; }
+    public readonly string SourceString { get; }
+    public readonly Version PrimaryVersion { get; }
     public string AdditionalText { get; } = string.Empty;
 
     public int CompareTo(NugetVersion otherNugetVersion)
@@ -32,13 +32,6 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
         if (!string.IsNullOrWhiteSpace(AdditionalText)) return -1;
         if (!string.IsNullOrWhiteSpace(otherNugetVersion.AdditionalText)) return 1;
         return 0;
-    }
-
-    public bool Equals(NugetVersion otherNugetVersion)
-    {
-        return
-            PrimaryVersion.Equals(otherNugetVersion.PrimaryVersion) &&
-            AdditionalText.Equals(otherNugetVersion.AdditionalText);
     }
 
     public static bool operator ==(NugetVersion lvs, NugetVersion rvs)
@@ -56,6 +49,16 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
         return lvs.CompareTo(rvs) < 0;
     }
 
+    public static bool operator <=(NugetVersion lvs, NugetVersion rvs)
+    {
+        return lvs.Equals(rvs) || lvs.CompareTo(rvs) < 0;
+    }
+
+    public static bool operator >=(NugetVersion lvs, NugetVersion rvs)
+    {
+        return lvs.Equals(rvs) || lvs.CompareTo(rvs) > 0;
+    }
+
     public static bool operator >(NugetVersion lvs, NugetVersion rvs)
     {
         return lvs.CompareTo(rvs) > 0;
@@ -71,6 +74,13 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
         return $"{PrimaryVersion}-{AdditionalText}".TrimEnd('-');
     }
 
+    public bool Equals(NugetVersion otherNugetVersion)
+    {
+        return
+            PrimaryVersion.Equals(otherNugetVersion.PrimaryVersion) &&
+            AdditionalText.Equals(otherNugetVersion.AdditionalText);
+    }
+
     public override bool Equals(object? obj)
     {
         if (obj is NugetVersion nuVersion)
@@ -78,7 +88,7 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
         return false;
     }
 
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
         return HashCode.Combine(PrimaryVersion, AdditionalText);
     }

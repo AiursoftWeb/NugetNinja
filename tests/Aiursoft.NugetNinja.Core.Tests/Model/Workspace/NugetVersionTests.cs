@@ -97,7 +97,7 @@ public class NugetVersionTests
     public void TestToString()
     {
         var version = new NugetVersion("10000.200000.30000000.49999999-PrEView   ");
-        Assert.AreEqual(version.ToString(), "10000.200000.30000000.49999999-preview");
+        Assert.AreEqual("10000.200000.30000000.49999999-preview", version.ToString());
     }
 
     [TestMethod]
@@ -106,6 +106,17 @@ public class NugetVersionTests
         var version1 = new NugetVersion("10.1.999.0-beta");
         var version2 = new NugetVersion("10.1.999.0-beta");
         Assert.AreEqual(version1.GetHashCode(), version2.GetHashCode());
+    }
+
+    [TestMethod]
+    public void TestHashcode()
+    {
+        var version1 = new NugetVersion("10.1.0.0-Preview");
+        var hashVersion1 = version1.GetHashCode();
+
+        var version2 = new NugetVersion("10.1.0.0-Preview");
+        var hashVersion2 = version2.GetHashCode();
+        Assert.AreEqual(hashVersion1, hashVersion2);
     }
 
     private void AssertLeftLarger(NugetVersion big, NugetVersion sml)
