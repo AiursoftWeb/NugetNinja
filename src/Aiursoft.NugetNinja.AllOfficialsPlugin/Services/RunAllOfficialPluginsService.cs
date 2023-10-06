@@ -61,6 +61,11 @@ public class RunAllOfficialPluginsService : IEntryService
                 if (shouldTakeAction) await action.TakeActionAsync();
             }
         }
+
+        if (!shouldTakeAction)
+        {
+            return;
+        }
         
         var finalModel = await _extractor.Parse(path);
         var projectsShouldUpgrade = finalModel.AllProjects
@@ -75,7 +80,7 @@ public class RunAllOfficialPluginsService : IEntryService
                 var increasedVersion = Increase(projectTakenActions.Version);
                 var increaseVersionAction = new IncreaseVersionAction(projectTakenActions, increasedVersion);
                 _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", increaseVersionAction.GetType().Name, increaseVersionAction.BuildMessage());
-                if (shouldTakeAction) await increaseVersionAction.TakeActionAsync();
+                await increaseVersionAction.TakeActionAsync();
             }
         }
     }
