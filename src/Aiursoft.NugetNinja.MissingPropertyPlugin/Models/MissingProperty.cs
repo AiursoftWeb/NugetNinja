@@ -2,6 +2,29 @@
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
 
+public class PackFile : IAction
+{
+    private readonly string _filePath;
+    public Project SourceProject { get; }
+
+    public PackFile(Project csproj, string filePath)
+    {
+        SourceProject = csproj;
+        _filePath = filePath;
+    }
+    
+    public string BuildMessage()
+    {
+        return $"The project: '{SourceProject}' should also pack with file: {_filePath}.";
+    }
+
+    public Task TakeActionAsync()
+    {
+        return SourceProject.PackFile(_filePath);
+    }
+
+}
+
 public class MissingProperty : IAction
 {
     private readonly string? _currentValue;

@@ -187,6 +187,7 @@ public class MissingPropertyDetector : IActionDetector
                 {
                     _logger.LogTrace("Project {Project} is missing readme info. Suggested readme file is: {Readme}", project, readmePath);
                     yield return new MissingProperty(project, nameof(project.PackageReadmeFile), "Readme.md");
+                    yield return new PackFile(project, readmePath);
                 }
                 else
                 {

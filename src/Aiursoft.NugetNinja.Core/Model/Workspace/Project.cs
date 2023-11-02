@@ -206,6 +206,38 @@ public class Project
         await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
 
+    public async Task PackFile(string filePath)
+    {
+        var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true
+        };
+        doc.LoadHtml(csprojContent);
+        
+        var newline = HtmlNode.CreateNode("\r\n    ");
+        var itemGroup = doc.DocumentNode
+            .Descendants("ItemGroup")
+            .FirstOrDefault();
+        
+        if (itemGroup == null)
+        {
+            itemGroup = doc.CreateElement("ItemGroup");
+            doc.DocumentNode.FirstChild?.AppendChild(itemGroup);
+            doc.DocumentNode.FirstChild?.AppendChild(newline);
+        }
+        
+        var none = doc.CreateElement("None");
+        none.Attributes.Add("Include", filePath);
+        none.Attributes.Add("Pack", "true");
+        none.Attributes.Add("PackagePath", ".");
+        
+        itemGroup.AppendChild(newline);
+        itemGroup.AppendChild(none);
+        
+        await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
+    }
+    
     public async Task AddOrUpdateProperty(string propertyName, string propertyValue)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
