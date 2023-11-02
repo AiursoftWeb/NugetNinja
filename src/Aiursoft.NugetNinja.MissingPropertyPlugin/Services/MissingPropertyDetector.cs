@@ -253,7 +253,9 @@ public class MissingPropertyDetector : IActionDetector
         while (true)
         {
             // Case insensitive search:
-            var files = Directory.GetFiles(path, "README.md");
+            var files = Directory.GetFiles(path)
+                .Where(f => f.EndsWith("readme.md", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
 
             if (files.Any())
             {
