@@ -35,7 +35,8 @@ public class CsprojWriter
         "PackageLicenseExpression",
         "PackageProjectUrl",
         "RepositoryType",
-        "RepositoryUrl"
+        "RepositoryUrl",
+        "PackageReadmeFile"
     };
     
     public async Task SaveCsprojToDisk(HtmlDocument doc, string path)

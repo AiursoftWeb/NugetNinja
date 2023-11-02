@@ -71,7 +71,7 @@ public class MissingPropertyDetector : IActionDetector
             }
 
             // Target framework.
-            var versionSuggestion = AnalyzeVersion(project);
+            var versionSuggestion = GetResetRuntimeSuggestion(project);
             if (versionSuggestion != null) yield return versionSuggestion;
 
             // Assembly name.
@@ -181,13 +181,24 @@ public class MissingPropertyDetector : IActionDetector
                     _logger.LogTrace("Project {Project} is missing property PackageTags", project);
                     yield return new MissingProperty(project, nameof(project.PackageTags), tags);
                 }
+
+                var readmePath = GetReadmePath(project);
+                if (!string.IsNullOrWhiteSpace(readmePath))
+                {
+                    _logger.LogTrace("Project {Project} is missing readme info. Suggested readme file is: {Readme}", project, readmePath);
+                    yield return new MissingProperty(project, nameof(project.PackageReadmeFile), "Readme.md");
+                }
+                else
+                {
+                    _logger.LogWarning("Project {Project} is missing Readme.md file in the repo!", project);
+                }
             }
             
             _logger.LogTrace("Project {Project} analyse finished", project);
         }
     }
 
-    private ResetRuntime? AnalyzeVersion(Project project)
+    private ResetRuntime? GetResetRuntimeSuggestion(Project project)
     {
         var runtimes = project.GetTargetFrameworks();
         for (var i = 0; i < runtimes.Length; i++)
@@ -228,5 +239,51 @@ public class MissingPropertyDetector : IActionDetector
         }
 
         return fileName;
+    }
+
+    /// <summary>
+    /// Gets the relative path to the README.md file in the project directory or any of its parent directories.
+    /// </summary>
+    /// <param name="project">The project to search for the README.md file.</param>
+    /// <returns>The relative path to the README.md file, or an empty string if the file is not found.</returns>
+    private string GetReadmePath(Project project)
+    {
+        var csprojDirectoryPath = Path.GetDirectoryName(project.PathOnDisk)!;
+        var path = csprojDirectoryPath;
+        var readmePath = string.Empty;
+        while (true)
+        {
+            // Case insensitive search:
+            var files = Directory.GetFiles(path, "README.md");
+
+            if (files.Any())
+            {
+                readmePath = files.First();
+                break;
+            }
+
+            var parent = Directory.GetParent(path);
+            if (parent == null)
+            {
+                break;
+            }
+            
+            var isGitRoot = Directory.Exists(Path.Combine(path, ".git"));
+            if (isGitRoot)
+            {
+                break;
+            }
+
+            path = parent.FullName;
+        }
+
+        if (string.IsNullOrWhiteSpace(readmePath))
+        {
+            return string.Empty;
+        }
+        
+        // Get relative path from project.PathOnDisk to readmePath:
+        var relativePath = Path.GetRelativePath(csprojDirectoryPath, readmePath);
+        return relativePath;
     }
 }

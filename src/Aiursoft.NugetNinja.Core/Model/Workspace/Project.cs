@@ -47,6 +47,7 @@ public class Project
         PackageProjectUrl = doc.Descendants(nameof(PackageProjectUrl)).SingleOrDefault()?.FirstChild?.InnerText;
         RepositoryType = doc.Descendants(nameof(RepositoryType)).SingleOrDefault()?.FirstChild?.InnerText;
         RepositoryUrl = doc.Descendants(nameof(RepositoryUrl)).SingleOrDefault()?.FirstChild?.InnerText;
+        PackageReadmeFile = doc.Descendants(nameof(PackageReadmeFile)).SingleOrDefault()?.FirstChild?.InnerText;
     }
 
     public string PathOnDisk { get; set; }
@@ -342,6 +343,7 @@ public class Project
     public string? PackageProjectUrl { get; set; }
     public string? RepositoryType { get; set; }
     public string? RepositoryUrl { get; set; }
+    public string? PackageReadmeFile { get; set; }
 
     #endregion
 }
