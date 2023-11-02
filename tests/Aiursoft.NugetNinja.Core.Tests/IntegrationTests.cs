@@ -11,14 +11,20 @@ public class IntegrationTests
 
     public IntegrationTests()
     {
-        _program = new AiursoftCommand().Configure(command => command.AddGlobalOptions().AddPlugins(                
-            new AllOfficialsPlugin.AllOfficialsPlugin(),
-            new MissingPropertyPlugin.MissingPropertyPlugin(),
-            new DeprecatedPackagePlugin.DeprecatedPackagePlugin(),
-            new PossiblePackageUpgradePlugin.PossiblePackageUpgradePlugin(),
-            new UselessPackageReferencePlugin.UselessPackageReferencePlugin(),
-            new UselessProjectReferencePlugin.UselessProjectReferencePlugin(),
-            new VisualizerPlugin.VisualizerPlugin()));
+        _program = new AiursoftCommand()
+            .Configure(command =>
+            {
+                command
+                    .AddGlobalOptions()
+                    .AddPlugins(                
+                        new AllOfficialsPlugin.AllOfficialsPlugin(),
+                        new MissingPropertyPlugin.MissingPropertyPlugin(),
+                        new DeprecatedPackagePlugin.DeprecatedPackagePlugin(),
+                        new PossiblePackageUpgradePlugin.PossiblePackageUpgradePlugin(),
+                        new UselessPackageReferencePlugin.UselessPackageReferencePlugin(),
+                        new UselessProjectReferencePlugin.UselessProjectReferencePlugin(),
+                        new VisualizerPlugin.VisualizerPlugin());
+            });
     }
 
     [TestMethod]
