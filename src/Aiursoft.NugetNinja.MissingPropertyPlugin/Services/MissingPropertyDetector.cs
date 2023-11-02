@@ -183,15 +183,11 @@ public class MissingPropertyDetector : IActionDetector
                 }
 
                 var readmePath = GetReadmePath(project);
-                if (!string.IsNullOrWhiteSpace(readmePath))
+                if (!string.IsNullOrWhiteSpace(readmePath) && string.IsNullOrWhiteSpace(project.PackageReadmeFile))
                 {
                     _logger.LogTrace("Project {Project} is missing readme info. Suggested readme file is: {Readme}", project, readmePath);
                     yield return new MissingProperty(project, nameof(project.PackageReadmeFile), "Readme.md");
                     yield return new PackFile(project, readmePath);
-                }
-                else
-                {
-                    _logger.LogWarning("Project {Project} is missing Readme.md file in the repo!", project);
                 }
             }
             
