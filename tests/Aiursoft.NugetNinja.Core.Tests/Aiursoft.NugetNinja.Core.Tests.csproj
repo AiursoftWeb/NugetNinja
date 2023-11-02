@@ -20,6 +20,6 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
-        <ProjectReference Include="..\..\src\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj" />
+        <ProjectReference Include="..\..\src\Aiursoft.NugetNinja.VisualizerPlugin\Aiursoft.NugetNinja.VisualizerPlugin.csproj" />
     </ItemGroup>
 </Project>
