@@ -186,7 +186,9 @@ public class MissingPropertyDetector : IActionDetector
                 if (!string.IsNullOrWhiteSpace(readmePath) && string.IsNullOrWhiteSpace(project.PackageReadmeFile))
                 {
                     _logger.LogTrace("Project {Project} is missing readme info. Suggested readme file is: {Readme}", project, readmePath);
-                    yield return new MissingProperty(project, nameof(project.PackageReadmeFile), "Readme.md");
+                    
+                    var fileName = Path.GetFileName(readmePath);
+                    yield return new MissingProperty(project, nameof(project.PackageReadmeFile), fileName);
                     yield return new PackFile(project, readmePath);
                 }
             }
