@@ -8,7 +8,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Tests.Model.Workspace;
 
 [TestClass]
 public class NugetVersionTests

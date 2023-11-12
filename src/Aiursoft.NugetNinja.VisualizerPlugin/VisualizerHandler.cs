@@ -76,7 +76,7 @@ public sealed class VisualizerHandler : CommandHandler
         string customNugetServer,
         string patToken)
     {
-        var host = ServiceBuilder.BuildHost<StartUp>(verbose);
+        var host = ServiceBuilder.CreateCommandHostBuilder<StartUp>(verbose);
         host.ConfigureServices(services =>
         {
             services.AddMemoryCache();

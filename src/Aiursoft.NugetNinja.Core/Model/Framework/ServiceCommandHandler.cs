@@ -47,7 +47,7 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
         string patToken,
         bool allowCross)
     {
-        var hostBuilder = ServiceBuilder.BuildHost<TS>(verbose);
+        var hostBuilder = ServiceBuilder.CreateCommandHostBuilder<TS>(verbose);
         hostBuilder.ConfigureServices(services => 
         {
             services.AddMemoryCache();
