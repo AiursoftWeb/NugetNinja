@@ -5,7 +5,7 @@
 [![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/aiursoft/nugetninja/-/pipelines)
 [![NuGet version (Aiursoft.NugetNinja)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja/)
 [![NuGet version (Aiursoft.NugetNinja.PrBot)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.PrBot.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja.PrBot/)
-[![ManHours](https://manhours.aiursoft.cn/gitlab/gitlab.aiursoft.cn/aiursoft/NugetNinja)](https://gitlab.aiursoft.cn/aiursoft/NugetNinja/-/commits/master?ref_type=heads)
+[![ManHours](https://manhours.aiursoft.cn/gitlab/gitlab.aiursoft.cn/aiursoft/NugetNinja.svg)](https://gitlab.aiursoft.cn/aiursoft/NugetNinja/-/commits/master?ref_type=heads)
 
 Nuget Ninjia is a tool for detecting dependencies of .NET projects. It analyzes the dependency structure of .NET projects in a directory and builds a directed acyclic graph. And will give some modification suggestions for Nuget packages, so that the dependencies of the project are as concise and up-to-date as possible.
 
