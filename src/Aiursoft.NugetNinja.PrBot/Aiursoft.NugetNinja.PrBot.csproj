@@ -41,6 +41,7 @@
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Aiursoft.GitRunner" Version="1.0.1" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.205.1" />
   </ItemGroup>
   <ItemGroup>

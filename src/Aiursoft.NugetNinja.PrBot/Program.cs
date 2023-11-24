@@ -1,7 +1,7 @@
-﻿using Aiursoft.Canon;
-using Aiursoft.NugetNinja.AllOfficialsPlugin;
+﻿using Aiursoft.NugetNinja.AllOfficialsPlugin;
 using Aiursoft.NugetNinja.Core;
 using Aiursoft.NugetNinja.PrBot;
+using Aiursoft.GitRunner;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -33,7 +33,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddMemoryCache();
             services.AddHttpClient();
             services.Configure<List<Server>>(context.Configuration.GetSection("Servers"));
-            services.AddTaskCanon();
+            services.AddGitRunner();
             services.AddTransient<Extractor>();
             services.AddTransient<ProjectsEnumerator>();
             services.AddTransient<IVersionControlService, GitHubService>();
@@ -43,8 +43,6 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<HttpWrapper>();
             services.AddTransient<NugetService>();
             services.AddTransient<VersionCrossChecker>();
-            services.AddTransient<CommandRunner>();
-            services.AddTransient<WorkspaceManager>();
             new StartUp().ConfigureServices(services);
             services.AddTransient<RunAllOfficialPluginsService>();
             services.AddTransient<Entry>();

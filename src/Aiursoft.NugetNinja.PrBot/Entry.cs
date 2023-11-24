@@ -1,4 +1,6 @@
-﻿using Aiursoft.NugetNinja.AllOfficialsPlugin;
+﻿using Aiursoft.GitRunner;
+using Aiursoft.GitRunner.Models;
+using Aiursoft.NugetNinja.AllOfficialsPlugin;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -84,7 +86,8 @@ public class Entry
         await _workspaceManager.ResetRepo(
             workPath,
             repo.DefaultBranch ?? throw new NullReferenceException($"The default branch of {repo} is null!"),
-            repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo} is null!"));
+            repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo} is null!"),
+            CloneMode.Depth1);
 
         // Run all plugins.
         await _runAllOfficialPluginsService.RunAllPlugins(workPath, true, onlyRunUpdatePlugin: connectionConfiguration.OnlyUpdate);
