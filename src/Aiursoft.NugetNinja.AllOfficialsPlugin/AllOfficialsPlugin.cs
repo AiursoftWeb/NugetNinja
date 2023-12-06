@@ -1,5 +1,4 @@
 ﻿using Aiursoft.CommandFramework.Abstracts;
-using Aiursoft.CommandFramework.Framework;
 
 namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
 
