@@ -7,11 +7,11 @@ namespace Aiursoft.NugetNinja.Core.Tests;
 [TestClass]
 public class IntegrationTests
 {
-    private readonly AiursoftCommand _program;
+    private readonly AiursoftCommandApp _program;
 
     public IntegrationTests()
     {
-        _program = new AiursoftCommand()
+        _program = new AiursoftCommandApp()
             .Configure(command =>
             {
                 command

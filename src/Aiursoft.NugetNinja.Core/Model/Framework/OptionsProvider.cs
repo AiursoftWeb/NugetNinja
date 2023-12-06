@@ -24,12 +24,12 @@ public static class OptionsProvider
             new[] { "--allow-preview" },
             "Allow using preview versions of packages from Nuget.");
 
-    public static readonly Option<string> CustomNugetServer =
+    public static readonly Option<string> CustomNugetServerOption =
         new(
             new[] { "--nuget-server" },
             "If you want to use a customized nuget server instead of the official nuget.org, you can set it with a value like: https://nuget.myserver/v3/index.json");
 
-    public static readonly Option<string> PatToken =
+    public static readonly Option<string> PatTokenOption =
         new(
             new[] { "--token" },
             "The PAT token which has privilege to access the nuget server. See: https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate");
@@ -47,13 +47,13 @@ public static class OptionsProvider
             DryRunOption,
             VerboseOption,
             AllowPreviewOption,
-            CustomNugetServer,
-            PatToken,
+            CustomNugetServerOption,
+            PatTokenOption,
             AllowPackageVersionCrossMicrosoftRuntime
         };
     }
 
-    public static RootCommand AddGlobalOptions(this RootCommand command)
+    public static Command AddGlobalOptions(this Command command)
     {
         var options = GetGlobalOptions();
         foreach (var option in options) command.AddGlobalOption(option);

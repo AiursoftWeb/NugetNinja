@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 
 namespace Aiursoft.NugetNinja.VisualizerPlugin;
 
@@ -24,7 +25,7 @@ public sealed class VisualizerHandler : CommandHandler
         new[] { "--excludes" },
         "Packages to exclude from the chart. Seperated by ','. For example: 'Microsoft,System,Test' to ignore system packages.");
 
-    private static readonly Option<bool> LocalOnly = new(
+    private static readonly Option<bool> LocalOnlyOption = new(
         new[] { "--local", "-l" },
         () => false,
         "Only show local project references. (Ignore package references.)");
@@ -35,32 +36,20 @@ public sealed class VisualizerHandler : CommandHandler
         {
             DepthOption,
             ExcludeOption,
-            LocalOnly
+            LocalOnlyOption
         };
     }
 
-    public override void OnCommandBuilt(Command command)
+    protected override Task Execute(InvocationContext context)
     {
-        command.SetHandler(
-            Execute,
-            OptionsProvider.PathOptions,
-            DepthOption,
-            ExcludeOption,
-            LocalOnly,
-            OptionsProvider.VerboseOption,
-            OptionsProvider.CustomNugetServer,
-            OptionsProvider.PatToken);
-    }
-
-    private Task Execute(
-        string path,
-        int depth,
-        string? excludes,
-        bool localOnly,
-        bool verbose,
-        string customNugetServer,
-        string patToken)
-    {
+        var path = context.ParseResult.GetValueForOption(OptionsProvider.PathOptions)!;
+        var depth = context.ParseResult.GetValueForOption(DepthOption);
+        var excludes = context.ParseResult.GetValueForOption(ExcludeOption);
+        var localOnly = context.ParseResult.GetValueForOption(LocalOnlyOption);
+        var verbose = context.ParseResult.GetValueForOption(OptionsProvider.VerboseOption);
+        var customNugetServer = context.ParseResult.GetValueForOption(OptionsProvider.CustomNugetServerOption)!;
+        var patToken = context.ParseResult.GetValueForOption(OptionsProvider.PatTokenOption)!;
+        
         var host = BuildHost(verbose, customNugetServer, patToken);
         var excludesArray = excludes?
             .Split(',')

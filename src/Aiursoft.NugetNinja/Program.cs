@@ -9,7 +9,7 @@ using Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 using Aiursoft.NugetNinja.UselessProjectReferencePlugin;
 using Aiursoft.NugetNinja.VisualizerPlugin;
 
-return await new AiursoftCommand()
+return await new AiursoftCommandApp()
     .Configure(command =>
     {
         command

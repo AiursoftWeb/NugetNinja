@@ -1,4 +1,4 @@
-﻿using System.CommandLine;
+﻿using System.CommandLine.Invocation;
 using Aiursoft.Canon;
 using Aiursoft.CommandFramework.Abstracts;
 using Aiursoft.CommandFramework.Framework;
@@ -14,20 +14,20 @@ public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
     where TE : class, IEntryService
     where TS : class, IStartUp, new()
 {
-    public override void OnCommandBuilt(Command command)
+    protected override async Task Execute(InvocationContext context)
     {
-        command.SetHandler(
-            Execute,
-            OptionsProvider.PathOptions,
-            OptionsProvider.DryRunOption,
-            OptionsProvider.VerboseOption,
-            OptionsProvider.AllowPreviewOption,
-            OptionsProvider.CustomNugetServer,
-            OptionsProvider.PatToken,
-            OptionsProvider.AllowPackageVersionCrossMicrosoftRuntime);
+        var path = context.ParseResult.GetValueForOption(OptionsProvider.PathOptions)!;
+        var dryRun = context.ParseResult.GetValueForOption(OptionsProvider.DryRunOption);
+        var verbose = context.ParseResult.GetValueForOption(OptionsProvider.VerboseOption);
+        var allowPreview = context.ParseResult.GetValueForOption(OptionsProvider.AllowPreviewOption);
+        var customNugetServer = context.ParseResult.GetValueForOption(OptionsProvider.CustomNugetServerOption)!;
+        var patToken = context.ParseResult.GetValueForOption(OptionsProvider.PatTokenOption)!;
+        var allowCross = context.ParseResult.GetValueForOption(OptionsProvider.AllowPreviewOption);
+       
+        await ExecuteWithArgs(path, dryRun, verbose, allowPreview, customNugetServer, patToken, allowCross);
     }
 
-    private Task Execute(
+    private Task ExecuteWithArgs(
         string path, 
         bool dryRun, 
         bool verbose, 
