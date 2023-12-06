@@ -5,8 +5,8 @@ namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 
 public class UselessPackageReferencePlugin : IPlugin
 {
-    public CommandHandler[] Install()
+    public ICommandHandlerBuilder[] Install()
     {
-        return new CommandHandler[] { new PackageReferenceHandler() };
+        return new ICommandHandlerBuilder[] { new PackageReferenceHandler() };
     }
 }

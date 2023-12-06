@@ -5,8 +5,8 @@ namespace Aiursoft.NugetNinja.VisualizerPlugin;
 
 public class VisualizerPlugin : IPlugin
 {
-    public CommandHandler[] Install()
+    public ICommandHandlerBuilder[] Install()
     {
-        return new CommandHandler[] { new VisualizerHandler() };
+        return new ICommandHandlerBuilder[] { new VisualizerHandler() };
     }
 }

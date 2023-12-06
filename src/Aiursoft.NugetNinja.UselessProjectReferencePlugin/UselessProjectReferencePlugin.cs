@@ -5,8 +5,8 @@ namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin;
 
 public class UselessProjectReferencePlugin : IPlugin
 {
-    public CommandHandler[] Install()
+    public ICommandHandlerBuilder[] Install()
     {
-        return new CommandHandler[] { new ProjectReferenceHandler() };
+        return new ICommandHandlerBuilder[] { new ProjectReferenceHandler() };
     }
 }

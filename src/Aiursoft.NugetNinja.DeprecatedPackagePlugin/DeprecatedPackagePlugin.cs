@@ -5,8 +5,8 @@ namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin;
 
 public class DeprecatedPackagePlugin : IPlugin
 {
-    public CommandHandler[] Install()
+    public ICommandHandlerBuilder[] Install()
     {
-        return new CommandHandler[] { new DeprecatedPackageHandler() };
+        return new ICommandHandlerBuilder[] { new DeprecatedPackageHandler() };
     }
 }

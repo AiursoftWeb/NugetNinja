@@ -10,7 +10,7 @@ using System.CommandLine.Invocation;
 
 namespace Aiursoft.NugetNinja.VisualizerPlugin;
 
-public sealed class VisualizerHandler : CommandHandler
+public sealed class VisualizerHandler : ExecutableCommandHandlerBuilder
 {
     public override string Name => "visualize";
 

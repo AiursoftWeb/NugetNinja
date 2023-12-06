@@ -5,8 +5,8 @@ namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
 
 public class AllOfficialsPlugin : IPlugin
 {
-    public CommandHandler[] Install()
+    public ICommandHandlerBuilder[] Install()
     {
-        return new CommandHandler[] { new AllOfficialsHandler() };
+        return new ICommandHandlerBuilder[] { new AllOfficialsHandler() };
     }
 }

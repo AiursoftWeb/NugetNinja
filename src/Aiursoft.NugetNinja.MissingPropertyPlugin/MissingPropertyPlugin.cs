@@ -5,8 +5,8 @@ namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
 
 public class MissingPropertyPlugin : IPlugin
 {
-    public CommandHandler[] Install()
+    public ICommandHandlerBuilder[] Install()
     {
-        return new CommandHandler[] { new MissingPropertyHandler() };
+        return new ICommandHandlerBuilder[] { new MissingPropertyHandler() };
     }
 }

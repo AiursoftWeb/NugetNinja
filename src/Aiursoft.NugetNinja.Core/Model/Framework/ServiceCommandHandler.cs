@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.Core;
 
-public abstract class ServiceCommandHandler<TE, TS> : CommandHandler
+public abstract class ServiceCommandHandler<TE, TS> : ExecutableCommandHandlerBuilder
     where TE : class, IEntryService
     where TS : class, IStartUp, new()
 {

@@ -5,8 +5,8 @@ namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
 
 public class PossiblePackageUpgradePlugin : IPlugin
 {
-    public CommandHandler[] Install()
+    public ICommandHandlerBuilder[] Install()
     {
-        return new CommandHandler[] { new PackageUpgradeHandler() };
+        return new ICommandHandlerBuilder[] { new PackageUpgradeHandler() };
     }
 }
