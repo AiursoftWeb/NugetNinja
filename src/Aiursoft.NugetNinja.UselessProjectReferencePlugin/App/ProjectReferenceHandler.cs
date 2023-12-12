@@ -4,7 +4,7 @@ namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin;
 
 public class ProjectReferenceHandler : DetectorBasedCommandHandler<UselessProjectReferenceDetector, StartUp>
 {
-    public override string Name => "clean-prj";
+    protected override string Name => "clean-prj";
 
-    public override string Description => "The command to clean up possible useless project references.";
+    protected override string Description => "The command to clean up possible useless project references.";
 }

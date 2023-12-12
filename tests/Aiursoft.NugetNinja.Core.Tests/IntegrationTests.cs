@@ -1,5 +1,11 @@
 using Aiursoft.CommandFramework;
-using Aiursoft.CommandFramework.Extensions;
+using Aiursoft.NugetNinja.AllOfficialsPlugin;
+using Aiursoft.NugetNinja.DeprecatedPackagePlugin;
+using Aiursoft.NugetNinja.MissingPropertyPlugin;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
+using Aiursoft.NugetNinja.UselessPackageReferencePlugin;
+using Aiursoft.NugetNinja.UselessProjectReferencePlugin;
+using Aiursoft.NugetNinja.VisualizerPlugin;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aiursoft.NugetNinja.Core.Tests;
@@ -7,25 +13,21 @@ namespace Aiursoft.NugetNinja.Core.Tests;
 [TestClass]
 public class IntegrationTests
 {
-    private readonly AiursoftCommandApp _program;
-
-    public IntegrationTests()
-    {
-        _program = new AiursoftCommandApp()
-            .Configure(command =>
-            {
-                command
-                    .AddGlobalOptions()
-                    .AddPlugins(                
-                        new AllOfficialsPlugin.AllOfficialsPlugin(),
-                        new MissingPropertyPlugin.MissingPropertyPlugin(),
-                        new DeprecatedPackagePlugin.DeprecatedPackagePlugin(),
-                        new PossiblePackageUpgradePlugin.PossiblePackageUpgradePlugin(),
-                        new UselessPackageReferencePlugin.UselessPackageReferencePlugin(),
-                        new UselessProjectReferencePlugin.UselessProjectReferencePlugin(),
-                        new VisualizerPlugin.VisualizerPlugin());
-            });
-    }
+    private readonly NestedCommandApp _program = new NestedCommandApp()
+        .WithFeature(new AllOfficialsHandler())
+        .WithFeature(new MissingPropertyHandler())
+        .WithFeature(new DeprecatedPackageHandler())
+        .WithFeature(new PackageUpgradeHandler())
+        .WithFeature(new PackageReferenceHandler())
+        .WithFeature(new ProjectReferenceHandler())
+        .WithFeature(new VisualizerHandler())
+        .WithGlobalOptions(OptionsProvider.PathOptions)
+        .WithGlobalOptions(OptionsProvider.DryRunOption)
+        .WithGlobalOptions(OptionsProvider.VerboseOption)
+        .WithGlobalOptions(OptionsProvider.AllowPreviewOption)
+        .WithGlobalOptions(OptionsProvider.CustomNugetServerOption)
+        .WithGlobalOptions(OptionsProvider.PatTokenOption)
+        .WithGlobalOptions(OptionsProvider.AllowPackageVersionCrossMicrosoftRuntime);
 
     [TestMethod]
     public async Task InvokeHelp()

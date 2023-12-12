@@ -4,9 +4,9 @@ namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
 
 public class AllOfficialsHandler : ServiceCommandHandler<RunAllOfficialPluginsService, StartUp>
 {
-    public override string Name => "all-officials";
+    protected override string Name => "all-officials";
 
-    public override string Description => "The command to run all officially supported features.";
+    protected override string Description => "The command to run all officially supported features.";
 
-    public override string[] Alias => new[] { "all" };
+    protected override string[] Alias => new[] { "all" };
 }

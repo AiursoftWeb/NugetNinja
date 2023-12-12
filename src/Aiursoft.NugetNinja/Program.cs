@@ -9,19 +9,21 @@ using Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 using Aiursoft.NugetNinja.UselessProjectReferencePlugin;
 using Aiursoft.NugetNinja.VisualizerPlugin;
 
-return await new AiursoftCommandApp()
-    .Configure(command =>
-    {
-        command
-            .AddGlobalOptions()
-            .AddPlugins(
-                new AllOfficialsPlugin(),
-                new MissingPropertyPlugin(),
-                new DeprecatedPackagePlugin(),
-                new PossiblePackageUpgradePlugin(),
-                new UselessPackageReferencePlugin(),
-                new UselessProjectReferencePlugin(),
-                new VisualizerPlugin()
-            );
-    })
+return await new NestedCommandApp()
+    .WithFeature(new AllOfficialsHandler())
+    .WithFeature(new MissingPropertyHandler())
+    .WithFeature(new DeprecatedPackageHandler())
+    .WithFeature(new PackageUpgradeHandler())
+    .WithFeature(new PackageReferenceHandler())
+    .WithFeature(new ProjectReferenceHandler())
+    .WithFeature(new VisualizerHandler())
+    .WithGlobalOptions(OptionsProvider.PathOptions)
+    .WithGlobalOptions(OptionsProvider.DryRunOption)
+    .WithGlobalOptions(OptionsProvider.VerboseOption)
+    .WithGlobalOptions(OptionsProvider.AllowPreviewOption)
+    .WithGlobalOptions(OptionsProvider.CustomNugetServerOption)
+    .WithGlobalOptions(OptionsProvider.PatTokenOption)
+    .WithGlobalOptions(OptionsProvider.AllowPackageVersionCrossMicrosoftRuntime)
     .RunAsync(args);
+    
+

@@ -4,7 +4,7 @@ namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
 
 public class PackageReferenceHandler : DetectorBasedCommandHandler<UselessPackageReferenceDetector, StartUp>
 {
-    public override string Name => "clean-pkg";
+    protected override string Name => "clean-pkg";
 
-    public override string Description => "The command to clean up possible useless package references.";
+    protected override string Description => "The command to clean up possible useless package references.";
 }

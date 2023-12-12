@@ -12,9 +12,9 @@ namespace Aiursoft.NugetNinja.VisualizerPlugin;
 
 public sealed class VisualizerHandler : ExecutableCommandHandlerBuilder
 {
-    public override string Name => "visualize";
+    protected override string Name => "visualize";
 
-    public override string Description => "The command to visualize the dependency relationship, with mermaid markdown.";
+    protected override string Description => "The command to visualize the dependency relationship, with mermaid markdown.";
 
     private static readonly Option<int> DepthOption = new(
         new[] { "--depth", "-d" },
@@ -30,7 +30,7 @@ public sealed class VisualizerHandler : ExecutableCommandHandlerBuilder
         () => false,
         "Only show local project references. (Ignore package references.)");
 
-    public override Option[] GetCommandOptions()
+    protected override Option[] GetCommandOptions()
     {
         return new Option[]
         {
