@@ -38,25 +38,4 @@ public static class OptionsProvider
         new(
             new[] { "--allow-package-version-cross-microsoft-runtime" },
             "Allow using NuGet package versions for different Microsoft runtime versions. For example, when using runtime 6.0, it will avoid upgrading packages to 7.0.");
-
-    private static Option[] GetGlobalOptions()
-    {
-        return new Option[]
-        {
-            PathOptions,
-            DryRunOption,
-            VerboseOption,
-            AllowPreviewOption,
-            CustomNugetServerOption,
-            PatTokenOption,
-            AllowPackageVersionCrossMicrosoftRuntime
-        };
-    }
-
-    public static Command AddGlobalOptions(this Command command)
-    {
-        var options = GetGlobalOptions();
-        foreach (var option in options) command.AddGlobalOption(option);
-        return command;
-    }
 }
