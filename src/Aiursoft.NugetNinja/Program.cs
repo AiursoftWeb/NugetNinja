@@ -1,5 +1,4 @@
 ﻿using Aiursoft.CommandFramework;
-using Aiursoft.CommandFramework.Extensions;
 using Aiursoft.NugetNinja.AllOfficialsPlugin;
 using Aiursoft.NugetNinja.Core;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin;
