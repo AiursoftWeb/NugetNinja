@@ -41,6 +41,7 @@ public class GitLabService : IVersionControlService
 
             foreach (var repo in currentPageItems) yield return new Repository
             {
+                Id = repo.Id,
                 Name = repo.Path,
                 FullName = repo.PathWithNameSpace,
                 Archived = repo.Archived,
