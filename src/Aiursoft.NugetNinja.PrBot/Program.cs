@@ -1,5 +1,4 @@
 ﻿using Aiursoft.NugetNinja.AllOfficialsPlugin;
-using Aiursoft.NugetNinja.Core;
 using Aiursoft.NugetNinja.PrBot;
 using Aiursoft.GitRunner;
 using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;

@@ -1,7 +1,6 @@
 ﻿using Aiursoft.Canon;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Services;
-using Aiursoft.NugetNinja.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
