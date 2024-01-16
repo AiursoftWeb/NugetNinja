@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Services.Extractor;
 
 public class Extractor
 {
@@ -11,13 +11,13 @@ public class Extractor
         _logger = logger;
     }
 
-    public async Task<Model> Parse(string rootPath)
+    public async Task<Model.Workspace.Model> Parse(string rootPath)
     {
         var csprojs = Directory
             .EnumerateFiles(rootPath, "*.csproj", SearchOption.AllDirectories)
             .ToArray();
 
-        var model = new Model();
+        var model = new Model.Workspace.Model();
 
         foreach (var csprojPath in csprojs)
         {

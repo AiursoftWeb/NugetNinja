@@ -1,13 +1,15 @@
 ﻿using Aiursoft.NugetNinja.AllOfficialsPlugin.Models;
-using Aiursoft.NugetNinja.Core;
-using Aiursoft.NugetNinja.DeprecatedPackagePlugin;
-using Aiursoft.NugetNinja.MissingPropertyPlugin;
-using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
-using Aiursoft.NugetNinja.UselessPackageReferencePlugin;
-using Aiursoft.NugetNinja.UselessProjectReferencePlugin;
+using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
+using Aiursoft.NugetNinja.Core.Services.Extractor;
+using Aiursoft.NugetNinja.DeprecatedPackagePlugin.Services;
+using Aiursoft.NugetNinja.MissingPropertyPlugin.Services;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
+using Aiursoft.NugetNinja.UselessPackageReferencePlugin.Services;
+using Aiursoft.NugetNinja.UselessProjectReferencePlugin.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.AllOfficialsPlugin;
+namespace Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 
 public class RunAllOfficialPluginsService : IEntryService
 {

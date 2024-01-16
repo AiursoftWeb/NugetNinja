@@ -1,7 +1,8 @@
-﻿using HtmlAgilityPack;
+﻿using Aiursoft.NugetNinja.Core.Services.Utils;
+using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Model.Workspace;
 
 public class Model
 {

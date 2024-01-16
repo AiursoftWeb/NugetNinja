@@ -1,6 +1,7 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Model.Framework;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 
-namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
+namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.App;
 
 public class PackageUpgradeHandler : DetectorBasedCommandHandler<PackageReferenceUpgradeDetector, StartUp>
 {

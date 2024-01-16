@@ -1,6 +1,8 @@
 ﻿using System.Text.Json.Serialization;
-using Aiursoft.NugetNinja.PrBot;
+using Aiursoft.NugetNinja.PrBot.Models;
 using Microsoft.Extensions.Logging;
+
+namespace Aiursoft.NugetNinja.PrBot.Services.Providers.GitLab;
 
 public class GitLabService : IVersionControlService
 {

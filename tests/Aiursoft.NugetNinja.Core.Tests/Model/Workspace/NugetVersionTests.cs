@@ -6,6 +6,7 @@
 // ReSharper disable ArrangeObjectCreationWhenTypeEvident
 // ReSharper disable SuspiciousTypeConversion.Global
 
+using Aiursoft.NugetNinja.Core.Model.Workspace;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aiursoft.NugetNinja.Core.Tests.Model.Workspace;

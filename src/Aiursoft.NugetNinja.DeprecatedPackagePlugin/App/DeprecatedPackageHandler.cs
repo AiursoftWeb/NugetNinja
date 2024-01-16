@@ -1,6 +1,7 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Model.Framework;
+using Aiursoft.NugetNinja.DeprecatedPackagePlugin.Services;
 
-namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin;
+namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin.App;
 
 public class DeprecatedPackageHandler : DetectorBasedCommandHandler<DeprecatedPackageDetector, StartUp>
 {

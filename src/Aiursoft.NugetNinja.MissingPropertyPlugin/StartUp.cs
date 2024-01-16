@@ -1,4 +1,5 @@
 ﻿using Aiursoft.CommandFramework.Abstracts;
+using Aiursoft.NugetNinja.MissingPropertyPlugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin;

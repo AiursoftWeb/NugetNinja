@@ -1,7 +1,8 @@
-﻿using Aiursoft.NugetNinja.Core.Services;
+﻿using Aiursoft.NugetNinja.Core.Services.IO;
+using Aiursoft.NugetNinja.Core.Services.Utils;
 using HtmlAgilityPack;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Model.Workspace;
 
 public class Project
 {

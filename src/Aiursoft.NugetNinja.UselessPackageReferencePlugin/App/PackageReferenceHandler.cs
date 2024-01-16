@@ -1,6 +1,7 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Model.Framework;
+using Aiursoft.NugetNinja.UselessPackageReferencePlugin.Services;
 
-namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
+namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin.App;
 
 public class PackageReferenceHandler : DetectorBasedCommandHandler<UselessPackageReferenceDetector, StartUp>
 {

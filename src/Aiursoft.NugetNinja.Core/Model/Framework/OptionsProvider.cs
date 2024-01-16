@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Model.Framework;
 
 public static class OptionsProvider
 {

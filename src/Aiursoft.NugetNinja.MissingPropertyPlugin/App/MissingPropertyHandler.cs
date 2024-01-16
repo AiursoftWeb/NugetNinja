@@ -1,6 +1,7 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Model.Framework;
+using Aiursoft.NugetNinja.MissingPropertyPlugin.Services;
 
-namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
+namespace Aiursoft.NugetNinja.MissingPropertyPlugin.App;
 
 public class MissingPropertyHandler : DetectorBasedCommandHandler<MissingPropertyDetector, StartUp>
 {

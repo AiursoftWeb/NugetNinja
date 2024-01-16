@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Aiursoft.NugetNinja.PrBot;
+namespace Aiursoft.NugetNinja.PrBot.Models;
 
 public class PullRequest
 {

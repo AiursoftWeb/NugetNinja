@@ -1,4 +1,6 @@
 ﻿using Aiursoft.NugetNinja.Core;
+using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.AllOfficialsPlugin.Models;
 

@@ -1,6 +1,9 @@
 ﻿using Aiursoft.GitRunner;
 using Aiursoft.GitRunner.Models;
 using Aiursoft.NugetNinja.AllOfficialsPlugin;
+using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
+using Aiursoft.NugetNinja.PrBot.Models;
+using Aiursoft.NugetNinja.PrBot.Services.Providers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

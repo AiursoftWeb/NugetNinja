@@ -1,7 +1,10 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
+using Aiursoft.NugetNinja.Core.Services.Nuget;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;
+namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 
 public class PackageReferenceUpgradeDetector : IActionDetector
 {

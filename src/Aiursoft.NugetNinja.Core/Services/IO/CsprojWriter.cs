@@ -2,7 +2,7 @@ using System.Xml;
 using System.Xml.Linq;
 using HtmlAgilityPack;
 
-namespace Aiursoft.NugetNinja.Core.Services;
+namespace Aiursoft.NugetNinja.Core.Services.IO;
 
 public class CsprojWriter
 {

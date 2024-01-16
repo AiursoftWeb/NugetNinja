@@ -1,4 +1,5 @@
 ﻿using Aiursoft.CommandFramework.Abstracts;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin;

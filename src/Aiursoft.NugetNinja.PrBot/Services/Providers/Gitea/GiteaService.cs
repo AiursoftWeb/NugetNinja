@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Aiursoft.NugetNinja.PrBot.Models;
+using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.PrBot;
+namespace Aiursoft.NugetNinja.PrBot.Services.Providers.Gitea;
 
 public class GiteaService : IVersionControlService
 {

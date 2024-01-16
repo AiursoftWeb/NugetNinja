@@ -2,11 +2,16 @@
 using System.Net;
 using System.Text.Json;
 using Aiursoft.Canon;
+using Aiursoft.NugetNinja.Core.Model.Framework;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
+using Aiursoft.NugetNinja.Core.Services.Analyser;
+using Aiursoft.NugetNinja.Core.Services.Nuget.Models;
+using Aiursoft.NugetNinja.Core.Services.Utils;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Services.Nuget;
 
 public class NugetService
 {

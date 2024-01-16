@@ -1,4 +1,4 @@
-﻿namespace Aiursoft.NugetNinja.Core;
+﻿namespace Aiursoft.NugetNinja.Core.Abstracts;
 
 public interface IEntryService
 {

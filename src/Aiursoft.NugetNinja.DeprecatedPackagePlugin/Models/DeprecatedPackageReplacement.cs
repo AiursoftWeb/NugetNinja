@@ -1,6 +1,7 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
 
-namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin;
+namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin.Models;
 
 public class DeprecatedPackageReplacement : IAction
 {

@@ -1,4 +1,4 @@
-namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
+namespace Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
 
 public class ProjectInfo
 {

@@ -3,12 +3,16 @@ using Aiursoft.Canon;
 using Aiursoft.CommandFramework.Abstracts;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Services;
-using Aiursoft.NugetNinja.Core.Services;
+using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Services.Analyser;
+using Aiursoft.NugetNinja.Core.Services.Extractor;
+using Aiursoft.NugetNinja.Core.Services.IO;
+using Aiursoft.NugetNinja.Core.Services.Nuget;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Model.Framework;
 
 public abstract class ServiceCommandHandler<TE, TS> : ExecutableCommandHandlerBuilder
     where TE : class, IEntryService

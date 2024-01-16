@@ -1,7 +1,11 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
+using Aiursoft.NugetNinja.Core.Services.Analyser;
+using Aiursoft.NugetNinja.Core.Services.Nuget;
+using Aiursoft.NugetNinja.UselessPackageReferencePlugin.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin;
+namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin.Services;
 
 public class UselessPackageReferenceDetector : IActionDetector
 {

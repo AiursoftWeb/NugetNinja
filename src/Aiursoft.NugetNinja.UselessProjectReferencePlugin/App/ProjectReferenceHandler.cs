@@ -1,6 +1,7 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Model.Framework;
+using Aiursoft.NugetNinja.UselessProjectReferencePlugin.Services;
 
-namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin;
+namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin.App;
 
 public class ProjectReferenceHandler : DetectorBasedCommandHandler<UselessProjectReferenceDetector, StartUp>
 {

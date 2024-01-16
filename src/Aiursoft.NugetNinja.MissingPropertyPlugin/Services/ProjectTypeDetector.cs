@@ -1,8 +1,9 @@
 using Aiursoft.CSTools.Tools;
-using Aiursoft.NugetNinja.Core;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
+using Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.MissingPropertyPlugin;
+namespace Aiursoft.NugetNinja.MissingPropertyPlugin.Services;
 
 public class ProjectTypeDetector
 {

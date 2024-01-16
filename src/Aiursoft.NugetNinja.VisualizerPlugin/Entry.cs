@@ -1,4 +1,7 @@
 using Aiursoft.NugetNinja.Core;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
+using Aiursoft.NugetNinja.Core.Services.Extractor;
+using Aiursoft.NugetNinja.Core.Services.Nuget;
 
 namespace Aiursoft.NugetNinja.VisualizerPlugin;
 

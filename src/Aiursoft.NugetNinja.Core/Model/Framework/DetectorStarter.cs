@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Services.Extractor;
+using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Model.Framework;
 
 public class DetectorStarter<T> : IEntryService where T : IActionDetector
 {

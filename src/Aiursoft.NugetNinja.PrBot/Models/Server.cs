@@ -1,4 +1,4 @@
-﻿namespace Aiursoft.NugetNinja.PrBot;
+﻿namespace Aiursoft.NugetNinja.PrBot.Models;
 
 public class Server
 {

@@ -2,6 +2,17 @@
 using Aiursoft.NugetNinja.Core;
 using Aiursoft.NugetNinja.PrBot;
 using Aiursoft.GitRunner;
+using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
+using Aiursoft.NugetNinja.Core.Services.Analyser;
+using Aiursoft.NugetNinja.Core.Services.Extractor;
+using Aiursoft.NugetNinja.Core.Services.Nuget;
+using Aiursoft.NugetNinja.PrBot.Models;
+using Aiursoft.NugetNinja.PrBot.Services;
+using Aiursoft.NugetNinja.PrBot.Services.Providers;
+using Aiursoft.NugetNinja.PrBot.Services.Providers.AzureDevOps;
+using Aiursoft.NugetNinja.PrBot.Services.Providers.Gitea;
+using Aiursoft.NugetNinja.PrBot.Services.Providers.GitHub;
+using Aiursoft.NugetNinja.PrBot.Services.Providers.GitLab;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

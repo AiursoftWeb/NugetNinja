@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Services.Analyser;
 public class VersionCrossChecker
 {
     public static readonly string[] netVersions = new string[]

@@ -1,4 +1,6 @@
-﻿namespace Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Model.Workspace;
+
+namespace Aiursoft.NugetNinja.Core.Abstracts;
 
 public interface IAction
 {

@@ -1,6 +1,9 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
+using Aiursoft.NugetNinja.Core.Services.Analyser;
+using Aiursoft.NugetNinja.UselessProjectReferencePlugin.Models;
 
-namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin;
+namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin.Services;
 
 public class UselessProjectReferenceDetector : IActionDetector
 {

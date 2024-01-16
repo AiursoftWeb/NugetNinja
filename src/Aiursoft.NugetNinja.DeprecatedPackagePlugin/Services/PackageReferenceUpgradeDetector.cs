@@ -1,7 +1,11 @@
-﻿using Aiursoft.NugetNinja.Core;
+﻿using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Workspace;
+using Aiursoft.NugetNinja.Core.Services.Nuget;
+using Aiursoft.NugetNinja.Core.Services.Nuget.Models;
+using Aiursoft.NugetNinja.DeprecatedPackagePlugin.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin;
+namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin.Services;
 
 public class DeprecatedPackageDetector : IActionDetector
 {

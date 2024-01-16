@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Aiursoft.NugetNinja.Core;
+namespace Aiursoft.NugetNinja.Core.Services.Utils;
 
 public static class StringExtensions
 {

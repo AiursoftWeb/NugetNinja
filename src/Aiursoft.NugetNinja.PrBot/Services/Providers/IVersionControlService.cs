@@ -1,4 +1,6 @@
-﻿namespace Aiursoft.NugetNinja.PrBot;
+﻿using Aiursoft.NugetNinja.PrBot.Models;
+
+namespace Aiursoft.NugetNinja.PrBot.Services.Providers;
 
 public interface IVersionControlService
 {
