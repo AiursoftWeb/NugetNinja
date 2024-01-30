@@ -43,6 +43,10 @@ public class Extractor
             var deserialized = deserializer.Deserialize<NinjaConfig>(configContent);
             model.NinjaConfig = deserialized;
         }
+        else
+        {
+            _logger.LogWarning("Can not find ninja config file: {Path}", configFilePath);
+        }
 
         return model;
     }
