@@ -20,5 +20,5 @@ public class PatchFileAction : IAction
         await File.WriteAllTextAsync(FilePath, Content);
     }
 
-    public required Project SourceProject { get; init; }
+    public Project? SourceProject { get; init; }
 }

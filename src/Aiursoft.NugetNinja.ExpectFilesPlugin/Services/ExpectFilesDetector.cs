@@ -50,8 +50,7 @@ public class ExpectFilesDetector : IActionDetector
                         yield return new PatchFileAction
                         {
                             FilePath = pathFileShouldBe,
-                            Content = fileContentShouldBe,
-                            SourceProject = context.AllProjects.First(),
+                            Content = fileContentShouldBe
                         };
                     }
                     else
