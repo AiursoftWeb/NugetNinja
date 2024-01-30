@@ -15,6 +15,7 @@ public class Extractor
 
     public async Task<Model.Workspace.Model> Parse(string rootPath)
     {
+        _logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", rootPath);
         var csprojs = Directory
             .EnumerateFiles(rootPath, "*.csproj", SearchOption.AllDirectories)
             .ToArray();
@@ -32,11 +33,12 @@ public class Extractor
         var configFilePath = Path.Combine(rootPath, "ninja.yaml");
         if (File.Exists(configFilePath))
         {
+            _logger.LogTrace("Found and parsing ninja config file: {Path}", configFilePath);
             var configContent = await File.ReadAllTextAsync(configFilePath);
             
             var deserializer = new DeserializerBuilder()
                 .IgnoreUnmatchedProperties()
-                .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
             var deserialized = deserializer.Deserialize<NinjaConfig>(configContent);
             model.NinjaConfig = deserialized;
@@ -48,7 +50,10 @@ public class Extractor
 
 public class NinjaConfig
 {
+    // ReSharper disable once UnusedMember.Global
     public int ConfigVersion { get; set; }
+    
+    // ReSharper disable once CollectionNeverUpdated.Global
     public List<NinjaConfigFile> Files { get; set; } = new();
 }
 

@@ -2,6 +2,7 @@
 using Aiursoft.NugetNinja.AllOfficialsPlugin.App;
 using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin.App;
+using Aiursoft.NugetNinja.ExpectFilesPlugin.App;
 using Aiursoft.NugetNinja.MissingPropertyPlugin.App;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.App;
 using Aiursoft.NugetNinja.UselessPackageReferencePlugin.App;
@@ -16,6 +17,7 @@ return await new NestedCommandApp()
     .WithFeature(new PackageReferenceHandler())
     .WithFeature(new ProjectReferenceHandler())
     .WithFeature(new VisualizerHandler())
+    .WithFeature(new ExpectFilesHandler())
     .WithGlobalOptions(OptionsProvider.PathOptions)
     .WithGlobalOptions(OptionsProvider.DryRunOption)
     .WithGlobalOptions(OptionsProvider.VerboseOption)

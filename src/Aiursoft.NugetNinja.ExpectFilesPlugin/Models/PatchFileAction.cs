@@ -15,6 +15,8 @@ public class PatchFileAction : IAction
 
     public async Task TakeActionAsync()
     {
+        // Delete then write.
+        File.Delete(FilePath);
         await File.WriteAllTextAsync(FilePath, Content);
     }
 

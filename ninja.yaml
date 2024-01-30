@@ -1,6 +1,6 @@
 configVersion: 1
 files:
   - name: nuget.config
-    contentUri: https://raw.githubusercontent.com/nuget/nuget.client/4.9.https://raw.githubusercontent.com/NuGet/NuGet.Client/dev/NuGet.Config3/src/NuGet.Core/NuGet.Config
+    contentUri: https://raw.githubusercontent.com/NuGet/NuGet.Client/dev/NuGet.Config
   - name: .editorconfig
     contentUri: https://raw.githubusercontent.com/dotnet/roslyn/master/.editorconfig

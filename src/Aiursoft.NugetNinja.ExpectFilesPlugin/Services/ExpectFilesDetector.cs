@@ -20,11 +20,12 @@ public class ExpectFilesDetector : IActionDetector
     
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
+        _logger.LogTrace("Analyzing expected {Count} files...", context.NinjaConfig.Files.Count);
         foreach (var fileExpected in context.NinjaConfig.Files)
         {
             if (!string.IsNullOrWhiteSpace(fileExpected.ContentUri) && !string.IsNullOrWhiteSpace(fileExpected.Name))
             {
-                _logger.LogTrace("Inspecting file {Name}...", fileExpected.Name);
+                _logger.LogTrace("Inspecting file {Name} with URI {Uri}...", fileExpected.Name, fileExpected.ContentUri);
                 var fileContentShouldBe = await _http.GetStringAsync(fileExpected.ContentUri);
                 var pathFileShouldBe = Path.Combine(context.RootPath, fileExpected.Name);
                 var fileOnDisk = new FileInfo(pathFileShouldBe);
