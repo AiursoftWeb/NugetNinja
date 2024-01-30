@@ -1,4 +1,5 @@
-﻿using Aiursoft.NugetNinja.Core.Services.Utils;
+﻿using Aiursoft.NugetNinja.Core.Services.Extractor;
+using Aiursoft.NugetNinja.Core.Services.Utils;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 
@@ -6,25 +7,25 @@ namespace Aiursoft.NugetNinja.Core.Model.Workspace;
 
 public class Model
 {
-    public List<Project> RootProjects { get; set; } = new();
-
     public List<Project> AllProjects { get; set; } = new();
 
     public List<Package> AllPackages { get; set; } = new();
+    
+    public NinjaConfig NinjaConfig { get; set; } = new();
+    
+    public string RootPath { get; set; } = null!;
 
     public async Task<Project> IncludeProject(string path, ILogger logger)
     {
-        var projectInDatabaes = AllProjects.FirstOrDefault(p => p.PathOnDisk == path);
-        if (projectInDatabaes != null)
+        var projectInDatabases = AllProjects.FirstOrDefault(p => p.PathOnDisk == path);
+        if (projectInDatabases != null)
         {
-            RootProjects.RemoveAll(p => p.PathOnDisk == path);
-            return projectInDatabaes;
+            return projectInDatabases;
         }
 
         logger.LogTrace("Inserting new project: {Path}", path);
         var builtProject = await BuildNewProject(path, logger);
         AllProjects.Add(builtProject);
-        RootProjects.Add(builtProject);
         return builtProject;
     }
 
