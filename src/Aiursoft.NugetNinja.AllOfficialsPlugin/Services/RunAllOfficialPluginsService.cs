@@ -3,6 +3,7 @@ using Aiursoft.NugetNinja.Core.Abstracts;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin.Services;
+using Aiursoft.NugetNinja.ExpectFilesPlugin.Services;
 using Aiursoft.NugetNinja.MissingPropertyPlugin.Services;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 using Aiursoft.NugetNinja.UselessPackageReferencePlugin.Services;
@@ -24,17 +25,19 @@ public class RunAllOfficialPluginsService : IEntryService
         DeprecatedPackageDetector deprecatedPackageDetector,
         PackageReferenceUpgradeDetector packageReferenceUpgradeDetector,
         UselessPackageReferenceDetector uselessPackageReferenceDetector,
-        UselessProjectReferenceDetector uselessProjectReferenceDetector)
+        UselessProjectReferenceDetector uselessProjectReferenceDetector,
+        ExpectFilesDetector expectFilesDetector)
     {
         _logger = logger;
         _extractor = extractor;
         _pluginDetectors = new List<IActionDetector>
         {
             missingPropertyDetector,
+            deprecatedPackageDetector,
+            packageReferenceUpgradeDetector,
             uselessPackageReferenceDetector,
             uselessProjectReferenceDetector,
-            packageReferenceUpgradeDetector,
-            deprecatedPackageDetector
+            expectFilesDetector
         };
     }
 

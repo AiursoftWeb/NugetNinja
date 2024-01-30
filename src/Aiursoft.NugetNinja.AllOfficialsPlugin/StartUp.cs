@@ -12,5 +12,6 @@ public class StartUp : IStartUp
         new UselessPackageReferencePlugin.StartUp().ConfigureServices(services);
         new UselessProjectReferencePlugin.StartUp().ConfigureServices(services);
         new MissingPropertyPlugin.StartUp().ConfigureServices(services);
+        new ExpectFilesPlugin.StartUp().ConfigureServices(services);
     }
 }

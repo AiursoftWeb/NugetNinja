@@ -11,6 +11,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Aiursoft.NugetNinja.DeprecatedPackagePlugin\Aiursoft.NugetNinja.DeprecatedPackagePlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.ExpectFilesPlugin\Aiursoft.NugetNinja.ExpectFilesPlugin.csproj" />
         <ProjectReference Include="..\Aiursoft.NugetNinja.MissingPropertyPlugin\Aiursoft.NugetNinja.MissingPropertyPlugin.csproj" />
         <ProjectReference Include="..\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.csproj" />
         <ProjectReference Include="..\Aiursoft.NugetNinja.UselessPackageReferencePlugin\Aiursoft.NugetNinja.UselessPackageReferencePlugin.csproj" />
