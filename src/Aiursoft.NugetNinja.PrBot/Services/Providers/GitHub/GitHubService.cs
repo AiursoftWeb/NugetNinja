@@ -1,4 +1,5 @@
-﻿using Aiursoft.NugetNinja.PrBot.Models;
+﻿using Aiursoft.NugetNinja.Core.Services.Utils;
+using Aiursoft.NugetNinja.PrBot.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.PrBot.Services.Providers.GitHub;

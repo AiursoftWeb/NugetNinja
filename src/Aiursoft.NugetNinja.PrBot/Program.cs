@@ -5,6 +5,7 @@ using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.Core.Services.Nuget;
+using Aiursoft.NugetNinja.Core.Services.Utils;
 using Aiursoft.NugetNinja.PrBot.Models;
 using Aiursoft.NugetNinja.PrBot.Services;
 using Aiursoft.NugetNinja.PrBot.Services.Providers;

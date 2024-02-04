@@ -1,15 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <Version>7.0.44</Version>
     <TargetFramework>net7.0</TargetFramework>
-    <AssemblyName>ninja-bot</AssemblyName>
-    <RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
+    <AssemblyName>ninja-merge-bot</AssemblyName>
+    <RootNamespace>Aiursoft.NugetNinja.MergeBot</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>ninja-bot</ToolCommandName>
+    <ToolCommandName>ninja-merge-bot</ToolCommandName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SelfContained>false</SelfContained>
@@ -20,7 +20,7 @@
     <Product>NugetNinja Bot</Product>
     <Authors>anduin2017 codgician</Authors>
     <Description>A bot for detecting dependencies of .NET projects and create pull requests automatically.</Description>
-    <PackageId>Aiursoft.NugetNinja.PrBot</PackageId>
+    <PackageId>Aiursoft.NugetNinja.MergeBot</PackageId>
     <PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</PackageProjectUrl>

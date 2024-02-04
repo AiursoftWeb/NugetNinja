@@ -2,7 +2,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.PrBot.Services;
+namespace Aiursoft.NugetNinja.Core.Services.Utils;
 public class HttpWrapper
 {
     private readonly ILogger<HttpWrapper> _logger;
