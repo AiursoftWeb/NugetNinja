@@ -37,7 +37,6 @@ public class ExpectFilesDetector : IActionDetector
                     {
                         FilePath = pathFileShouldBe,
                         Content = fileContentShouldBe,
-                        SourceProject = context.AllProjects.First(),
                     };
                 }
                 else
