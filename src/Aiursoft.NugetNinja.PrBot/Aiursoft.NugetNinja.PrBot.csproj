@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>8.0.0</Version>
+    <Version>8.0.1</Version>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>ninja-bot</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
@@ -41,7 +41,7 @@
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.GitRunner" Version="7.0.16" />
+    <PackageReference Include="Aiursoft.GitRunner" Version="8.0.0" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.205.1" />
   </ItemGroup>
   <ItemGroup>
