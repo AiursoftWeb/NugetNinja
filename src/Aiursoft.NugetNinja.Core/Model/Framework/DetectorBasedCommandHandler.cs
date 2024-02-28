@@ -5,6 +5,4 @@ namespace Aiursoft.NugetNinja.Core.Model.Framework;
 
 public abstract class DetectorBasedCommandHandler<T, TS> : ServiceCommandHandler<DetectorStarter<T>, TS>
     where T : IActionDetector
-    where TS : class, IStartUp, new()
-{
-}
+    where TS : class, IStartUp, new();
