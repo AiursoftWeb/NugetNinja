@@ -34,7 +34,7 @@ public class GitLabService : IGitServer
         var endpoint = $"{endPoint}/api/v4/projects/{projectId}/merge_requests/{mergeRequestId}";
         var json = await _httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
         var mergeRequest = JsonConvert.DeserializeObject<DetailedMergeRequest>(json);
-        return mergeRequest!;
+        return mergeRequest;
     }
     
     public async Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId)
