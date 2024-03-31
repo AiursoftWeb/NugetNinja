@@ -32,6 +32,6 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
     {
         logger.LogInformation("Merging merge request {MergeRequestId} in GitLab...", mergeRequestId);
         var endpoint = $"{endPoint}/api/v4/projects/{projectId}/merge_requests/{mergeRequestId}/merge";
-        await httpClient.SendHttp(endpoint, HttpMethod.Put, patToken);
+        await httpClient.SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 }
