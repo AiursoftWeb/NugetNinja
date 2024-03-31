@@ -55,13 +55,22 @@ public class Entry
                 }
                 
                 _logger.LogInformation("Merge request {MergeRequest} has a successful pipeline!", mergeRequest.Title);
-                await _retryEngine.RunWithRetry(async (attempt) =>
+                try
                 {
-                    _logger.LogInformation("Merging merge request {MergeRequest} with attempt {Attempt}...", mergeRequest.Title, attempt);
-                    await gitServer.MergeRequest(server.EndPoint!, server.Token!, mergeRequest.ProjectId, mergeRequest.IID);
-                }, attempts: 3);
-                    
-                _logger.LogInformation("Merge request {MergeRequest} has been merged!", mergeRequest.Title);
+                    await _retryEngine.RunWithRetry(async (attempt) =>
+                    {
+                        _logger.LogInformation("Merging merge request {MergeRequest} with attempt {Attempt}...",
+                            mergeRequest.Title, attempt);
+                        await gitServer.MergeRequest(server.EndPoint!, server.Token!, mergeRequest.ProjectId,
+                            mergeRequest.IID);
+                    }, attempts: 3);
+
+                    _logger.LogInformation("Merge request {MergeRequest} has been merged!", mergeRequest.Title);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Failed to merge merge request {MergeRequest}!", mergeRequest.Title);
+                }
             }
         }
     }
