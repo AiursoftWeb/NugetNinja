@@ -8,7 +8,7 @@ WORKDIR /config
 RUN dotnet tool install --global Aiursoft.NugetNinja --add-source https://nuget.aiursoft.cn/v3/index.json
 RUN dotnet tool install --global Aiursoft.NugetNinja.PrBot --add-source https://nuget.aiursoft.cn/v3/index.json
 
-RUN echo "cd /config && /root/.dotnet/tools/ninja-bot" > /start.sh
+RUN echo "cd /config && /root/.dotnet/tools/ninja-bot" > /start.sh && chmod +x /start.sh
 
 ENV PATH="/root/.dotnet/tools:${PATH}"
 
