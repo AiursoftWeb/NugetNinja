@@ -8,7 +8,6 @@ using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.App;
 using Aiursoft.NugetNinja.UselessPackageReferencePlugin.App;
 using Aiursoft.NugetNinja.UselessProjectReferencePlugin.App;
 using Aiursoft.NugetNinja.VisualizerPlugin;
-using System.Text.Json;
 
 return await new NestedCommandApp()
     .WithFeature(new AllOfficialsHandler())
