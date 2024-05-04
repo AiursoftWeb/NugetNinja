@@ -4,8 +4,8 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 namespace Aiursoft.NugetNinja.Core.Services.Analyser;
 public class VersionCrossChecker
 {
-    public static readonly string[] netVersions = new string[]
-    {
+    private static readonly string[] NetVersions =
+    [
         "netcoreapp1.0", 
         "netcoreapp1.1", 
         "netcoreapp2.0", 
@@ -21,8 +21,8 @@ public class VersionCrossChecker
         "net6.0", 
         "net7.0",
         "net8.0",
-        "net9.0",
-    };
+        "net9.0"
+    ];
 
     public bool LikeRuntimeVersions(IEnumerable<NugetVersion> inputList)
     {
@@ -37,7 +37,7 @@ public class VersionCrossChecker
         var versionsList = new List<Version>();
         var regex = new Regex(@"\d([.\d]+)?");
 
-        foreach (string version in netVersions)
+        foreach (string version in NetVersions)
         {
             var matches = regex.Matches(version);
 

@@ -335,6 +335,8 @@ public class Project
     ///   WinExe
     /// </summary>
     public string? OutputType { get; init; }
+    
+    // ReSharper disable once InconsistentNaming
     public string? UseWPF { get; init; }
     public string? UseWindowsForms { get; init; }
     public string? Version { get; init; }
