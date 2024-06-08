@@ -3,6 +3,7 @@ FROM hub.aiursoft.cn/mcr.microsoft.com/dotnet/sdk:8.0
 RUN apt update
 RUN apt install -y git unzip wget cron
 RUN mkdir -p /config
+RUN mkdir -p /config-merge
 RUN mkdir -p /root/.local/share/NugetNinjaWorkspace/
 RUN mkdir -p /root/.dotnet/tools
 
