@@ -66,6 +66,8 @@ public class Entry
                     }, attempts: 3);
 
                     _logger.LogInformation("Merge request {MergeRequest} has been merged!", mergeRequest.Title);
+
+                    await Task.Delay(5000);
                 }
                 catch (Exception e)
                 {
