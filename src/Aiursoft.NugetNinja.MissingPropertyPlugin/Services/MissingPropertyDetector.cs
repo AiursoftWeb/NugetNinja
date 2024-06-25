@@ -13,7 +13,7 @@ public class MissingPropertyDetector : IActionDetector
     private readonly ILogger<MissingPropertyDetector> _logger;
 
     private readonly string[] _notSupportedRuntimes =
-    {
+    [
         "net5.0",
         "netcoreapp3.1",
         "netcoreapp3.0",
@@ -21,7 +21,7 @@ public class MissingPropertyDetector : IActionDetector
         "netcoreapp2.1",
         "netcoreapp1.1",
         "netcoreapp1.0"
-    };
+    ];
 
     private readonly string _suggestedRuntime = "net6.0";
 

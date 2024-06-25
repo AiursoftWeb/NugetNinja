@@ -30,15 +30,15 @@ public class RunAllOfficialPluginsService : IEntryService
     {
         _logger = logger;
         _extractor = extractor;
-        _pluginDetectors = new List<IActionDetector>
-        {
+        _pluginDetectors =
+        [
             missingPropertyDetector,
             deprecatedPackageDetector,
             packageReferenceUpgradeDetector,
             uselessPackageReferenceDetector,
             uselessProjectReferenceDetector,
             expectFilesDetector
-        };
+        ];
     }
 
     public Task OnServiceStartedAsync(string path, bool shouldTakeAction) => RunAllPlugins(path, shouldTakeAction, false);

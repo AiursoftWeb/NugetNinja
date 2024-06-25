@@ -66,19 +66,19 @@ public class Project
     /// </summary>
     public string? Sdk { get; init; }
 
-    public List<Project> ProjectReferences { get; init; } = new();
+    public List<Project> ProjectReferences { get; init; } = [];
 
-    public List<Package> PackageReferences { get; init; } = new();
+    public List<Package> PackageReferences { get; init; } = [];
 
-    public List<string> FrameworkReferences { get; init; } = new();
+    public List<string> FrameworkReferences { get; init; } = [];
 
     public string[] GetTargetFrameworks()
     {
         if (!string.IsNullOrWhiteSpace(TargetFrameworks)) return TargetFrameworks.Split(';');
 
-        if (!string.IsNullOrWhiteSpace(TargetFramework)) return new[] { TargetFramework };
+        if (!string.IsNullOrWhiteSpace(TargetFramework)) return [TargetFramework];
 
-        return Array.Empty<string>();
+        return [];
     }
 
     public bool Executable()

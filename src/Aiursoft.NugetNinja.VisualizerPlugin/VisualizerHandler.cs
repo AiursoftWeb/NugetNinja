@@ -20,27 +20,27 @@ public sealed class VisualizerHandler : ExecutableCommandHandlerBuilder
     protected override string Description => "The command to visualize the dependency relationship, with mermaid markdown.";
 
     private static readonly Option<int> DepthOption = new(
-        new[] { "--depth", "-d" },
+        ["--depth", "-d"],
         () => int.MaxValue,
         "Depth for package reference");
 
     private static readonly Option<string> ExcludeOption = new(
-        new[] { "--excludes" },
+        ["--excludes"],
         "Packages to exclude from the chart. Seperated by ','. For example: 'Microsoft,System,Test' to ignore system packages.");
 
     private static readonly Option<bool> LocalOnlyOption = new(
-        new[] { "--local", "-l" },
+        ["--local", "-l"],
         () => false,
         "Only show local project references. (Ignore package references.)");
 
     protected override Option[] GetCommandOptions()
     {
-        return new Option[]
-        {
+        return
+        [
             DepthOption,
             ExcludeOption,
             LocalOnlyOption
-        };
+        ];
     }
 
     protected override Task Execute(InvocationContext context)
@@ -59,7 +59,7 @@ public sealed class VisualizerHandler : ExecutableCommandHandlerBuilder
             .Where(t => !string.IsNullOrWhiteSpace(t))
             .Select(t => t.Trim())
             .Distinct()
-            .ToArray() ?? Array.Empty<string>();
+            .ToArray() ?? [];
         return RunFromHost(host, path, depth, excludesArray, localOnly);
     }
 

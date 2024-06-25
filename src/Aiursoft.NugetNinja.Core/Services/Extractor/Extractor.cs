@@ -58,7 +58,7 @@ public class NinjaConfig
     public int ConfigVersion { get; set; }
     
     // ReSharper disable once CollectionNeverUpdated.Global
-    public List<NinjaConfigFile> Files { get; set; } = new();
+    public List<NinjaConfigFile> Files { get; set; } = [];
 }
 
 public class NinjaConfigFile

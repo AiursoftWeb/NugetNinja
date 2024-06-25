@@ -7,7 +7,7 @@ namespace Aiursoft.NugetNinja.Core.Services.IO;
 public class CsprojWriter
 {
     private static readonly string[] PropertyOrder =
-    {
+    [
         "OutputType",
         "Version",
         "TargetFramework",
@@ -37,7 +37,7 @@ public class CsprojWriter
         "RepositoryType",
         "RepositoryUrl",
         "PackageReadmeFile"
-    };
+    ];
     
     public async Task SaveCsprojToDisk(HtmlDocument doc, string path)
     {

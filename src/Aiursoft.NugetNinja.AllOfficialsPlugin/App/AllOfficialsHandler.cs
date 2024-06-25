@@ -9,5 +9,5 @@ public class AllOfficialsHandler : ServiceCommandHandler<RunAllOfficialPluginsSe
 
     protected override string Description => "The command to run all officially supported features.";
 
-    protected override string[] Alias => new[] { "all" };
+    protected override string[] Alias => ["all"];
 }

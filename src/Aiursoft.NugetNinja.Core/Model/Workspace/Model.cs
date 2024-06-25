@@ -7,9 +7,9 @@ namespace Aiursoft.NugetNinja.Core.Model.Workspace;
 
 public class Model
 {
-    public List<Project> AllProjects { get; set; } = new();
+    public List<Project> AllProjects { get; set; } = [];
 
-    public List<Package> AllPackages { get; set; } = new();
+    public List<Package> AllPackages { get; set; } = [];
     
     public NinjaConfig NinjaConfig { get; set; } = new();
     
