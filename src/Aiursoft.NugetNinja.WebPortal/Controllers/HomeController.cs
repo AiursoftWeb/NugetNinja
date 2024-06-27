@@ -4,20 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Aiursoft.NugetNinja.WebPortal.Controllers;
 
-public class HomeController : Controller
+public class HomeController(ILogger<HomeController> logger) : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(
-        ILogger<HomeController> logger)
-    {
-        _logger = logger;
-    }
-
     [HttpGet]
     public IActionResult Index()
     {
-        _logger.LogInformation("A user accessed the index page");
+        logger.LogInformation("A user accessed the index page");
 
         var model = new IndexViewModel();
         return View(model);
@@ -61,7 +53,7 @@ public class HomeController : Controller
     [HttpPost]
     public IActionResult Unsubscribe([FromForm] [Required] [Url] string githubUrl)
     {
-        _logger.LogInformation("A user unsubscribed the repo: {GithubUrl}", githubUrl);
+        logger.LogInformation("A user unsubscribed the repo: {GithubUrl}", githubUrl);
 
         // Really unsubscribe.
         return RedirectToAction(nameof(SuccessfullyUnSubscribed));

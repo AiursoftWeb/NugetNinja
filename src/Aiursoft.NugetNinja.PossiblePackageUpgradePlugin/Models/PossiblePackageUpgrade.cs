@@ -3,18 +3,11 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Models;
 
-public class PossiblePackageUpgrade : IAction
+public class PossiblePackageUpgrade(Project source, Package target, NugetVersion newVersion) : IAction
 {
-    public PossiblePackageUpgrade(Project source, Package target, NugetVersion newVersion)
-    {
-        SourceProject = source;
-        Package = target;
-        NewVersion = newVersion;
-    }
-
-    public Project SourceProject { get; }
-    public Package Package { get; }
-    public NugetVersion NewVersion { get; }
+    public Project SourceProject { get; } = source;
+    public Package Package { get; } = target;
+    public NugetVersion NewVersion { get; } = newVersion;
 
     public string BuildMessage()
     {

@@ -4,54 +4,15 @@ using HtmlAgilityPack;
 
 namespace Aiursoft.NugetNinja.Core.Model.Workspace;
 
-public class Project
+public class Project(string pathOnDisk, HtmlNode doc)
 {
-    public Project(string pathOnDisk, HtmlNode doc)
-    {
-        // Global
-        PathOnDisk = pathOnDisk;
-        Sdk = doc.ChildNodes["Project"].Attributes[nameof(Sdk)]?.Value;
-        
-        // Build and code
-        OutputType = doc.Descendants(nameof(OutputType)).SingleOrDefault()?.FirstChild?.InnerText;
-        UseWPF = doc.Descendants(nameof(UseWPF)).SingleOrDefault()?.FirstChild?.InnerText;
-        UseWindowsForms = doc.Descendants(nameof(UseWindowsForms)).SingleOrDefault()?.FirstChild?.InnerText;
-        Version = doc.Descendants(nameof(Version)).SingleOrDefault()?.FirstChild?.InnerText;
-        TargetFramework = doc.Descendants(nameof(TargetFramework)).SingleOrDefault()?.FirstChild?.InnerText;
-        TargetFrameworks = doc.Descendants(nameof(TargetFrameworks)).SingleOrDefault()?.FirstChild?.InnerText;
-        AssemblyName = doc.Descendants(nameof(AssemblyName)).SingleOrDefault()?.FirstChild?.InnerText;
-        RootNamespace = doc.Descendants(nameof(RootNamespace)).SingleOrDefault()?.FirstChild?.InnerText;
-        IsTestProject = doc.Descendants(nameof(IsTestProject)).SingleOrDefault()?.FirstChild?.InnerText;
+    // Global
+    // Build and code
+    // Tool
+    // Best practice
+    // Nuget
 
-        // Tool
-        IsPackable = doc.Descendants(nameof(IsPackable)).SingleOrDefault()?.FirstChild?.InnerText;
-        GeneratePackageOnBuild = doc.Descendants(nameof(GeneratePackageOnBuild)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackAsTool = doc.Descendants(nameof(PackAsTool)).SingleOrDefault()?.FirstChild?.InnerText;
-        ToolCommandName = doc.Descendants(nameof(ToolCommandName)).SingleOrDefault()?.FirstChild?.InnerText;
-
-        // Best practice
-        ImplicitUsings = doc.Descendants(nameof(ImplicitUsings)).SingleOrDefault()?.FirstChild?.InnerText;
-        Nullable = doc.Descendants(nameof(Nullable)).SingleOrDefault()?.FirstChild?.InnerText;
-        SelfContained = doc.Descendants(nameof(SelfContained)).SingleOrDefault()?.FirstChild?.InnerText;
-        PublishTrimmed = doc.Descendants(nameof(PublishTrimmed)).SingleOrDefault()?.FirstChild?.InnerText;
-        PublishReadyToRun = doc.Descendants(nameof(PublishReadyToRun)).SingleOrDefault()?.FirstChild?.InnerText;
-        PublishSingleFile = doc.Descendants(nameof(PublishSingleFile)).SingleOrDefault()?.FirstChild?.InnerText;
-        
-        // Nuget
-        Company = doc.Descendants(nameof(Company)).SingleOrDefault()?.FirstChild?.InnerText;
-        Product = doc.Descendants(nameof(Product)).SingleOrDefault()?.FirstChild?.InnerText;
-        Authors = doc.Descendants(nameof(Authors)).SingleOrDefault()?.FirstChild?.InnerText;
-        Description = doc.Descendants(nameof(Description)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackageId = doc.Descendants(nameof(PackageId)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackageTags = doc.Descendants(nameof(PackageTags)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackageLicenseExpression = doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackageProjectUrl = doc.Descendants(nameof(PackageProjectUrl)).SingleOrDefault()?.FirstChild?.InnerText;
-        RepositoryType = doc.Descendants(nameof(RepositoryType)).SingleOrDefault()?.FirstChild?.InnerText;
-        RepositoryUrl = doc.Descendants(nameof(RepositoryUrl)).SingleOrDefault()?.FirstChild?.InnerText;
-        PackageReadmeFile = doc.Descendants(nameof(PackageReadmeFile)).SingleOrDefault()?.FirstChild?.InnerText;
-    }
-
-    public string PathOnDisk { get; set; }
+    public string PathOnDisk { get; set; } = pathOnDisk;
     public string FileName => Path.GetFileNameWithoutExtension(PathOnDisk);
     
     /// <summary>
@@ -64,7 +25,7 @@ public class Project
     ///   Microsoft.NET.Sdk.Worker
     ///   Microsoft.NET.Sdk.WindowsDesktop
     /// </summary>
-    public string? Sdk { get; init; }
+    public string? Sdk { get; init; } = doc.ChildNodes["Project"].Attributes[nameof(Sdk)]?.Value;
 
     public List<Project> ProjectReferences { get; init; } = [];
 
@@ -334,51 +295,52 @@ public class Project
     ///   Exe
     ///   WinExe
     /// </summary>
-    public string? OutputType { get; init; }
-    
+    public string? OutputType { get; init; } = doc.Descendants(nameof(OutputType)).SingleOrDefault()?.FirstChild?.InnerText;
+
     // ReSharper disable once InconsistentNaming
-    public string? UseWPF { get; init; }
-    public string? UseWindowsForms { get; init; }
-    public string? Version { get; init; }
-    public string? TargetFramework { get; init; }
-    public string? TargetFrameworks { get; init; }
-    public string? AssemblyName { get; init; }
-    public string? RootNamespace { get; init; }
-    public string? IsTestProject { get; init; }
+    public string? UseWPF { get; init; } = doc.Descendants(nameof(UseWPF)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? UseWindowsForms { get; init; } = doc.Descendants(nameof(UseWindowsForms)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? Version { get; init; } = doc.Descendants(nameof(Version)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? TargetFramework { get; init; } = doc.Descendants(nameof(TargetFramework)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? TargetFrameworks { get; init; } = doc.Descendants(nameof(TargetFrameworks)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? AssemblyName { get; init; } = doc.Descendants(nameof(AssemblyName)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? RootNamespace { get; init; } = doc.Descendants(nameof(RootNamespace)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? IsTestProject { get; init; } = doc.Descendants(nameof(IsTestProject)).SingleOrDefault()?.FirstChild?.InnerText;
+
     #endregion
     
     #region Tool
-    public string? IsPackable { get; init; }
-    public string? GeneratePackageOnBuild { get; init; }
-    public string? PackAsTool { get; init; }
-    public string? ToolCommandName { get; init; }
+    public string? IsPackable { get; init; } = doc.Descendants(nameof(IsPackable)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? GeneratePackageOnBuild { get; init; } = doc.Descendants(nameof(GeneratePackageOnBuild)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PackAsTool { get; init; } = doc.Descendants(nameof(PackAsTool)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? ToolCommandName { get; init; } = doc.Descendants(nameof(ToolCommandName)).SingleOrDefault()?.FirstChild?.InnerText;
 
     #endregion
 
     #region Best practice
 
-    public string? ImplicitUsings { get; init; }
-    public string? Nullable { get; init; }
-    public string? SelfContained { get; set; }
-    public string? PublishTrimmed { get; set; }
-    public string? PublishReadyToRun { get; set; }
-    public string? PublishSingleFile { get; set; }
+    public string? ImplicitUsings { get; init; } = doc.Descendants(nameof(ImplicitUsings)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? Nullable { get; init; } = doc.Descendants(nameof(Nullable)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? SelfContained { get; set; } = doc.Descendants(nameof(SelfContained)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PublishTrimmed { get; set; } = doc.Descendants(nameof(PublishTrimmed)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PublishReadyToRun { get; set; } = doc.Descendants(nameof(PublishReadyToRun)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PublishSingleFile { get; set; } = doc.Descendants(nameof(PublishSingleFile)).SingleOrDefault()?.FirstChild?.InnerText;
 
     #endregion
 
     #region Nuget Packaging
 
-    public string? Company { get; init; }
-    public string? Product { get; init; }
-    public string? Authors { get; set; }
-    public string? Description { get; init; }
-    public string? PackageId { get; init; }
-    public string? PackageTags { get; init; }
-    public string? PackageLicenseExpression { get; set; }
-    public string? PackageProjectUrl { get; set; }
-    public string? RepositoryType { get; set; }
-    public string? RepositoryUrl { get; set; }
-    public string? PackageReadmeFile { get; set; }
+    public string? Company { get; init; } = doc.Descendants(nameof(Company)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? Product { get; init; } = doc.Descendants(nameof(Product)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? Authors { get; set; } = doc.Descendants(nameof(Authors)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? Description { get; init; } = doc.Descendants(nameof(Description)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PackageId { get; init; } = doc.Descendants(nameof(PackageId)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PackageTags { get; init; } = doc.Descendants(nameof(PackageTags)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PackageLicenseExpression { get; set; } = doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PackageProjectUrl { get; set; } = doc.Descendants(nameof(PackageProjectUrl)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? RepositoryType { get; set; } = doc.Descendants(nameof(RepositoryType)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? RepositoryUrl { get; set; } = doc.Descendants(nameof(RepositoryUrl)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? PackageReadmeFile { get; set; } = doc.Descendants(nameof(PackageReadmeFile)).SingleOrDefault()?.FirstChild?.InnerText;
 
     #endregion
 }

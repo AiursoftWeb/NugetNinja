@@ -5,19 +5,10 @@ using Aiursoft.NugetNinja.Core.Services.Nuget;
 namespace Aiursoft.NugetNinja.VisualizerPlugin;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class Entry
+public class Entry(
+    NugetService nugetService,
+    Extractor extractor)
 {
-    private readonly NugetService _nugetService;
-    private readonly Extractor _extractor;
-
-    public Entry(
-        NugetService nugetService,
-        Extractor extractor)
-    {
-        _nugetService = nugetService;
-        _extractor = extractor;
-    }
-
     public async Task OnServiceStartedAsync(string path, int depth, string[] excludes, bool localOnly)
     {
         var colorShouldBe = Console.ForegroundColor;
@@ -34,7 +25,7 @@ title: Project dependency diagram
         Console.ForegroundColor = ConsoleColor.DarkMagenta;
         Console.WriteLine("stateDiagram-v2");
         Console.ForegroundColor = ConsoleColor.Blue;
-        var model = await _extractor.Parse(path);
+        var model = await extractor.Parse(path);
         await foreach (var result in GenerateRelationships(model, depth, excludes, localOnly).Distinct())
         {
             Console.WriteLine(result);
@@ -73,7 +64,7 @@ title: Project dependency diagram
             yield break;
         }
 
-        var refs = await _nugetService.GetPackageDependencies(package);
+        var refs = await nugetService.GetPackageDependencies(package);
         foreach (var reference in refs?.Where(p => !excludes.Any(e => p.Name.Contains(e))) ?? Array.Empty<Package>())
         {
             yield return $"    {package.Name} --> {reference.Name}";

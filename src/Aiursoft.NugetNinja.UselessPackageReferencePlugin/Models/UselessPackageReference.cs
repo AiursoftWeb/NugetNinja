@@ -3,16 +3,10 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin.Models;
 
-public class UselessPackageReference : IAction
+public class UselessPackageReference(Project source, Package target) : IAction
 {
-    public UselessPackageReference(Project source, Package target)
-    {
-        SourceProject = source;
-        TargetPackage = target;
-    }
-
-    public Project SourceProject { get; set; }
-    public Package TargetPackage { get; set; }
+    public Project SourceProject { get; set; } = source;
+    public Package TargetPackage { get; set; } = target;
 
     public string BuildMessage()
     {

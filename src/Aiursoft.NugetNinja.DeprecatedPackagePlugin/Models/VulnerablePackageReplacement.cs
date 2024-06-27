@@ -3,16 +3,10 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin.Models;
 
-public class VulnerablePackageReplacement : IAction
+public class VulnerablePackageReplacement(Project source, Package target) : IAction
 {
-    public VulnerablePackageReplacement(Project source, Package target)
-    {
-        SourceProject = source;
-        Package = target;
-    }
-
-    public Project SourceProject { get; }
-    public Package Package { get; }
+    public Project SourceProject { get; } = source;
+    public Package Package { get; } = target;
 
     public string BuildMessage()
     {

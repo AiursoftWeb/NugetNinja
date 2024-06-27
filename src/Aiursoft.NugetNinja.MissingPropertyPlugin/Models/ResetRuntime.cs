@@ -3,30 +3,20 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
 
-public class ResetRuntime : IAction
+public class ResetRuntime(
+    Project project,
+    string[] newRuntimes,
+    int inserted,
+    int deprecated)
+    : IAction
 {
-    private readonly int _deprecated;
-    private readonly int _inserted;
-
-    public ResetRuntime(
-        Project project,
-        string[] newRuntimes,
-        int inserted,
-        int deprecated)
-    {
-        _inserted = inserted;
-        _deprecated = deprecated;
-        SourceProject = project;
-        NewRuntimes = newRuntimes;
-    }
-
-    public Project SourceProject { get; }
-    public string[] NewRuntimes { get; }
+    public Project SourceProject { get; } = project;
+    public string[] NewRuntimes { get; } = newRuntimes;
 
     public string BuildMessage()
     {
         return
-            $"The project: '{SourceProject}' with runtimes: '{string.Join(',', SourceProject.GetTargetFrameworks())}' should insert {_inserted} runtime(s) and deprecate {_deprecated} runtime(s) to '{string.Join(',', NewRuntimes)}'.";
+            $"The project: '{SourceProject}' with runtimes: '{string.Join(',', SourceProject.GetTargetFrameworks())}' should insert {inserted} runtime(s) and deprecate {deprecated} runtime(s) to '{string.Join(',', NewRuntimes)}'.";
     }
 
     public async Task TakeActionAsync()

@@ -3,16 +3,10 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.AllOfficialsPlugin.Models;
 
-public class IncreaseVersionAction : IAction
+public class IncreaseVersionAction(Project source, NugetVersion newVersion) : IAction
 {
-    public IncreaseVersionAction(Project source, NugetVersion newVersion)
-    {
-        SourceProject = source;
-        NewVersion = newVersion;
-    }
-
-    public Project SourceProject { get; }
-    public NugetVersion NewVersion { get; }
+    public Project SourceProject { get; } = source;
+    public NugetVersion NewVersion { get; } = newVersion;
 
     public string BuildMessage()
     {

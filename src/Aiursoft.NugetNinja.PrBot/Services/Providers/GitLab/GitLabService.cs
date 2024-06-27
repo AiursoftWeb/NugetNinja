@@ -5,26 +5,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.PrBot.Services.Providers.GitLab;
 
-public class GitLabService : IVersionControlService
+public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger) : IVersionControlService
 {
-    private readonly HttpWrapper _httpClient;
-    private readonly ILogger<GitLabService> _logger;
-
-    public GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger)
-    {
-        _httpClient = httpClient;
-        _logger = logger;
-    }
-
     public string GetName() => "GitLab";
 
     public async Task<bool> RepoExists(string endPoint, string orgName, string repoName, string patToken)
     {
-        _logger.LogInformation("Checking if repository exists in GitLab: {OrgName}/{RepoName}...", orgName, repoName);
+        logger.LogInformation("Checking if repository exists in GitLab: {OrgName}/{RepoName}...", orgName, repoName);
         try
         {
             var endpoint = $"{endPoint}/api/v4/projects/{orgName}%2F{repoName}";
-            await _httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
+            await httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
             return true;
         }
         catch
@@ -35,11 +26,11 @@ public class GitLabService : IVersionControlService
 
     public async IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken)
     {
-        _logger.LogInformation("Listing all starred repositories for user: {UserName} in GitLab...", userName);
+        logger.LogInformation("Listing all starred repositories for user: {UserName} in GitLab...", userName);
         for (var i = 1; ; i++)
         {
             var endpoint = $"{endPoint}/api/v4/users/{userName}/starred_projects?per_page=100&page={i}";
-            var currentPageItems = await _httpClient.SendHttpAndGetJson<List<GitLabProject>>(endpoint, HttpMethod.Get, patToken);
+            var currentPageItems = await httpClient.SendHttpAndGetJson<List<GitLabProject>>(endpoint, HttpMethod.Get, patToken);
             if (!currentPageItems.Any()) yield break;
 
             foreach (var repo in currentPageItems) yield return new Repository
@@ -60,16 +51,16 @@ public class GitLabService : IVersionControlService
 
     public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
     {
-        _logger.LogInformation("Forking repository in GitLab: {Org}/{Repo}...", org, repo);
+        logger.LogInformation("Forking repository in GitLab: {Org}/{Repo}...", org, repo);
         var endpoint = $"{endPoint}/api/v4/projects/{org}%2F{repo}/fork";
-        await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken);
+        await httpClient.SendHttp(endpoint, HttpMethod.Post, patToken);
     }
 
     public async Task<IEnumerable<PullRequest>> GetPullRequests(string endPoint, string org, string repo, string head, string patToken)
     {
-        _logger.LogInformation("Getting pull requests in GitLab: {Org}/{Repo}...", org, repo);
+        logger.LogInformation("Getting pull requests in GitLab: {Org}/{Repo}...", org, repo);
         var endpoint = $"{endPoint}/api/v4/projects/{org}%2F{repo}/merge_requests?state=opened&source_branch={head.Split(':').Last()}";
-        var gitlabPrs = await _httpClient.SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
+        var gitlabPrs = await httpClient.SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
         return gitlabPrs.Select(p => new PullRequest
         {
             User = new User
@@ -85,9 +76,9 @@ public class GitLabService : IVersionControlService
         var myName = head.Split(':').First();
         var myBranch = head.Split(":").Last();
         var project = await GetProject(endPoint, org, repo, patToken);
-        _logger.LogInformation("Creating a new pull request in GitLab: {Org}/{Repo}...", org, repo);
+        logger.LogInformation("Creating a new pull request in GitLab: {Org}/{Repo}...", org, repo);
         var endpoint = $"{endPoint}/api/v4/projects/{myName}%2F{repo}/merge_requests";
-        await _httpClient.SendHttp(endpoint, HttpMethod.Post, patToken, new
+        await httpClient.SendHttp(endpoint, HttpMethod.Post, patToken, new
         {
             title = "Auto dependencies upgrade by bot.",
             description = @"
@@ -105,7 +96,7 @@ This pull request may break or change the behavior of this application. Review w
     private async Task<GitLabProject> GetProject(string endpoint, string org, string repo, string patToken)
     {
         //https://gitlab.aiursoft.cn/api/v4/projects/aiursoft%2fscanner
-        return await _httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{org}%2f{repo}", HttpMethod.Get, patToken);
+        return await httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{org}%2f{repo}", HttpMethod.Get, patToken);
     }
 
     public string GetPushPath(Server connectionConfiguration, Repository repo)

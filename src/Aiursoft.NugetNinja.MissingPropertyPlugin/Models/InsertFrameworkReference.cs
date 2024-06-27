@@ -3,16 +3,10 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
 
-public class InsertFrameworkReference : IAction
+public class InsertFrameworkReference(Project source, string frameworkReference) : IAction
 {
-    public InsertFrameworkReference(Project source, string frameworkReference)
-    {
-        SourceProject = source;
-        FrameworkReference = frameworkReference;
-    }
-
-    public Project SourceProject { get; set; }
-    public string FrameworkReference { get; set; }
+    public Project SourceProject { get; set; } = source;
+    public string FrameworkReference { get; set; } = frameworkReference;
 
     public string BuildMessage()
     {

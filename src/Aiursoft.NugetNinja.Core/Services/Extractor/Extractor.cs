@@ -4,18 +4,11 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Aiursoft.NugetNinja.Core.Services.Extractor;
 
-public class Extractor
+public class Extractor(ILogger<Extractor> logger)
 {
-    private readonly ILogger<Extractor> _logger;
-
-    public Extractor(ILogger<Extractor> logger)
-    {
-        _logger = logger;
-    }
-
     public async Task<Model.Workspace.Model> Parse(string rootPath)
     {
-        _logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", rootPath);
+        logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", rootPath);
         var csprojs = Directory
             .EnumerateFiles(rootPath, "*.csproj", SearchOption.AllDirectories)
             .ToArray();
@@ -27,13 +20,13 @@ public class Extractor
 
         foreach (var csprojPath in csprojs)
         {
-            await model.IncludeProject(csprojPath, _logger);
+            await model.IncludeProject(csprojPath, logger);
         }
         
         var configFilePath = Path.Combine(rootPath, "ninja.yaml");
         if (File.Exists(configFilePath))
         {
-            _logger.LogTrace("Found and parsing ninja config file: {Path}", configFilePath);
+            logger.LogTrace("Found and parsing ninja config file: {Path}", configFilePath);
             var configContent = await File.ReadAllTextAsync(configFilePath);
             
             var deserializer = new DeserializerBuilder()
@@ -45,7 +38,7 @@ public class Extractor
         }
         else
         {
-            _logger.LogWarning("Can not find ninja config file: {Path}", configFilePath);
+            logger.LogWarning("Can not find ninja config file: {Path}", configFilePath);
         }
 
         return model;

@@ -7,22 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin.Services;
 
-public class UselessPackageReferenceDetector : IActionDetector
+public class UselessPackageReferenceDetector(
+    ILogger<UselessPackageReferenceDetector> logger,
+    NugetService nugetService,
+    ProjectsEnumerator enumerator)
+    : IActionDetector
 {
-    private readonly ProjectsEnumerator _enumerator;
-    private readonly ILogger<UselessPackageReferenceDetector> _logger;
-    private readonly NugetService _nugetService;
-
-    public UselessPackageReferenceDetector(
-        ILogger<UselessPackageReferenceDetector> logger,
-        NugetService nugetService,
-        ProjectsEnumerator enumerator)
-    {
-        _logger = logger;
-        _nugetService = nugetService;
-        _enumerator = enumerator;
-    }
-
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
         foreach (var uselessReferences in context.AllProjects.Select(AnalyzeProject))
@@ -33,14 +23,14 @@ public class UselessPackageReferenceDetector : IActionDetector
     private async IAsyncEnumerable<UselessPackageReference> AnalyzeProject(Project context)
     {
         var accessiblePackages = new List<Package>();
-        var relatedProjects = _enumerator.EnumerateAllBuiltProjects(context, false);
+        var relatedProjects = enumerator.EnumerateAllBuiltProjects(context, false);
         foreach (var relatedProject in relatedProjects)
         {
             accessiblePackages.AddRange(relatedProject.PackageReferences);
             foreach (var package in relatedProject.PackageReferences)
                 try
                 {
-                    var recursivePackagesBroughtUp = await _nugetService.GetPackageDependencies(package);
+                    var recursivePackagesBroughtUp = await nugetService.GetPackageDependencies(package);
                     if (recursivePackagesBroughtUp != null)
                     {
                         accessiblePackages.AddRange(recursivePackagesBroughtUp);
@@ -48,8 +38,8 @@ public class UselessPackageReferenceDetector : IActionDetector
                 }
                 catch (Exception e)
                 {
-                    _logger.LogTrace(e, "Failed to get package dependencies by name: \'{Package}\'", package);
-                    _logger.LogCritical("Failed to get package dependencies by name: \'{Package}\'", package);
+                    logger.LogTrace(e, "Failed to get package dependencies by name: \'{Package}\'", package);
+                    logger.LogCritical("Failed to get package dependencies by name: \'{Package}\'", package);
                 }
         }
 
@@ -59,7 +49,7 @@ public class UselessPackageReferenceDetector : IActionDetector
             foreach (var otherDirectReference in context.PackageReferences.Where(p => p != directReference))
                 try
                 {
-                    var references = await _nugetService.GetPackageDependencies(otherDirectReference);
+                    var references = await nugetService.GetPackageDependencies(otherDirectReference);
                     if (references != null)
                     {
                         accessiblePackagesForThisProject.AddRange(references);
@@ -67,8 +57,8 @@ public class UselessPackageReferenceDetector : IActionDetector
                 }
                 catch (Exception e)
                 {
-                    _logger.LogTrace(e, "Failed to get package dependencies by name: \'{OtherDirectReference}\'", otherDirectReference);
-                    _logger.LogCritical("Failed to get package dependencies by name: \'{OtherDirectReference}\'", otherDirectReference);
+                    logger.LogTrace(e, "Failed to get package dependencies by name: \'{OtherDirectReference}\'", otherDirectReference);
+                    logger.LogCritical("Failed to get package dependencies by name: \'{OtherDirectReference}\'", otherDirectReference);
                 }
 
             if (accessiblePackagesForThisProject.Any(pa => pa.Name == directReference.Name))

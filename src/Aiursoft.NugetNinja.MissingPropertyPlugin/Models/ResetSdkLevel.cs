@@ -3,16 +3,10 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
 
-public class ResetSdkLevel : IAction
+public class ResetSdkLevel(Project project, string newSdk) : IAction
 {
-    public ResetSdkLevel(Project project, string newSdk)
-    {
-        SourceProject = project;
-        NewSdk = newSdk;
-    }
-
-    public Project SourceProject { get; }
-    public string NewSdk { get; }
+    public Project SourceProject { get; } = project;
+    public string NewSdk { get; } = newSdk;
 
     public string BuildMessage()
     {

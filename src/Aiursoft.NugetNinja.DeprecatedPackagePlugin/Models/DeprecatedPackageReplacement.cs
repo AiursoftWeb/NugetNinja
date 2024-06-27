@@ -3,18 +3,11 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.DeprecatedPackagePlugin.Models;
 
-public class DeprecatedPackageReplacement : IAction
+public class DeprecatedPackageReplacement(Project source, Package target, Package? alternative) : IAction
 {
-    public DeprecatedPackageReplacement(Project source, Package target, Package? alternative)
-    {
-        SourceProject = source;
-        Package = target;
-        Alternative = alternative;
-    }
-
-    public Project SourceProject { get; }
-    public Package Package { get; }
-    public Package? Alternative { get; }
+    public Project SourceProject { get; } = source;
+    public Package Package { get; } = target;
+    public Package? Alternative { get; } = alternative;
 
     public string BuildMessage()
     {

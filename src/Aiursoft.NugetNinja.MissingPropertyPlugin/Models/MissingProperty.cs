@@ -3,57 +3,39 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
 
-public class PackFile : IAction
+public class PackFile(Project csproj, string filePath) : IAction
 {
-    private readonly string _filePath;
-    public Project SourceProject { get; }
+    public Project SourceProject { get; } = csproj;
 
-    public PackFile(Project csproj, string filePath)
-    {
-        SourceProject = csproj;
-        _filePath = filePath;
-    }
-    
     public string BuildMessage()
     {
-        return $"The project: '{SourceProject}' should also pack with file: {_filePath}.";
+        return $"The project: '{SourceProject}' should also pack with file: {filePath}.";
     }
 
     public Task TakeActionAsync()
     {
-        return SourceProject.PackFile(_filePath);
+        return SourceProject.PackFile(filePath);
     }
 
 }
 
-public class MissingProperty : IAction
+public class MissingProperty(Project csproj, string propertyName, string suggestedValue, string? currentValue = null)
+    : IAction
 {
-    private readonly string? _currentValue;
-    private readonly string _propertyName;
-    private readonly string _suggestedValue;
-
-    public Project SourceProject { get; }
-
-    public MissingProperty(Project csproj, string propertyName, string suggestedValue, string? currentValue = null)
-    {
-        SourceProject = csproj;
-        _propertyName = propertyName;
-        _suggestedValue = suggestedValue;
-        _currentValue = currentValue;
-    }
+    public Project SourceProject { get; } = csproj;
 
     public string BuildMessage()
     {
-        if (_currentValue != _suggestedValue)
+        if (currentValue != suggestedValue)
         {
-            if (string.IsNullOrWhiteSpace(_currentValue))
+            if (string.IsNullOrWhiteSpace(currentValue))
             {
                 return
-                    $"The project: '{SourceProject}' lacks of property '{_propertyName}'. You can possibly set that to: '{_suggestedValue}'.";
+                    $"The project: '{SourceProject}' lacks of property '{propertyName}'. You can possibly set that to: '{suggestedValue}'.";
             }
             else
             {
-                return $"The project: '{SourceProject}' property '{_propertyName}' with value '{_currentValue}' was not suggested. You can possibly set that to: '{_suggestedValue}'.";
+                return $"The project: '{SourceProject}' property '{propertyName}' with value '{currentValue}' was not suggested. You can possibly set that to: '{suggestedValue}'.";
             }
         }
 
@@ -62,6 +44,6 @@ public class MissingProperty : IAction
 
     public Task TakeActionAsync()
     {
-        return SourceProject.AddOrUpdateProperty(_propertyName, _suggestedValue);
+        return SourceProject.AddOrUpdateProperty(propertyName, suggestedValue);
     }
 }

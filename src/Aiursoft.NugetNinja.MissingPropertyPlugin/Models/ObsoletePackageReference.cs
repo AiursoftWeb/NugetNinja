@@ -3,16 +3,10 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
 
-public class ObsoletePackageReference : IAction
+public class ObsoletePackageReference(Project source, string target) : IAction
 {
-    public ObsoletePackageReference(Project source, string target)
-    {
-        SourceProject = source;
-        TargetPackage = target;
-    }
-
-    public Project SourceProject { get; set; }
-    public string TargetPackage { get; set; }
+    public Project SourceProject { get; set; } = source;
+    public string TargetPackage { get; set; } = target;
 
     public string BuildMessage()
     {

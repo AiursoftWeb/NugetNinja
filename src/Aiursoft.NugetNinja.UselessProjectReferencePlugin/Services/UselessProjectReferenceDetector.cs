@@ -5,15 +5,8 @@ using Aiursoft.NugetNinja.UselessProjectReferencePlugin.Models;
 
 namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin.Services;
 
-public class UselessProjectReferenceDetector : IActionDetector
+public class UselessProjectReferenceDetector(ProjectsEnumerator enumerator) : IActionDetector
 {
-    private readonly ProjectsEnumerator _enumerator;
-
-    public UselessProjectReferenceDetector(ProjectsEnumerator enumerator)
-    {
-        _enumerator = enumerator;
-    }
-
     public IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
         return Analyze(context).ToAsyncEnumerable();
@@ -31,7 +24,7 @@ public class UselessProjectReferenceDetector : IActionDetector
         var allRecursiveReferences = new List<Project>();
         foreach (var recursiveReferences in
                  directReferences.Select(directReference =>
-                     _enumerator.EnumerateAllBuiltProjects(directReference, false)))
+                     enumerator.EnumerateAllBuiltProjects(directReference, false)))
             allRecursiveReferences.AddRange(recursiveReferences);
 
         foreach (var directReference in directReferences.Where(directReference =>

@@ -8,19 +8,11 @@ using Microsoft.VisualStudio.Services.WebApi;
 
 namespace Aiursoft.NugetNinja.PrBot.Services.Providers.AzureDevOps;
 
-public class AzureDevOpsService : IVersionControlService
+public class AzureDevOpsService(
+    CacheService cacheService,
+    ILogger<AzureDevOpsService> logger)
+    : IVersionControlService
 {
-    private readonly CacheService _cacheService;
-    private readonly ILogger<AzureDevOpsService> _logger;
-
-    public AzureDevOpsService(
-        CacheService cacheService,
-        ILogger<AzureDevOpsService> logger)
-    {
-        _cacheService = cacheService;
-        _logger = logger;
-    }
-
     public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch,
         string patToken)
     {
@@ -68,7 +60,7 @@ This pull request may break or change the behavior of this application. Review w
                     CloneUrl = repo.SshUrl
                 };
             else
-                _logger.LogWarning("Got a repository from Azure Devops with name: {RepoName} who\'s default branch is null!", repo.Name);
+                logger.LogWarning("Got a repository from Azure Devops with name: {RepoName} who\'s default branch is null!", repo.Name);
     }
 
     public string GetName()
@@ -111,7 +103,7 @@ This pull request may break or change the behavior of this application. Review w
 
     private async Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken)
     {
-        return await _cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", async () =>
+        return await cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", async () =>
         {
             var credentials = new VssBasicCredential(string.Empty, patToken);
             var connection = new VssConnection(new Uri(endPoint), credentials);

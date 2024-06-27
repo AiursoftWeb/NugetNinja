@@ -8,40 +8,26 @@ using Microsoft.Extensions.Options;
 
 namespace Aiursoft.NugetNinja.PrBot;
 
-public class Entry
+public class Entry(
+    IOptions<List<Server>> servers,
+    IEnumerable<IVersionControlService> versionControls,
+    RunAllOfficialPluginsService runAllOfficialPluginsService,
+    WorkspaceManager workspaceManager,
+    ILogger<Entry> logger)
 {
-    private readonly ILogger<Entry> _logger;
-    private readonly RunAllOfficialPluginsService _runAllOfficialPluginsService;
-    private readonly List<Server> _servers;
-    private readonly IEnumerable<IVersionControlService> _versionControls;
+    private readonly List<Server> _servers = servers.Value;
 
     private readonly string _workspaceFolder =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NugetNinjaWorkspace");
 
-    private readonly WorkspaceManager _workspaceManager;
-
-    public Entry(
-        IOptions<List<Server>> servers,
-        IEnumerable<IVersionControlService> versionControls,
-        RunAllOfficialPluginsService runAllOfficialPluginsService,
-        WorkspaceManager workspaceManager,
-        ILogger<Entry> logger)
-    {
-        _servers = servers.Value;
-        _versionControls = versionControls;
-        _runAllOfficialPluginsService = runAllOfficialPluginsService;
-        _workspaceManager = workspaceManager;
-        _logger = logger;
-    }
-
     public async Task RunAsync()
     {
-        _logger.LogInformation("Starting Nuget Ninja PR bot...");
+        logger.LogInformation("Starting Nuget Ninja PR bot...");
 
         foreach (var server in _servers)
         {
-            _logger.LogInformation("Processing server: {ServerProvider}...", server.Provider);
-            var serviceProvider = _versionControls.First(v => v.GetName() == server.Provider);
+            logger.LogInformation("Processing server: {ServerProvider}...", server.Provider);
+            var serviceProvider = versionControls.First(v => v.GetName() == server.Provider);
             await RunServerAsync(server, serviceProvider);
         }
     }
@@ -54,25 +40,25 @@ public class Entry
             .Where(r => r.Owner?.Login != server.UserName)
             .ToListAsync();
 
-        _logger.LogInformation("Got {MyStarsCount} stared repositories as registered to create pull requests automatically", myStars.Count);
-        _logger.LogInformation("\r\n\r\n");
-        _logger.LogInformation("================================================================");
-        _logger.LogInformation("\r\n\r\n");
+        logger.LogInformation("Got {MyStarsCount} stared repositories as registered to create pull requests automatically", myStars.Count);
+        logger.LogInformation("\r\n\r\n");
+        logger.LogInformation("================================================================");
+        logger.LogInformation("\r\n\r\n");
         foreach (var repo in myStars)
             try
             {
-                _logger.LogInformation("Processing repository {Repo}...", repo);
+                logger.LogInformation("Processing repository {Repo}...", repo);
                 await ProcessRepository(repo, server, versionControl);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Crashed when processing repo: {Repo}!", repo);
+                logger.LogError(e, "Crashed when processing repo: {Repo}!", repo);
             }
             finally
             {
-                _logger.LogInformation("\r\n\r\n");
-                _logger.LogInformation("================================================================");
-                _logger.LogInformation("\r\n\r\n");
+                logger.LogInformation("\r\n\r\n");
+                logger.LogInformation("================================================================");
+                logger.LogInformation("\r\n\r\n");
             }
     }
 
@@ -84,31 +70,31 @@ public class Entry
 
         // Clone locally.
         var workPath = Path.Combine(_workspaceFolder, $"{repo.Id}-{repo.Name}");
-        _logger.LogInformation("Cloning repository: {RepoName} to {WorkPath}...", repo.Name, workPath);
-        await _workspaceManager.ResetRepo(
+        logger.LogInformation("Cloning repository: {RepoName} to {WorkPath}...", repo.Name, workPath);
+        await workspaceManager.ResetRepo(
             workPath,
             repo.DefaultBranch ?? throw new NullReferenceException($"The default branch of {repo} is null!"),
             repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo} is null!"),
             CloneMode.Full);
 
         // Run all plugins.
-        await _runAllOfficialPluginsService.RunAllPlugins(workPath, true, onlyRunUpdatePlugin: connectionConfiguration.OnlyUpdate);
+        await runAllOfficialPluginsService.RunAllPlugins(workPath, true, onlyRunUpdatePlugin: connectionConfiguration.OnlyUpdate);
 
         // Consider changes...
-        if (!await _workspaceManager.PendingCommit(workPath))
+        if (!await workspaceManager.PendingCommit(workPath))
         {
-            _logger.LogInformation("{Repo} has no suggestion that we can make. Ignore", repo);
+            logger.LogInformation("{Repo} has no suggestion that we can make. Ignore", repo);
             return;
         }
 
-        _logger.LogInformation("{Repo} is pending some fix. We will try to create\\\\update related pull request", repo);
-        await _workspaceManager.SetUserConfig(workPath, connectionConfiguration.DisplayName,
+        logger.LogInformation("{Repo} is pending some fix. We will try to create\\\\update related pull request", repo);
+        await workspaceManager.SetUserConfig(workPath, connectionConfiguration.DisplayName,
             connectionConfiguration.UserEmail);
-        var saved = await _workspaceManager.CommitToBranch(workPath, "Auto csproj fix and update by bot.",
+        var saved = await workspaceManager.CommitToBranch(workPath, "Auto csproj fix and update by bot.",
             connectionConfiguration.ContributionBranch);
         if (!saved)
         {
-            _logger.LogInformation("{Repo} has no suggestion that we can make. Ignore", repo);
+            logger.LogInformation("{Repo} has no suggestion that we can make. Ignore", repo);
             return;
         }
 
@@ -137,7 +123,7 @@ public class Entry
         // Push to forked repo.
         var pushPath = versionControl.GetPushPath(connectionConfiguration, repo);
 
-        await _workspaceManager.Push(
+        await workspaceManager.Push(
             workPath,
             connectionConfiguration.ContributionBranch,
             pushPath,
@@ -162,6 +148,6 @@ public class Entry
                 repo.DefaultBranch,
                 connectionConfiguration.Token);
         else
-            _logger.LogInformation("Skipped creating new pull request for {Repo} because there already exists", repo);
+            logger.LogInformation("Skipped creating new pull request for {Repo} because there already exists", repo);
     }
 }

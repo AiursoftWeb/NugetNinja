@@ -12,34 +12,26 @@ using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 
-public class RunAllOfficialPluginsService : IEntryService
+public class RunAllOfficialPluginsService(
+    ILogger<RunAllOfficialPluginsService> logger,
+    Extractor extractor,
+    MissingPropertyDetector missingPropertyDetector,
+    DeprecatedPackageDetector deprecatedPackageDetector,
+    PackageReferenceUpgradeDetector packageReferenceUpgradeDetector,
+    UselessPackageReferenceDetector uselessPackageReferenceDetector,
+    UselessProjectReferenceDetector uselessProjectReferenceDetector,
+    ExpectFilesDetector expectFilesDetector)
+    : IEntryService
 {
-    private readonly Extractor _extractor;
-    private readonly ILogger<RunAllOfficialPluginsService> _logger;
-    private readonly List<IActionDetector> _pluginDetectors;
-
-    public RunAllOfficialPluginsService(
-        ILogger<RunAllOfficialPluginsService> logger,
-        Extractor extractor,
-        MissingPropertyDetector missingPropertyDetector,
-        DeprecatedPackageDetector deprecatedPackageDetector,
-        PackageReferenceUpgradeDetector packageReferenceUpgradeDetector,
-        UselessPackageReferenceDetector uselessPackageReferenceDetector,
-        UselessProjectReferenceDetector uselessProjectReferenceDetector,
-        ExpectFilesDetector expectFilesDetector)
-    {
-        _logger = logger;
-        _extractor = extractor;
-        _pluginDetectors =
-        [
-            missingPropertyDetector,
-            deprecatedPackageDetector,
-            packageReferenceUpgradeDetector,
-            uselessPackageReferenceDetector,
-            uselessProjectReferenceDetector,
-            expectFilesDetector
-        ];
-    }
+    private readonly List<IActionDetector> _pluginDetectors =
+    [
+        missingPropertyDetector,
+        deprecatedPackageDetector,
+        packageReferenceUpgradeDetector,
+        uselessPackageReferenceDetector,
+        uselessProjectReferenceDetector,
+        expectFilesDetector
+    ];
 
     public Task OnServiceStartedAsync(string path, bool shouldTakeAction) => RunAllPlugins(path, shouldTakeAction, false);
 
@@ -53,16 +45,16 @@ public class RunAllOfficialPluginsService : IEntryService
                 continue;
             }
 
-            _logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", path);
-            var model = await _extractor.Parse(path);
+            logger.LogTrace("Parsing files to build project structure based on path: \'{Path}\'...", path);
+            var model = await extractor.Parse(path);
 
-            _logger.LogInformation("Analyzing possible actions via {Name}...", plugin.GetType().Name);
+            logger.LogInformation("Analyzing possible actions via {Name}...", plugin.GetType().Name);
             var actions = plugin.AnalyzeAsync(model);
 
             await foreach (var action in actions)
             {
                 allActionsTaken.Add(action);
-                _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", action.GetType().Name, action.BuildMessage());
+                logger.LogWarning("Action {Action} built suggestion: {Suggestion}", action.GetType().Name, action.BuildMessage());
                 if (shouldTakeAction) await action.TakeActionAsync();
             }
         }
@@ -72,7 +64,7 @@ public class RunAllOfficialPluginsService : IEntryService
             return;
         }
         
-        var finalModel = await _extractor.Parse(path);
+        var finalModel = await extractor.Parse(path);
         var projectsShouldUpgrade = finalModel.AllProjects
             .Where(project => !string.IsNullOrWhiteSpace(project.Version))
             .Where(project => HasActionTaken(project, allActionsTaken))
@@ -84,7 +76,7 @@ public class RunAllOfficialPluginsService : IEntryService
             {
                 var increasedVersion = Increase(projectTakenActions.Version);
                 var increaseVersionAction = new IncreaseVersionAction(projectTakenActions, increasedVersion);
-                _logger.LogWarning("Action {Action} built suggestion: {Suggestion}", increaseVersionAction.GetType().Name, increaseVersionAction.BuildMessage());
+                logger.LogWarning("Action {Action} built suggestion: {Suggestion}", increaseVersionAction.GetType().Name, increaseVersionAction.BuildMessage());
                 await increaseVersionAction.TakeActionAsync();
             }
         }

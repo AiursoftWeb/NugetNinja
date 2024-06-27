@@ -80,26 +80,26 @@ public class NugetService
         }
     }
 
-    public Task<CatalogInformation?> GetPackageDeprecationInfo(Package package)
+    public Task<CatalogInformation> GetPackageDeprecationInfo(Package package)
     {
         return _cacheService.RunWithCache($"nuget-deprecation-info-{package}-version-{package.Version}-cache",
             () => GetPackageDeprecationInfoFromNuget(package));
     }
 
-    public Task<IReadOnlyCollection<NugetVersion>?> GetAllPublishedVersions(string packageName)
+    public Task<IReadOnlyCollection<NugetVersion>> GetAllPublishedVersions(string packageName)
     {
         return _cacheService.RunWithCache($"all-nuget-published-versions-package-{packageName}-preview-cache",
             () => GetAllPublishedVersionsFromNuget(packageName));
     }
 
-    public Task<NugetServerEndPoints?> GetApiEndpoint(string? overrideServer = null)
+    public Task<NugetServerEndPoints> GetApiEndpoint(string? overrideServer = null)
     {
         var server = overrideServer ?? _customNugetServer;
         return _cacheService.RunWithCache($"nuget-server-{server}-endpoint-cache",
             () => GetApiEndpointFromNuget(server));
     }
 
-    public Task<Package[]?> GetPackageDependencies(Package package)
+    public Task<Package[]> GetPackageDependencies(Package package)
     {
         return _cacheService.RunWithCache($"nuget-package-{package.Name}-dependencies-{package.Version}-cache",
             () => GetPackageDependenciesFromNuget(package));

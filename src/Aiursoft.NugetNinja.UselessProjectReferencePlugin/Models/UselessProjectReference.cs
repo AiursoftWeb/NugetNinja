@@ -3,16 +3,10 @@ using Aiursoft.NugetNinja.Core.Model.Workspace;
 
 namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin.Models;
 
-public class UselessProjectReference : IAction
+public class UselessProjectReference(Project source, Project target) : IAction
 {
-    public UselessProjectReference(Project source, Project target)
-    {
-        SourceProject = source;
-        TargetProject = target;
-    }
-
-    public Project SourceProject { get; set; }
-    public Project TargetProject { get; set; }
+    public Project SourceProject { get; set; } = source;
+    public Project TargetProject { get; set; } = target;
 
     public string BuildMessage()
     {

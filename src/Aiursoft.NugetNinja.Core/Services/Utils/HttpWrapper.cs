@@ -3,19 +3,10 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.Core.Services.Utils;
-public class HttpWrapper
+public class HttpWrapper(
+    ILogger<HttpWrapper> logger,
+    HttpClient httpClient)
 {
-    private readonly ILogger<HttpWrapper> _logger;
-    private readonly HttpClient _httpClient;
-
-    public HttpWrapper(
-        ILogger<HttpWrapper> logger,
-        HttpClient httpClient)
-    {
-        _logger = logger;
-        _httpClient = httpClient;
-    }
-
     public async Task<string> SendHttp(string endPoint, HttpMethod method, string patToken, object? body = null)
     {
         var request = new HttpRequestMessage(method, endPoint)
@@ -29,9 +20,9 @@ public class HttpWrapper
         request.Headers.Add("User-Agent", $"curl/7.76.1");
         request.Headers.Add("accept", "application/json");
 
-        _logger.LogTrace("{Method}: to endpoint: {EndPoint}...", method.Method, endPoint);
+        logger.LogTrace("{Method}: to endpoint: {EndPoint}...", method.Method, endPoint);
 
-        var response = await _httpClient.SendAsync(request);
+        var response = await httpClient.SendAsync(request);
         try
         {
             response.EnsureSuccessStatusCode();
@@ -39,7 +30,7 @@ public class HttpWrapper
         catch
         {
             var error = await response.Content.ReadAsStringAsync();
-            _logger.LogWarning("Endpoint: {EndPoint} respond error: {Error}", endPoint, error);
+            logger.LogWarning("Endpoint: {EndPoint} respond error: {Error}", endPoint, error);
             throw;
         }
 
