@@ -29,7 +29,7 @@ public class DeprecatedPackageDetector(
                 continue;
             }
 
-            if (catalogInformation?.Deprecation != null)
+            if (catalogInformation.Deprecation != null)
             {
                 Package? alternative = null;
                 if (!string.IsNullOrWhiteSpace(catalogInformation.Deprecation.AlternatePackage?.Id))
@@ -44,7 +44,7 @@ public class DeprecatedPackageDetector(
                     package,
                     alternative);
             }
-            else if (catalogInformation?.Vulnerabilities?.Any() == true)
+            else if (catalogInformation.Vulnerabilities?.Any() == true)
             {
                 yield return new VulnerablePackageReplacement(project, package);
             }

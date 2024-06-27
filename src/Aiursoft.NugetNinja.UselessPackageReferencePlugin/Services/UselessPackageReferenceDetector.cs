@@ -31,10 +31,7 @@ public class UselessPackageReferenceDetector(
                 try
                 {
                     var recursivePackagesBroughtUp = await nugetService.GetPackageDependencies(package);
-                    if (recursivePackagesBroughtUp != null)
-                    {
-                        accessiblePackages.AddRange(recursivePackagesBroughtUp);
-                    }
+                    accessiblePackages.AddRange(recursivePackagesBroughtUp);
                 }
                 catch (Exception e)
                 {
@@ -50,10 +47,7 @@ public class UselessPackageReferenceDetector(
                 try
                 {
                     var references = await nugetService.GetPackageDependencies(otherDirectReference);
-                    if (references != null)
-                    {
-                        accessiblePackagesForThisProject.AddRange(references);
-                    }
+                    accessiblePackagesForThisProject.AddRange(references);
                 }
                 catch (Exception e)
                 {

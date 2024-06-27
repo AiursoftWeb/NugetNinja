@@ -65,7 +65,7 @@ title: Project dependency diagram
         }
 
         var refs = await nugetService.GetPackageDependencies(package);
-        foreach (var reference in refs?.Where(p => !excludes.Any(e => p.Name.Contains(e))) ?? Array.Empty<Package>())
+        foreach (var reference in refs.Where(p => !excludes.Any(e => p.Name.Contains(e))))
         {
             yield return $"    {package.Name} --> {reference.Name}";
             await foreach (var generated in WritePackageInfo(
