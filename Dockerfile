@@ -13,7 +13,7 @@ ENV CACHEBUST=build-$(date)
 RUN dotnet tool install --global Aiursoft.NugetNinja            --add-source https://nuget.aiursoft.cn/v3/index.json
 RUN dotnet tool install --global Aiursoft.NugetNinja.PrBot      --add-source https://nuget.aiursoft.cn/v3/index.json
 RUN dotnet tool install --global Aiursoft.NugetNinja.MergeBot   --add-source https://nuget.aiursoft.cn/v3/index.json
-RUN ninja --version
+RUN /root/.dotnet/tools/ninja --version
 
 RUN echo "cd /config       && /root/.dotnet/tools/ninja-bot"       > /start.sh       && chmod +x /start.sh
 RUN echo "cd /config-merge && /root/.dotnet/tools/ninja-merge-bot" > /start-merge.sh && chmod +x /start-merge.sh
