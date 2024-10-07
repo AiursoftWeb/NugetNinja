@@ -7,6 +7,9 @@ RUN mkdir -p /config-merge
 RUN mkdir -p /root/.local/share/NugetNinjaWorkspace/
 RUN mkdir -p /root/.dotnet/tools
 
+# Add a cachebuster to force rebuild the image
+ENV CACHEBUST=build-$(date)
+
 RUN dotnet tool install --global Aiursoft.NugetNinja            --add-source https://nuget.aiursoft.cn/v3/index.json
 RUN dotnet tool install --global Aiursoft.NugetNinja.PrBot      --add-source https://nuget.aiursoft.cn/v3/index.json
 RUN dotnet tool install --global Aiursoft.NugetNinja.MergeBot   --add-source https://nuget.aiursoft.cn/v3/index.json
