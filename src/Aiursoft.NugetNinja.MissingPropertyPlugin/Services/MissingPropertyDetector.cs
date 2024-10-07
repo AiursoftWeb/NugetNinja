@@ -297,7 +297,8 @@ public class MissingPropertyDetector(
             return string.Empty;
         }
         
-        var licenseContent = File.ReadAllText(licensePath);
+        var absoluteLicensePath = Path.Combine(Path.GetDirectoryName(project.PathOnDisk)!, licensePath);
+        var licenseContent = File.ReadAllText(absoluteLicensePath);
         var licenseExpression = LicenseExpressionParser.Parse(licenseContent);
         return licenseExpression;
     }
