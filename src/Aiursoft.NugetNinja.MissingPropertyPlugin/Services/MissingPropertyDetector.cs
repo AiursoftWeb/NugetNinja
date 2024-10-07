@@ -1,4 +1,5 @@
-﻿using Aiursoft.CSTools.Tools;
+﻿using Aiursoft.CSTools.Services;
+using Aiursoft.CSTools.Tools;
 using Aiursoft.NugetNinja.Core.Abstracts;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
 using Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
@@ -131,6 +132,7 @@ public class MissingPropertyDetector(
                 yield return new MissingProperty(project, nameof(project.ImplicitUsings), "enable");
             }
 
+            // Package metadata
             if (projectInfo.ShouldPackAsNugetLibrary)
             {
                 // Company
@@ -176,7 +178,39 @@ public class MissingPropertyDetector(
                     logger.LogTrace("Project {Project} is missing property PackageTags", project);
                     yield return new MissingProperty(project, nameof(project.PackageTags), tags);
                 }
+                
+                // PackageLicenseExpression
+                var licenseExpression = GetLicenseExpression(project);
+                if (!string.IsNullOrWhiteSpace(licenseExpression) && string.IsNullOrWhiteSpace(project.PackageLicenseExpression))
+                {
+                    logger.LogTrace("Project {Project} is missing property PackageLicenseExpression", project);
+                    yield return new MissingProperty(project, nameof(project.PackageLicenseExpression), licenseExpression);
+                }
+                
+                // PackageProjectUrl
+                var gitRemoteUrl = await GetGitRemote(Path.GetDirectoryName(project.PathOnDisk)!);
+                var projectUrl = gitRemoteUrl.Replace(".git", string.Empty);
+                if (string.IsNullOrWhiteSpace(project.PackageProjectUrl))
+                {
+                    logger.LogTrace("Project {Project} is missing property PackageProjectUrl", project);
+                    yield return new MissingProperty(project, nameof(project.PackageProjectUrl), projectUrl);
+                }
+                
+                // RepositoryType
+                if (string.IsNullOrWhiteSpace(project.RepositoryType))
+                {
+                    logger.LogTrace("Project {Project} is missing property RepositoryType", project);
+                    yield return new MissingProperty(project, nameof(project.RepositoryType), "git"); // NugetNinja only supports git repositories
+                }
+                
+                // RepositoryUrl
+                if (string.IsNullOrWhiteSpace(project.RepositoryUrl))
+                {
+                    logger.LogTrace("Project {Project} is missing property RepositoryUrl", project);
+                    yield return new MissingProperty(project, nameof(project.RepositoryUrl), gitRemoteUrl);
+                }
 
+                // Readme file
                 var readmePath = GetReadmePath(project);
                 if (!string.IsNullOrWhiteSpace(readmePath) && string.IsNullOrWhiteSpace(project.PackageReadmeFile))
                 {
@@ -242,14 +276,63 @@ public class MissingPropertyDetector(
     /// <returns>The relative path to the README.md file, or an empty string if the file is not found.</returns>
     private string GetReadmePath(Project project)
     {
+        return SearchInRepo(project, "readme.md");
+    }
+    
+    private string GetLicensePath(Project project)
+    {
+        var licensePath = SearchInRepo(project, "license");
+        if (string.IsNullOrWhiteSpace(licensePath))
+        {
+            licensePath = SearchInRepo(project, "license.md");
+        }
+        return licensePath;
+    }
+    
+    private string GetLicenseExpression(Project project)
+    {
+        var licensePath = GetLicensePath(project);
+        if (string.IsNullOrWhiteSpace(licensePath))
+        {
+            return string.Empty;
+        }
+        
+        var licenseContent = File.ReadAllText(licensePath);
+        var licenseExpression = LicenseExpressionParser.Parse(licenseContent);
+        return licenseExpression;
+    }
+    
+    private async Task<string> GetGitRemote(string projectPath)
+    {
+        var commandService = new CommandService();
+        var (code, output, err) = await commandService.RunCommandAsync(
+            bin: "git", 
+            arg: "remote get-url origin",
+            path: projectPath);
+        if (code != 0)
+        {
+            throw new Exception($"Failed to get git remote: {err}. Command executed: git remote get-url origin at {projectPath}");
+        }
+        
+        return output.Trim();
+    }
+
+    /// <summary>
+    /// Searches for a file in the repository by iterating through the project directory and its parent directories.
+    /// </summary>
+    /// <param name="project">The project to search in.</param>
+    /// <param name="fileNameEndsWith">The file name to search for. Only match the file if it ends with this string. Case-insensitive.</param>
+    /// <returns>The relative path to the file if found, otherwise an empty string.</returns>
+    private string SearchInRepo(Project project, string fileNameEndsWith)
+    {
         var csprojDirectoryPath = Path.GetDirectoryName(project.PathOnDisk)!;
         var path = csprojDirectoryPath;
         var readmePath = string.Empty;
         while (true)
         {
-            // Case insensitive search:
+            // Case-insensitive search:
             var files = Directory.GetFiles(path)
-                .Where(f => f.EndsWith("readme.md", StringComparison.OrdinalIgnoreCase))
+                .Where(f => f.EndsWith(fileNameEndsWith, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
             if (files.Any())
