@@ -11,7 +11,7 @@
     <PackageId>Aiursoft.NugetNinja.Core</PackageId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.Canon" Version="8.0.5" />
+    <PackageReference Include="Aiursoft.Canon" Version="8.0.6" />
     <PackageReference Include="Aiursoft.CommandFramework" Version="8.0.6" />
     <PackageReference Include="Aiursoft.CSTools" Version="8.0.4" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.70" />
