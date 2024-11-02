@@ -25,12 +25,12 @@ public class RunAllOfficialPluginsService(
 {
     private readonly List<IActionDetector> _pluginDetectors =
     [
-        missingPropertyDetector,
-        deprecatedPackageDetector,
-        packageReferenceUpgradeDetector,
         uselessPackageReferenceDetector,
         uselessProjectReferenceDetector,
-        expectFilesDetector
+        packageReferenceUpgradeDetector,
+        missingPropertyDetector,
+        expectFilesDetector,
+        deprecatedPackageDetector
     ];
 
     public Task OnServiceStartedAsync(string path, bool shouldTakeAction) => RunAllPlugins(path, shouldTakeAction, false);
