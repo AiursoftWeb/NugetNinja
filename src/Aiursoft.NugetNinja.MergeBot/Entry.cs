@@ -35,11 +35,11 @@ public class Entry(
 
             foreach (var mergeRequest in validMergeRequests)
             {
-                logger.LogInformation("Found open merge request: {MergeRequest}", mergeRequest.Title);
+                logger.LogInformation("Found open merge request: {MergeRequest}, Id is: {Id}", mergeRequest.Title, mergeRequest.IID);
                 var details = await gitServer.GetMergeRequestDetails(server.EndPoint!, server.UserName!, server.Token!, mergeRequest.ProjectId, mergeRequest.IID);
                 if (details.Pipeline?.Status != "success")
                 {
-                    logger.LogWarning("Merge request {MergeRequest} has a failed pipeline!", mergeRequest.Title);
+                    logger.LogWarning("Merge request {MergeRequest} has a pipeline with status {Status}!", mergeRequest.Title, details.Pipeline?.Status);
                     continue;
                 }
                 

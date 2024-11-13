@@ -13,7 +13,7 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
     public async Task<IReadOnlyCollection<MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
     {
         logger.LogTrace("Listing all open merge requests for user: {UserName} in GitLab...", userName);
-        var endpoint = $"{endPoint}/api/v4/merge_requests?state=opened&author_username={userName}&scope=all";
+        var endpoint = $"{endPoint}/api/v4/merge_requests?state=opened&author_username={userName}&scope=all&per_page=100";
         var json = await httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
         var mergeRequests = JsonConvert.DeserializeObject<List<MergeRequestSearchResult>>(json);
         return mergeRequests!;
