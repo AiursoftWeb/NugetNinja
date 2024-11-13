@@ -11,6 +11,10 @@ Nuget Ninja is a tool for detecting dependencies of .NET projects. It analyzes t
 
 ## Install
 
+Requirements:
+
+1. [.NET 8 SDK](http://dot.net/)
+
 Run the following command to install this tool:
 
 ```bash
