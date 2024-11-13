@@ -73,7 +73,7 @@ C:\workspace> ninja.exe all --path .
 
 Requirements about how to develop.
 
-* [.NET SDK 6.0](https://github.com/dotnet/core/tree/master/release-notes)
+* [.NET 8 SDK](http://dot.net)
 
 1. Execute `dotnet restore` to restore all .NET dependencies.
 2. Execute the following command to build the app:
