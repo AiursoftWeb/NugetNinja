@@ -25,20 +25,22 @@ After getting the binary, run it directly in the terminal.
 C:\workspace> ninja.exe
 
 Description:
-  Nuget Ninja, a tool for detecting dependencies of .NET projects.
+  A tool for detecting dependencies of .NET projects.
 
 Usage:
   ninja [command] [options]
 
 Options:
-  -p, --path <path> (REQUIRED)   Path of the projects to be changed.
-  -d, --dry-run                  Preview changes without actually making them
-  -v, --verbose                  Show detailed log
-  --allow-preview                Allow using preview versions of packages from Nuget.
-  --nuget-server <nuget-server>  If you want to use a customized nuget server instead of the official nuget.org, you can set it with a value like: https://nuget.myserver/v3/index.json
-  --token <token>                The PAT token which has privilege to access the nuget server. See: https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
-  --version                      Show version information
-  -?, -h, --help                 Show help and usage information
+  -p, --path <path> (REQUIRED)                     Path of the projects to be changed.
+  -d, --dry-run                                    Preview changes without actually making them
+  -v, --verbose                                    Show detailed log
+  --allow-preview                                  Allow using preview versions of packages from Nuget.
+  --nuget-server <nuget-server>                    If you want to use a customized nuget server instead of the official nuget.org, you can set it with a value like: https://nuget.myserver/v3/index.json
+  --token <token>                                  The PAT token which has privilege to access the nuget server. See: 
+                                                   https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
+  --allow-package-version-cross-microsoft-runtime  Allow using NuGet package versions for different Microsoft runtime versions. For example, when using runtime 6.0, it will avoid upgrading packages to 7.0.
+  --version                                        Show version information
+  -?, -h, --help                                   Show help and usage information
 
 Commands:
   all, all-officials  The command to run all officially supported features.
@@ -47,6 +49,9 @@ Commands:
   upgrade-pkg         The command to upgrade all package references to possible latest and avoid conflicts.
   clean-pkg           The command to clean up possible useless package references.
   clean-prj           The command to clean up possible useless project references.
+  visualize           The command to visualize the dependency relationship, with mermaid markdown.
+  expect-files        The command to search for all expected files and add patch the content.
+
 ```
 
 ### Sample
