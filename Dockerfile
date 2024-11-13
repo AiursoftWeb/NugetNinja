@@ -22,7 +22,11 @@ ENV PATH="/root/.dotnet/tools:${PATH}"
 
 # Register a crontab job to run ninja-bot every day
 RUN crontab -l | { cat; echo "0 5 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
+
+# Register multiple auto merge jobs, because some CI may run very slow.
 RUN crontab -l | { cat; echo "0 6 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 7 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 8 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
 
 VOLUME /config
 VOLUME /config-merge
