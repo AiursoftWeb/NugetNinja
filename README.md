@@ -13,7 +13,7 @@ Nuget Ninja is a tool for detecting dependencies of .NET projects. It analyzes t
 
 Requirements:
 
-1. [.NET 8 SDK](http://dot.net/)
+1. [.NET 9 SDK](http://dot.net/)
 
 Run the following command to install this tool:
 
@@ -82,7 +82,7 @@ C:\workspace> ninja.exe all --path .
 
 Requirements about how to develop.
 
-* [.NET 8 SDK](http://dot.net)
+* [.NET 9 SDK](http://dot.net)
 
 1. Execute `dotnet restore` to restore all .NET dependencies.
 2. Execute the following command to build the app:

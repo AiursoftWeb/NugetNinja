@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <AssemblyName>Aiursoft.NugetNinja.DeprecatedPackagePlugin</AssemblyName>
         <RootNamespace>Aiursoft.NugetNinja.DeprecatedPackagePlugin</RootNamespace>
         <IsTestProject>false</IsTestProject>
