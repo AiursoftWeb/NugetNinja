@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>Aiursoft.NugetNinja.Core</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.Core</RootNamespace>
     <IsTestProject>false</IsTestProject>
@@ -11,12 +11,12 @@
     <PackageId>Aiursoft.NugetNinja.Core</PackageId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.Canon" Version="8.0.6" />
-    <PackageReference Include="Aiursoft.CommandFramework" Version="8.0.6" />
-    <PackageReference Include="Aiursoft.CSTools" Version="8.0.4" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.71" />
+    <PackageReference Include="Aiursoft.Canon" Version="9.0.0" />
+    <PackageReference Include="Aiursoft.CommandFramework" Version="9.0.1" />
+    <PackageReference Include="Aiursoft.CSTools" Version="9.0.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 </Project>
