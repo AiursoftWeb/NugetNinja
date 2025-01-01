@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>9.0.1</Version>
+    <Version>9.0.2</Version>
     <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>ninja-merge-bot</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.MergeBot</RootNamespace>
@@ -41,7 +41,7 @@
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.GitRunner" Version="9.0.0" />
+    <PackageReference Include="Aiursoft.GitRunner" Version="9.0.1" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
   </ItemGroup>
   <ItemGroup>
