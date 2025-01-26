@@ -1,4 +1,4 @@
-FROM hub.aiursoft.cn/mcr.microsoft.com/dotnet/sdk:9.0
+FROM hub.aiursoft.cn/aiursoft/internalimages/dotnet
 
 RUN apt update
 RUN apt install -y git unzip wget cron
