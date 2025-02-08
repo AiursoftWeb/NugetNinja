@@ -7,12 +7,15 @@ RUN mkdir -p /config-merge
 RUN mkdir -p /root/.local/share/NugetNinjaWorkspace/
 RUN mkdir -p /root/.dotnet/tools
 
-# Add a cachebuster to force rebuild the image
-ENV CACHEBUST=build-$(date)
+WORKDIR /app
+COPY . .
+RUN dotnet build -maxcpucount:1 --configuration Release --no-self-contained *.sln && \
+    dotnet pack -maxcpucount:1 --configuration Release *.sln || echo "Some packaging failed!" 
 
-RUN dotnet tool install --global Aiursoft.NugetNinja            --add-source https://nuget.aiursoft.cn/v3/index.json
-RUN dotnet tool install --global Aiursoft.NugetNinja.PrBot      --add-source https://nuget.aiursoft.cn/v3/index.json
-RUN dotnet tool install --global Aiursoft.NugetNinja.MergeBot   --add-source https://nuget.aiursoft.cn/v3/index.json
+RUN dotnet tool install --global Aiursoft.NugetNinja          --add-source /app/src/Aiursoft.NugetNinja/bin/Release/ && \
+    dotnet tool install --global Aiursoft.NugetNinja.PrBot    --add-source /app/src/Aiursoft.NugetNinja.PrBot/bin/Release/ && \
+    dotnet tool install --global Aiursoft.NugetNinja.MergeBot --add-source /app/src/Aiursoft.NugetNinja.MergeBot/bin/Release/
+     
 RUN /root/.dotnet/tools/ninja --version
 
 RUN echo "cd /config       && /root/.dotnet/tools/ninja-bot"       > /start.sh       && chmod +x /start.sh
