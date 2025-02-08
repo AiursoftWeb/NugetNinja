@@ -12,41 +12,94 @@ public class ExpectFilesDetector(
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
         logger.LogTrace("Analyzing expected {Count} files...", context.NinjaConfig.Files.Count);
+
         foreach (var fileExpected in context.NinjaConfig.Files)
         {
-            if (!string.IsNullOrWhiteSpace(fileExpected.ContentUri) && !string.IsNullOrWhiteSpace(fileExpected.Name))
+            if (string.IsNullOrWhiteSpace(fileExpected.Name))
             {
-                logger.LogTrace("Inspecting file {Name} with URI {Uri}...", fileExpected.Name, fileExpected.ContentUri);
-                var fileContentShouldBe = await http.GetStringAsync(fileExpected.ContentUri);
-                var pathFileShouldBe = Path.Combine(context.RootPath, fileExpected.Name);
-                var fileOnDisk = new FileInfo(pathFileShouldBe);
-                if (!fileOnDisk.Exists)
+                logger.LogWarning("File expected with empty Name is skipped.");
+                continue;
+            }
+
+            var expectedName = fileExpected.Name;
+            var expectedPath = Path.Combine(context.RootPath, expectedName);
+            var directory = new DirectoryInfo(context.RootPath);
+
+            var matches = directory.GetFiles()
+                .Where(f => string.Equals(f.Name, expectedName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (matches.Count > 1)
+            {
+                logger.LogError("Multiple files matching {ExpectedName} (ignoring case) found in {Directory}.", expectedName, context.RootPath);
+                throw new Exception($"Multiple files matching {expectedName} (ignoring case) found in {context.RootPath}.");
+            }
+            if (matches.Count == 1)
+            {
+                var existingFile = matches[0];
+                var isExactName = string.Equals(existingFile.Name, expectedName, StringComparison.Ordinal);
+
+                if (!isExactName)
                 {
-                   // Write the content.
-                    logger.LogInformation("File {Name} does not exist. Creating...", fileExpected.Name);
-                    yield return new PatchFileAction
+                    logger.LogInformation("File {ExistingName} found (ignoring case match for {ExpectedName}). Renaming to {ExpectedName}.", 
+                        existingFile.Name, expectedName, expectedName);
+                    yield return new RenameFileAction
                     {
-                        FilePath = pathFileShouldBe,
-                        Content = fileContentShouldBe,
+                        SourcePath = existingFile.FullName,
+                        DestinationPath = expectedPath,
                     };
                 }
-                else
+
+                if (!string.IsNullOrWhiteSpace(fileExpected.ContentUri))
                 {
-                    // Check the content.
-                    var fileContentOnDisk = await File.ReadAllTextAsync(pathFileShouldBe);
-                    if (fileContentOnDisk != fileContentShouldBe)
+                    var expectedContent = await http.GetStringAsync(fileExpected.ContentUri);
+                    string actualContent;
+                    try
                     {
-                        logger.LogInformation("File {Name} is not the same as expected. Patching...", fileExpected.Name);
+                        // 注意：如果文件需要重命名，目前仍可通过原路径读取内容
+                        actualContent = await File.ReadAllTextAsync(existingFile.FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to read file content from {FilePath}", existingFile.FullName);
+                        actualContent = string.Empty;
+                    }
+
+                    if (actualContent != expectedContent)
+                    {
+                        logger.LogInformation("File {ExpectedName} content does not match expected content. Patching...", expectedName);
                         yield return new PatchFileAction
                         {
-                            FilePath = pathFileShouldBe,
-                            Content = fileContentShouldBe
+                            FilePath = expectedPath,
+                            Content = expectedContent,
                         };
                     }
                     else
                     {
-                        logger.LogTrace("File {Name} is the same as expected. Skipping...", fileExpected.Name);
+                        logger.LogTrace("File {ExpectedName} content matches expected. No patch needed.", expectedName);
                     }
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(fileExpected.ContentUri))
+                {
+                    var expectedContent = await http.GetStringAsync(fileExpected.ContentUri);
+                    logger.LogInformation("File {ExpectedName} does not exist. Creating with expected content...", expectedName);
+                    yield return new PatchFileAction
+                    {
+                        FilePath = expectedPath,
+                        Content = expectedContent,
+                    };
+                }
+                else
+                {
+                    logger.LogInformation("File {ExpectedName} does not exist. Creating an empty file...", expectedName);
+                    yield return new PatchFileAction
+                    {
+                        FilePath = expectedPath,
+                        Content = string.Empty,
+                    };
                 }
             }
         }
