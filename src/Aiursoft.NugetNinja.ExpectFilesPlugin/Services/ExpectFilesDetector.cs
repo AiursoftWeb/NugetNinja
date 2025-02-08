@@ -56,7 +56,6 @@ public class ExpectFilesDetector(
                     string actualContent;
                     try
                     {
-                        // 注意：如果文件需要重命名，目前仍可通过原路径读取内容
                         actualContent = await File.ReadAllTextAsync(existingFile.FullName);
                     }
                     catch (Exception ex)
