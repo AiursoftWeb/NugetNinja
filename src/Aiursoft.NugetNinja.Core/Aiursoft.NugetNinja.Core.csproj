@@ -16,7 +16,7 @@
     <PackageReference Include="Aiursoft.CSTools" Version="9.0.1" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 </Project>
