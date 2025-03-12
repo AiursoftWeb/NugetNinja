@@ -14,10 +14,10 @@ public class Project(string pathOnDisk, HtmlNode doc)
 
     public string PathOnDisk { get; set; } = pathOnDisk;
     public string FileName => Path.GetFileNameWithoutExtension(PathOnDisk);
-    
+
     /// <summary>
     /// Usually can be one of the followings:
-    /// 
+    ///
     ///   Microsoft.NET.Sdk
     ///   Microsoft.NET.Sdk.Web
     ///   Microsoft.NET.Sdk.BlazorWebAssembly
@@ -25,7 +25,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
     ///   Microsoft.NET.Sdk.Worker
     ///   Microsoft.NET.Sdk.WindowsDesktop
     /// </summary>
-    public string? Sdk { get; init; } = doc.ChildNodes["Project"].Attributes[nameof(Sdk)]?.Value;
+    public string? Sdk { get; init; } = doc.ChildNodes["Project"].Attributes[nameof(Sdk)].Value;
 
     public List<Project> ProjectReferences { get; init; } = [];
 
@@ -77,7 +77,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
             throw new InvalidOperationException(
                 $"Could remove PackageReference {refName} in project {this} because it was not found!");
 
-        if (node.Attributes["Version"] != null)
+        if (!string.IsNullOrWhiteSpace(node.Attributes["Version"].Value))
         {
             node.Attributes["Version"].Value = newVersion.ToString();
             await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
@@ -176,30 +176,30 @@ public class Project(string pathOnDisk, HtmlNode doc)
             OptionOutputOriginalCase = true
         };
         doc.LoadHtml(csprojContent);
-        
+
         var newline = HtmlNode.CreateNode("\r\n    ");
         var itemGroup = doc.DocumentNode
             .Descendants("ItemGroup")
             .FirstOrDefault();
-        
+
         if (itemGroup == null)
         {
             itemGroup = doc.CreateElement("ItemGroup");
-            doc.DocumentNode.FirstChild?.AppendChild(itemGroup);
-            doc.DocumentNode.FirstChild?.AppendChild(newline);
+            doc.DocumentNode.FirstChild.AppendChild(itemGroup);
+            doc.DocumentNode.FirstChild.AppendChild(newline);
         }
-        
+
         var none = doc.CreateElement("None");
         none.Attributes.Add("Include", filePath);
         none.Attributes.Add("Pack", "true");
         none.Attributes.Add("PackagePath", ".");
-        
+
         itemGroup.AppendChild(newline);
         itemGroup.AppendChild(none);
-        
+
         await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
-    
+
     public async Task AddOrUpdateProperty(string propertyName, string propertyValue)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
@@ -212,10 +212,11 @@ public class Project(string pathOnDisk, HtmlNode doc)
         var existingNodes = doc.DocumentNode
             .Descendants(propertyName)
             .ToArray();
-        if (existingNodes.Any())
+        if (existingNodes.Length != 0)
         {
             foreach (var existingNode in existingNodes)
-                if (existingNode.FirstChild != null)
+            {
+                if (existingNode.HasChildNodes)
                 {
                     existingNode.FirstChild.InnerHtml = propertyValue;
                 }
@@ -224,6 +225,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
                     var valueNode = HtmlNode.CreateNode(propertyValue);
                     existingNode.AppendChild(valueNode);
                 }
+            }
         }
         else
         {
@@ -259,8 +261,8 @@ public class Project(string pathOnDisk, HtmlNode doc)
         if (itemGroup == null)
         {
             itemGroup = doc.CreateElement("ItemGroup");
-            doc.DocumentNode.FirstChild?.AppendChild(itemGroup);
-            doc.DocumentNode.FirstChild?.AppendChild(newline);
+            doc.DocumentNode.FirstChild.AppendChild(itemGroup);
+            doc.DocumentNode.FirstChild.AppendChild(newline);
         }
 
         var reference = doc.CreateElement("FrameworkReference");
@@ -280,11 +282,11 @@ public class Project(string pathOnDisk, HtmlNode doc)
             parent.Remove();
         else
             node.Remove();
-        
+
         await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
 
-   
+
 
     #region Build and code
 
@@ -295,52 +297,52 @@ public class Project(string pathOnDisk, HtmlNode doc)
     ///   Exe
     ///   WinExe
     /// </summary>
-    public string? OutputType { get; init; } = doc.Descendants(nameof(OutputType)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? OutputType { get; init; } = doc.Descendants(nameof(OutputType)).SingleOrDefault()?.FirstChild.InnerText;
 
     // ReSharper disable once InconsistentNaming
-    public string? UseWPF { get; init; } = doc.Descendants(nameof(UseWPF)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? UseWindowsForms { get; init; } = doc.Descendants(nameof(UseWindowsForms)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? Version { get; init; } = doc.Descendants(nameof(Version)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? TargetFramework { get; init; } = doc.Descendants(nameof(TargetFramework)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? TargetFrameworks { get; init; } = doc.Descendants(nameof(TargetFrameworks)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? AssemblyName { get; init; } = doc.Descendants(nameof(AssemblyName)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? RootNamespace { get; init; } = doc.Descendants(nameof(RootNamespace)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? IsTestProject { get; init; } = doc.Descendants(nameof(IsTestProject)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? UseWPF { get; init; } = doc.Descendants(nameof(UseWPF)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? UseWindowsForms { get; init; } = doc.Descendants(nameof(UseWindowsForms)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? Version { get; init; } = doc.Descendants(nameof(Version)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? TargetFramework { get; init; } = doc.Descendants(nameof(TargetFramework)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? TargetFrameworks { get; init; } = doc.Descendants(nameof(TargetFrameworks)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? AssemblyName { get; init; } = doc.Descendants(nameof(AssemblyName)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? RootNamespace { get; init; } = doc.Descendants(nameof(RootNamespace)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? IsTestProject { get; init; } = doc.Descendants(nameof(IsTestProject)).SingleOrDefault()?.FirstChild.InnerText;
 
     #endregion
-    
+
     #region Tool
-    public string? IsPackable { get; init; } = doc.Descendants(nameof(IsPackable)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? GeneratePackageOnBuild { get; init; } = doc.Descendants(nameof(GeneratePackageOnBuild)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PackAsTool { get; init; } = doc.Descendants(nameof(PackAsTool)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? ToolCommandName { get; init; } = doc.Descendants(nameof(ToolCommandName)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? IsPackable { get; init; } = doc.Descendants(nameof(IsPackable)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? GeneratePackageOnBuild { get; init; } = doc.Descendants(nameof(GeneratePackageOnBuild)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PackAsTool { get; init; } = doc.Descendants(nameof(PackAsTool)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? ToolCommandName { get; init; } = doc.Descendants(nameof(ToolCommandName)).SingleOrDefault()?.FirstChild.InnerText;
 
     #endregion
 
     #region Best practice
 
-    public string? ImplicitUsings { get; init; } = doc.Descendants(nameof(ImplicitUsings)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? Nullable { get; init; } = doc.Descendants(nameof(Nullable)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? SelfContained { get; set; } = doc.Descendants(nameof(SelfContained)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PublishTrimmed { get; set; } = doc.Descendants(nameof(PublishTrimmed)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PublishReadyToRun { get; set; } = doc.Descendants(nameof(PublishReadyToRun)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PublishSingleFile { get; set; } = doc.Descendants(nameof(PublishSingleFile)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? ImplicitUsings { get; init; } = doc.Descendants(nameof(ImplicitUsings)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? Nullable { get; init; } = doc.Descendants(nameof(Nullable)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? SelfContained { get; set; } = doc.Descendants(nameof(SelfContained)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PublishTrimmed { get; set; } = doc.Descendants(nameof(PublishTrimmed)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PublishReadyToRun { get; set; } = doc.Descendants(nameof(PublishReadyToRun)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PublishSingleFile { get; set; } = doc.Descendants(nameof(PublishSingleFile)).SingleOrDefault()?.FirstChild.InnerText;
 
     #endregion
 
     #region Nuget Packaging
 
-    public string? Company { get; init; } = doc.Descendants(nameof(Company)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? Product { get; init; } = doc.Descendants(nameof(Product)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? Authors { get; set; } = doc.Descendants(nameof(Authors)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? Description { get; init; } = doc.Descendants(nameof(Description)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PackageId { get; init; } = doc.Descendants(nameof(PackageId)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PackageTags { get; init; } = doc.Descendants(nameof(PackageTags)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PackageLicenseExpression { get; set; } = doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PackageProjectUrl { get; set; } = doc.Descendants(nameof(PackageProjectUrl)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? RepositoryType { get; set; } = doc.Descendants(nameof(RepositoryType)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? RepositoryUrl { get; set; } = doc.Descendants(nameof(RepositoryUrl)).SingleOrDefault()?.FirstChild?.InnerText;
-    public string? PackageReadmeFile { get; set; } = doc.Descendants(nameof(PackageReadmeFile)).SingleOrDefault()?.FirstChild?.InnerText;
+    public string? Company { get; init; } = doc.Descendants(nameof(Company)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? Product { get; init; } = doc.Descendants(nameof(Product)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? Authors { get; set; } = doc.Descendants(nameof(Authors)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? Description { get; init; } = doc.Descendants(nameof(Description)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PackageId { get; init; } = doc.Descendants(nameof(PackageId)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PackageTags { get; init; } = doc.Descendants(nameof(PackageTags)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PackageLicenseExpression { get; set; } = doc.Descendants(nameof(PackageLicenseExpression)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PackageProjectUrl { get; set; } = doc.Descendants(nameof(PackageProjectUrl)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? RepositoryType { get; set; } = doc.Descendants(nameof(RepositoryType)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? RepositoryUrl { get; set; } = doc.Descendants(nameof(RepositoryUrl)).SingleOrDefault()?.FirstChild.InnerText;
+    public string? PackageReadmeFile { get; set; } = doc.Descendants(nameof(PackageReadmeFile)).SingleOrDefault()?.FirstChild.InnerText;
 
     #endregion
 }

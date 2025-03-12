@@ -10,9 +10,9 @@ public class Model
     public List<Project> AllProjects { get; set; } = [];
 
     public List<Package> AllPackages { get; set; } = [];
-    
+
     public NinjaConfig NinjaConfig { get; set; } = new();
-    
+
     public string RootPath { get; set; } = null!;
 
     public async Task<Project> IncludeProject(string path, ILogger logger)
@@ -63,8 +63,8 @@ public class Model
         var packageReferences = doc.DocumentNode
             .Descendants("PackageReference")
             .Select(p => new Package(
-                p.Attributes["Include"]?.Value ?? p.Attributes["Update"]?.Value ?? "Unknown",
-                p.Attributes["Version"]?.Value ?? "0.0.1"))
+                p.Attributes["Include"].Value,
+                p.Attributes["Version"].Value))
             .ToArray();
 
         foreach (var package in packageReferences)
