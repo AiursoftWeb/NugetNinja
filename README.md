@@ -78,28 +78,22 @@ Run all plugins under the current folder:
 C:\workspace> ninja.exe all --path .
 ```
 
-## How to build and run locally
+## Run locally
 
-Requirements about how to develop.
+Requirements about how to run
 
-* [.NET 9 SDK](http://dot.net)
-
-1. Execute `dotnet restore` to restore all .NET dependencies.
-2. Execute the following command to build the app:
-   * `dotnet publish -c Release -r win-x64` on Windows.
-   * `dotnet publish -c Release -r linux-x64` on Linux.
-   * `dotnet publish -c Release -r osx-x64` on Mac OS.
-3. Execute `dotnet run` to run the app
+1. [.NET 9 SDK](http://dot.net/)
+2. Execute `dotnet run` to run the app
 
 ## Run in Microsoft Visual Studio
 
 1. Open the `.sln` file in the project path.
 2. Press `F5`.
 
-## Contributing
+## How to contribute
 
 There are many ways to contribute to the project: logging bugs, submitting pull requests, reporting issues, and creating suggestions.
 
-Even if you have push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your personal workflow cruft out of sight.
+Even if you with push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your workflow cruft out of sight.
 
-We're also interested in your feedback for the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.
+We're also interested in your feedback on the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.
