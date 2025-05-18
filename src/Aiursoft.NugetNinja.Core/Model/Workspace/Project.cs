@@ -11,7 +11,6 @@ public class Project(string pathOnDisk, HtmlNode doc)
     // Tool
     // Best practice
     // Nuget
-
     public string PathOnDisk { get; set; } = pathOnDisk;
     public string FileName => Path.GetFileNameWithoutExtension(PathOnDisk);
 
@@ -25,7 +24,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
     ///   Microsoft.NET.Sdk.Worker
     ///   Microsoft.NET.Sdk.WindowsDesktop
     /// </summary>
-    public string? Sdk { get; init; } = doc.ChildNodes["Project"].Attributes[nameof(Sdk)].Value;
+    public string? Sdk { get; init; } = doc.ChildNodes["Project"]!.Attributes[nameof(Sdk)].Value;
 
     public List<Project> ProjectReferences { get; init; } = [];
 
