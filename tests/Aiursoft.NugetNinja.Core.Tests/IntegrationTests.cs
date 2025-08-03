@@ -7,7 +7,6 @@ using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.App;
 using Aiursoft.NugetNinja.UselessPackageReferencePlugin.App;
 using Aiursoft.NugetNinja.UselessProjectReferencePlugin.App;
 using Aiursoft.NugetNinja.VisualizerPlugin;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aiursoft.NugetNinja.Core.Tests;
 
