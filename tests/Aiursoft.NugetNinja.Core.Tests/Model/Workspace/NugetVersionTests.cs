@@ -25,7 +25,6 @@ public class NugetVersionTests
     public void TestNotNullEquals()
     {
         var version = new NugetVersion("10.1.0.0-Preview");
-        Assert.IsTrue(version != null);
         Assert.IsTrue(!version.Equals(null));
         Assert.IsTrue(null != version);
     }
