@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>9.0.33</Version>
+    <Version>9.0.34</Version>
     <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>ninja-bot</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
