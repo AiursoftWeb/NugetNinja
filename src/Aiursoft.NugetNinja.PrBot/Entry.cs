@@ -75,7 +75,8 @@ public class Entry(
             workPath,
             repo.DefaultBranch ?? throw new NullReferenceException($"The default branch of {repo} is null!"),
             repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo} is null!"),
-            CloneMode.Full);
+            CloneMode.Full,
+            connectionConfiguration.Token);
 
         // Run all plugins.
         await runAllOfficialPluginsService.RunAllPlugins(workPath, true, onlyRunUpdatePlugin: connectionConfiguration.OnlyUpdate);
