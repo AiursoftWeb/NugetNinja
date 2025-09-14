@@ -41,8 +41,7 @@ public class ExpectFilesDetector(
 
                 if (!isExactName)
                 {
-                    logger.LogInformation("File {ExistingName} found (ignoring case match for {ExpectedName}). Renaming to {ExpectedName}.", 
-                        existingFile.Name, expectedName, expectedName);
+                    logger.LogInformation("File {ExistingName} found (ignoring case match for {ExpectedName}). Renaming...", existingFile.Name, expectedName);
                     yield return new RenameFileAction
                     {
                         SourcePath = existingFile.FullName,
