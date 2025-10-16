@@ -8,6 +8,8 @@
 
 using Aiursoft.NugetNinja.Core.Model.Workspace;
 
+[assembly: DoNotParallelize]
+
 namespace Aiursoft.NugetNinja.Core.Tests.Model.Workspace;
 
 [TestClass]
@@ -25,7 +27,7 @@ public class NugetVersionTests
     public void TestNotNullEquals()
     {
         var version = new NugetVersion("10.1.0.0-Preview");
-        Assert.IsTrue(!version.Equals(null));
+        Assert.IsFalse(version.Equals(null));
         Assert.IsTrue(null != version);
     }
 
@@ -63,7 +65,7 @@ public class NugetVersionTests
         var version1 = new NugetVersion("10.1.0.0-Preview");
         object version2 = new NugetVersion("10.1.0.0-preview");
         Assert.IsTrue(version1.Equals(version1 as object));
-        Assert.IsFalse(version1 == version2);
+        Assert.AreNotEqual(version2, version1);
         Assert.IsTrue(version1 == (NugetVersion)version2);
         Assert.IsTrue(version1.Equals(version2));
         Assert.IsFalse(version1.Equals(new int()));
