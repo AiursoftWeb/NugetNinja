@@ -140,7 +140,7 @@ public class NugetVersionTests
     public void TestToString()
     {
         var version = new NugetVersion("10000.200000.30000000.49999999-PrEView   ");
-        Assert.AreEqual(version.ToString(), "10000.200000.30000000.49999999-preview");
+        Assert.AreEqual("10000.200000.30000000.49999999-preview", version.ToString());
     }
 
     [TestMethod]
