@@ -65,7 +65,8 @@ public class NugetVersionTests
         var version1 = new NugetVersion("10.1.0.0-Preview");
         object version2 = new NugetVersion("10.1.0.0-preview");
         Assert.IsTrue(version1.Equals(version1 as object));
-        Assert.AreNotEqual(version2, version1);
+        var versionEqual = version1 == version2;
+        Assert.IsFalse(versionEqual);
         Assert.IsTrue(version1 == (NugetVersion)version2);
         Assert.IsTrue(version1.Equals(version2));
         Assert.IsFalse(version1.Equals(new int()));
