@@ -58,6 +58,50 @@ Commands:
 
 ```
 
+### Config file
+
+Beyond managing NuGet packages, NugetNinja can also enforce repository structure by ensuring common files (like `.gitignore`, `LICENSE`, or `.editorconfig`) are present and up-to-date.
+
+This feature is configured by placing a `ninja.yaml` file in the root of your repository.
+
+This YAML file defines a list of files you expect to be in your repository. For each file, you must specify its `name` and can optionally provide a `contentUri` pointing to the raw content that file should have.
+
+Here is a sample `ninja.yaml`:
+
+```yaml
+configVersion: 1
+files:
+  - name: .editorconfig
+    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/.editorconfig
+  - name: .gitignore
+    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/.gitignore
+  - name: .gitlab-ci.yml
+    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/.gitlab-ci.yml
+  - name: LICENSE
+    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/LICENSE
+  - name: CODE_OF_CONDUCT.md
+    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/CODE_OF_CONDUCT.md
+  - name: ninja.yaml
+    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/ninja.yaml
+  - name: nuget.config
+    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/nuget.config
+  - name: README.md
+```
+
+When you run the `expect-files` command, NugetNinja will read this configuration and perform the following actions:
+
+1.  **Create Missing Files:** If a file specified in `files` (e.g., `LICENSE`) does not exist in your project's root directory, NugetNinja will create it.
+
+      * If a `contentUri` is provided, the tool will download the content from that URL and write it to the new file.
+      * If no `contentUri` is provided, an empty file will be created.
+
+2.  **Patch Existing Files:** If a file already exists, NugetNinja will compare its content with the content at the specified `contentUri`.
+
+      * If the contents do not match, the local file will be **overwritten** (patched) with the content from the URL.
+      * If the contents match, no action is taken.
+
+3.  **Correct File Casing:** The tool performs a case-insensitive search for the file. If it finds a file with a matching name but different casing (e.g., your repo has `license` but the YAML specifies `LICENSE`), it will rename the file to match the exact casing in the `name` property.
+
 ### Sample
 
 Generate suggestions for the current workspace without modifying local files:
