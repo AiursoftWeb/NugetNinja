@@ -1,4 +1,4 @@
-FROM hub.aiursoft.cn/aiursoft/internalimages/dotnet
+FROM hub.aiursoft.com/aiursoft/internalimages/dotnet
 
 RUN apt update
 RUN apt install -y git unzip wget cron
