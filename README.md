@@ -1,11 +1,11 @@
 # Nuget Ninja
 
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.cn/aiursoft/nugetninja/-/blob/master/LICENSE)
-[![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/pipeline.svg)](https://gitlab.aiursoft.cn/aiursoft/nugetninja/-/pipelines)
-[![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/nugetninja/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/aiursoft/nugetninja/-/pipelines)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/blob/master/LICENSE)
+[![Pipeline stat](https://gitlab.aiursoft.com/aiursoft/nugetninja/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
+[![Test Coverage](https://gitlab.aiursoft.com/aiursoft/nugetninja/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
 [![NuGet version (Aiursoft.NugetNinja)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja/)
 [![NuGet version (Aiursoft.NugetNinja.PrBot)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.PrBot.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja.PrBot/)
-[![ManHours](https://manhours.aiursoft.cn/r/gitlab.aiursoft.cn/aiursoft/NugetNinja.svg)](https://gitlab.aiursoft.cn/aiursoft/NugetNinja/-/commits/master?ref_type=heads)
+[![ManHours](https://manhours.aiursoft.cn/r/gitlab.aiursoft.com/aiursoft/NugetNinja.svg)](https://gitlab.aiursoft.com/aiursoft/NugetNinja/-/commits/master?ref_type=heads)
 
 Nuget Ninja is a tool for detecting dependencies of .NET projects. It analyzes the dependency structure of .NET projects in a directory and builds a directed acyclic graph. And will give some modification suggestions for Nuget packages, so that the dependencies of the project are as concise and up-to-date as possible.
 
@@ -72,19 +72,19 @@ Here is a sample `ninja.yaml`:
 configVersion: 1
 files:
   - name: .editorconfig
-    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/.editorconfig
+    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/.editorconfig
   - name: .gitignore
-    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/.gitignore
+    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/.gitignore
   - name: .gitlab-ci.yml
-    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/.gitlab-ci.yml
+    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/.gitlab-ci.yml
   - name: LICENSE
-    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/LICENSE
+    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/LICENSE
   - name: CODE_OF_CONDUCT.md
-    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/CODE_OF_CONDUCT.md
+    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/CODE_OF_CONDUCT.md
   - name: ninja.yaml
-    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/ninja.yaml
+    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/ninja.yaml
   - name: nuget.config
-    contentUri: https://gitlab.aiursoft.cn/aiursoft/tracer/-/raw/master/nuget.config
+    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/nuget.config
   - name: README.md
 ```
 

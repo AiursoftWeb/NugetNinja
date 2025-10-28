@@ -23,9 +23,9 @@
     <PackageId>Aiursoft.NugetNinja.MergeBot</PackageId>
     <PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</PackageProjectUrl>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.cn/aiursoft/nugetninja</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>

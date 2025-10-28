@@ -95,7 +95,7 @@ This pull request may break or change the behavior of this application. Review w
 
     private async Task<GitLabProject> GetProject(string endpoint, string org, string repo, string patToken)
     {
-        //https://gitlab.aiursoft.cn/api/v4/projects/aiursoft%2fscanner
+        //https://gitlab.aiursoft.com/api/v4/projects/aiursoft%2fscanner
         return await httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{org}%2f{repo}", HttpMethod.Get, patToken);
     }
 
