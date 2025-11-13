@@ -7,9 +7,18 @@ namespace Aiursoft.NugetNinja.UselessProjectReferencePlugin.Services;
 
 public class UselessProjectReferenceDetector(ProjectsEnumerator enumerator) : IActionDetector
 {
-    public IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
+    public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
-        return Analyze(context).ToAsyncEnumerable();
+        // By making this an async iterator, we manually wrap the synchronous
+        // collection and avoid the ambiguous .ToAsyncEnumerable() call.
+        foreach (var action in Analyze(context))
+        {
+            yield return action;
+        }
+        
+        // We add a single await to make the method truly asynchronous
+        // and satisfy the compiler/runtime.
+        await Task.CompletedTask;
     }
 
     private IEnumerable<IAction> Analyze(Model context)
