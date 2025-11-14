@@ -13,7 +13,7 @@ Nuget Ninja is a tool for detecting dependencies of .NET projects. It analyzes t
 
 Requirements:
 
-1. [.NET 9 SDK](http://dot.net/)
+1. [.NET 10 SDK](http://dot.net/)
 
 Run the following command to install this tool:
 
@@ -126,7 +126,7 @@ C:\workspace> ninja.exe all --path .
 
 Requirements about how to run
 
-1. [.NET 9 SDK](http://dot.net/)
+1. [.NET 10 SDK](http://dot.net/)
 2. Execute `dotnet run` to run the app
 
 ## Run in Microsoft Visual Studio
