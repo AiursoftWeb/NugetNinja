@@ -20,18 +20,27 @@ public sealed class VisualizerHandler : ExecutableCommandHandlerBuilder
     protected override string Description => "The command to visualize the dependency relationship, with mermaid markdown.";
 
     private static readonly Option<int> DepthOption = new(
-        ["--depth", "-d"],
-        () => int.MaxValue,
-        "Depth for package reference");
+        name: "--depth",
+        aliases: "-d")
+    {
+        Description = "Depth for package reference",
+        DefaultValueFactory = _ => int.MaxValue,
+    };
 
     private static readonly Option<string> ExcludeOption = new(
-        ["--excludes"],
-        "Packages to exclude from the chart. Seperated by ','. For example: 'Microsoft,System,Test' to ignore system packages.");
+        "--excludes")
+    {
+        Description =
+            "Packages to exclude from the chart. Seperated by ','. For example: 'Microsoft,System,Test' to ignore system packages."
+    };
 
     private static readonly Option<bool> LocalOnlyOption = new(
-        ["--local", "-l"],
-        () => false,
-        "Only show local project references. (Ignore package references.)");
+        name: "--local",
+        aliases: "-l")
+    {
+        Description = "Only show local project references. (Ignore package references.)",
+        DefaultValueFactory = _ => false
+    };
 
     protected override Option[] GetCommandOptions()
     {
@@ -43,16 +52,16 @@ public sealed class VisualizerHandler : ExecutableCommandHandlerBuilder
         ];
     }
 
-    protected override Task Execute(InvocationContext context)
+    protected override Task Execute(ParseResult context)
     {
-        var path = context.ParseResult.GetValueForOption(OptionsProvider.PathOptions)!;
-        var depth = context.ParseResult.GetValueForOption(DepthOption);
-        var excludes = context.ParseResult.GetValueForOption(ExcludeOption);
-        var localOnly = context.ParseResult.GetValueForOption(LocalOnlyOption);
-        var verbose = context.ParseResult.GetValueForOption(OptionsProvider.VerboseOption);
-        var customNugetServer = context.ParseResult.GetValueForOption(OptionsProvider.CustomNugetServerOption)!;
-        var patToken = context.ParseResult.GetValueForOption(OptionsProvider.PatTokenOption)!;
-        
+        var path = context.GetValue(OptionsProvider.PathOptions)!;
+        var depth = context.GetValue(DepthOption);
+        var excludes = context.GetValue(ExcludeOption);
+        var localOnly = context.GetValue(LocalOnlyOption);
+        var verbose = context.GetValue(OptionsProvider.VerboseOption);
+        var customNugetServer = context.GetValue(OptionsProvider.CustomNugetServerOption)!;
+        var patToken = context.GetValue(OptionsProvider.PatTokenOption)!;
+
         var host = BuildHost(verbose, customNugetServer, patToken);
         var excludesArray = excludes?
             .Split(',')

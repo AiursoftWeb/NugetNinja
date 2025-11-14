@@ -1,4 +1,5 @@
-﻿using System.CommandLine.Invocation;
+﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using Aiursoft.Canon;
 using Aiursoft.CommandFramework.Abstracts;
 using Aiursoft.CommandFramework.Framework;
@@ -18,24 +19,24 @@ public abstract class ServiceCommandHandler<TE, TS> : ExecutableCommandHandlerBu
     where TE : class, IEntryService
     where TS : class, IStartUp, new()
 {
-    protected override async Task Execute(InvocationContext context)
+    protected override async Task Execute(ParseResult context)
     {
-        var path = context.ParseResult.GetValueForOption(OptionsProvider.PathOptions)!;
-        var dryRun = context.ParseResult.GetValueForOption(OptionsProvider.DryRunOption);
-        var verbose = context.ParseResult.GetValueForOption(OptionsProvider.VerboseOption);
-        var allowPreview = context.ParseResult.GetValueForOption(OptionsProvider.AllowPreviewOption);
-        var customNugetServer = context.ParseResult.GetValueForOption(OptionsProvider.CustomNugetServerOption)!;
-        var patToken = context.ParseResult.GetValueForOption(OptionsProvider.PatTokenOption)!;
-        var allowCross = context.ParseResult.GetValueForOption(OptionsProvider.AllowPreviewOption);
-       
+        var path = context.GetValue(OptionsProvider.PathOptions)!;
+        var dryRun = context.GetValue(OptionsProvider.DryRunOption);
+        var verbose = context.GetValue(OptionsProvider.VerboseOption);
+        var allowPreview = context.GetValue(OptionsProvider.AllowPreviewOption);
+        var customNugetServer = context.GetValue(OptionsProvider.CustomNugetServerOption)!;
+        var patToken = context.GetValue(OptionsProvider.PatTokenOption)!;
+        var allowCross = context.GetValue(OptionsProvider.AllowPreviewOption);
+
         await ExecuteWithArgs(path, dryRun, verbose, allowPreview, customNugetServer, patToken, allowCross);
     }
 
     private Task ExecuteWithArgs(
-        string path, 
-        bool dryRun, 
-        bool verbose, 
-        bool allowPreview, 
+        string path,
+        bool dryRun,
+        bool verbose,
+        bool allowPreview,
         string customNugetServer,
         string patToken,
         bool allowCross)
@@ -45,14 +46,14 @@ public abstract class ServiceCommandHandler<TE, TS> : ExecutableCommandHandlerBu
     }
 
     protected virtual IHost BuildHost(
-        bool verbose, 
-        bool allowPreview, 
+        bool verbose,
+        bool allowPreview,
         string customNugetServer,
         string patToken,
         bool allowCross)
     {
         var hostBuilder = ServiceBuilder.CreateCommandHostBuilder<TS>(verbose);
-        hostBuilder.ConfigureServices(services => 
+        hostBuilder.ConfigureServices(services =>
         {
             services.AddMemoryCache();
             services.AddHttpClient();
