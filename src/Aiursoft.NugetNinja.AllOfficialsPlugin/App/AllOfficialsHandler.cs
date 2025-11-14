@@ -1,5 +1,4 @@
-﻿using System.CommandLine;
-using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
+﻿using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 using Aiursoft.NugetNinja.Core.Model.Framework;
 
 namespace Aiursoft.NugetNinja.AllOfficialsPlugin.App;

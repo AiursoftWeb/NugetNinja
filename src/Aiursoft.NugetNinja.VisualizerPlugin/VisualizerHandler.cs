@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
