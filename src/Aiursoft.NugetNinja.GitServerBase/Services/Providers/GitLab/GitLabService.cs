@@ -105,7 +105,7 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
 
         var project = await GetProject(endPoint, org, repo, patToken);
 
-        if (project?.HttpUrlToRepo == null || project.DefaultBranch == null || project.PathWithNameSpace == null)
+        if (project.HttpUrlToRepo == null || project.DefaultBranch == null || project.PathWithNameSpace == null)
         {
             throw new InvalidOperationException($"Could not get complete project details for {org}/{repo}");
         }
@@ -125,10 +125,7 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
         };
     }
 
-    private async Task<GitLabProject> GetProjectById(string endpoint, int projectId, string patToken)
-    {
-        return await httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{projectId}", HttpMethod.Get, patToken);
-    }
+
 
     public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
     {

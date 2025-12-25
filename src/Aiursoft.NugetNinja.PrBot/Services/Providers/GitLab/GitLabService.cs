@@ -92,7 +92,7 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
     {
         logger.LogInformation("Getting repository details for {Org}/{Repo} in GitLab...", org, repo);
         var project = await GetProject(endPoint, org, repo, patToken);
-        if (project?.HttpUrlToRepo == null || project.DefaultBranch == null || project.PathWithNameSpace == null)
+        if (project.HttpUrlToRepo == null || project.DefaultBranch == null || project.PathWithNameSpace == null)
             throw new InvalidOperationException($"Could not get complete project details for {org}/{repo}");
         return new Repository
         {

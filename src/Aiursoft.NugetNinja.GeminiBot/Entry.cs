@@ -23,10 +23,10 @@ public class Entry
         IssueProcessor issueProcessor,
         ILogger<Entry> logger)
     {
-        _servers = servers?.Value ?? throw new ArgumentNullException(nameof(servers));
-        _versionControls = versionControls ?? throw new ArgumentNullException(nameof(versionControls));
-        _issueProcessor = issueProcessor ?? throw new ArgumentNullException(nameof(issueProcessor));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _servers = servers.Value;
+        _versionControls = versionControls;
+        _issueProcessor = issueProcessor;
+        _logger = logger;
     }
 
     public async Task RunAsync()

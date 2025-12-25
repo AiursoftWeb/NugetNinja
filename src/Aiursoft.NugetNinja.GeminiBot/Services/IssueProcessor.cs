@@ -29,11 +29,11 @@ public class IssueProcessor
         IOptions<GeminiBotOptions> options,
         ILogger<IssueProcessor> logger)
     {
-        _versionControl = versionControl ?? throw new ArgumentNullException(nameof(versionControl));
-        _workspaceManager = workspaceManager ?? throw new ArgumentNullException(nameof(workspaceManager));
-        _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _versionControl = versionControl;
+        _workspaceManager = workspaceManager;
+        _commandService = commandService;
+        _options = options.Value;
+        _logger = logger;
     }
 
     /// <summary>
