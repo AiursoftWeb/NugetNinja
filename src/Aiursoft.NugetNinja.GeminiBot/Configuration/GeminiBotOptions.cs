@@ -22,4 +22,14 @@ public class GeminiBotOptions
     /// Delay in milliseconds when waiting for a forked repository to become available.
     /// </summary>
     public int ForkWaitDelayMs { get; set; } = 5000;
+
+    /// <summary>
+    /// The AI model to use for Gemini CLI (passed to --model parameter).
+    /// </summary>
+    public string? Model { get; set; }
+
+    /// <summary>
+    /// The API key for Gemini (set as GEMINI_API_KEY environment variable).
+    /// </summary>
+    public string? GeminiApiKey { get; set; }
 }

@@ -319,12 +319,30 @@ Please analyze the failure logs, identify the root cause, and make the necessary
 
             _logger.LogInformation("Running Gemini CLI in {WorkPath}", workPath);
 
-            var geminiCommand = "gemini --yolo < .gemini-task.txt";
+            // Build Gemini command with optional --model parameter
+            var geminiCommand = "gemini --yolo";
+            if (!string.IsNullOrWhiteSpace(_options.Model))
+            {
+                geminiCommand += $" --model {_options.Model}";
+            }
+            geminiCommand += " < .gemini-task.txt";
+
+            // Build environment variables dictionary
+            IDictionary<string, string?>? envVars = null;
+            if (!string.IsNullOrWhiteSpace(_options.GeminiApiKey))
+            {
+                envVars = new Dictionary<string, string?>
+                {
+                    ["GEMINI_API_KEY"] = _options.GeminiApiKey
+                };
+            }
+
             var (code, output, error) = await _commandService.RunCommandAsync(
                 bin: "/bin/bash",
                 arg: $"-c \"{geminiCommand}\"",
                 path: workPath,
-                timeout: _options.GeminiTimeout);
+                timeout: _options.GeminiTimeout,
+                environmentVariables: envVars);
 
             if (code != 0)
             {
