@@ -14,6 +14,9 @@ public class MergeRequestSearchResult
     [JsonProperty("project_id")]
     public int ProjectId { get; set; }
 
+    [JsonProperty("source_project_id")]
+    public int SourceProjectId { get; set; }
+
     [JsonProperty("title")]
     public string? Title { get; set; }
 

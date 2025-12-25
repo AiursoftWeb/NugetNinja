@@ -155,11 +155,39 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
 
     public async Task<IReadOnlyCollection<PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
     {
-        logger.LogTrace("Getting jobs for pipeline {PipelineId} in GitLab...", pipelineId);
-        var endpoint = $"{endPoint}/api/v4/projects/{projectId}/pipelines/{pipelineId}/jobs";
-        var json = await httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
-        var jobs = JsonConvert.DeserializeObject<List<PipelineJob>>(json);
-        return jobs!;
+        logger.LogTrace("Getting jobs for pipeline {PipelineId} in project {ProjectId}...", pipelineId, projectId);
+        try
+        {
+            // First try the direct jobs endpoint
+            var endpoint = $"{endPoint}/api/v4/projects/{projectId}/pipelines/{pipelineId}/jobs";
+            logger.LogTrace("Trying endpoint: {Endpoint}", endpoint);
+            var json = await httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
+            var jobs = JsonConvert.DeserializeObject<List<PipelineJob>>(json);
+            return jobs ?? new List<PipelineJob>();
+        }
+        catch (HttpRequestException ex) when (ex.Message.Contains("404"))
+        {
+            logger.LogWarning("Pipeline {PipelineId} jobs endpoint returned 404 in project {ProjectId}.", pipelineId, projectId);
+
+            // Alternative: Try getting all jobs from the project and filter by pipeline
+            try
+            {
+                logger.LogInformation("Trying alternative approach: fetching all project jobs and filtering...");
+                var projectJobsEndpoint = $"{endPoint}/api/v4/projects/{projectId}/jobs?per_page=100";
+                var allJobsJson = await httpClient.SendHttp(projectJobsEndpoint, HttpMethod.Get, patToken);
+                var allJobs = JsonConvert.DeserializeObject<List<PipelineJob>>(allJobsJson) ?? new List<PipelineJob>();
+
+                // Filter by pipeline ID
+                var pipelineJobs = allJobs.Where(j => j.PipelineId == pipelineId).ToList();
+                logger.LogInformation("Found {Count} jobs for pipeline {PipelineId} using alternative method", pipelineJobs.Count, pipelineId);
+                return pipelineJobs;
+            }
+            catch (Exception alternativeEx)
+            {
+                logger.LogError(alternativeEx, "Alternative method also failed for pipeline {PipelineId}", pipelineId);
+                return new List<PipelineJob>();
+            }
+        }
     }
 
     public async Task<string> GetJobLog(string endPoint, string patToken, int projectId, int jobId)

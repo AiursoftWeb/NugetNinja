@@ -122,15 +122,28 @@ public class MergeRequestProcessor
                 return;
             }
 
-            // Get repository details
+            if (details.Pipeline.Id <= 0)
+            {
+                _logger.LogWarning("MR #{IID} has invalid pipeline ID: {PipelineId}", mr.IID, details.Pipeline.Id);
+                return;
+            }
+
+            // CRITICAL: Pipeline runs in the SOURCE project (fork), not the target project!
+            var pipelineProjectId = mr.SourceProjectId > 0 ? mr.SourceProjectId : mr.ProjectId;
+            _logger.LogInformation("MR #{IID}: Using project ID {ProjectId} for pipeline operations (source: {SourceProjectId}, target: {TargetProjectId})",
+                mr.IID, pipelineProjectId, mr.SourceProjectId, mr.ProjectId);
+
+            // Get repository details from SOURCE project (where the branch exists)
+            // The MR branch is in the fork, not in the target project!
+            _logger.LogInformation("Getting repository details from source project {ProjectId}...", pipelineProjectId);
             var repository = await _versionControl.GetRepository(
                 server.EndPoint,
-                mr.ProjectId.ToString(),
+                pipelineProjectId.ToString(),
                 string.Empty,
                 server.Token);
 
-            // Get failure logs
-            var failureLogs = await GetFailureLogsAsync(server, mr.ProjectId, details.Pipeline.Id);
+            // Get failure logs from SOURCE project (where pipeline runs)
+            var failureLogs = await GetFailureLogsAsync(server, pipelineProjectId, details.Pipeline.Id);
 
             if (string.IsNullOrWhiteSpace(failureLogs))
             {
@@ -205,11 +218,19 @@ public class MergeRequestProcessor
     {
         try
         {
+            _logger.LogInformation("Fetching jobs for pipeline {PipelineId} in project {ProjectId}...", pipelineId, projectId);
+
             var jobs = await _versionControl.GetPipelineJobs(
                 server.EndPoint,
                 server.Token,
                 projectId,
                 pipelineId);
+
+            if (jobs == null || jobs.Count == 0)
+            {
+                _logger.LogWarning("Pipeline {PipelineId} has no jobs (may have been deleted or not started yet)", pipelineId);
+                return string.Empty;
+            }
 
             var failedJobs = jobs.Where(j => j.Status == "failed").ToList();
 
@@ -239,6 +260,11 @@ public class MergeRequestProcessor
             }
 
             return allLogs.ToString();
+        }
+        catch (HttpRequestException ex) when (ex.Message.Contains("404"))
+        {
+            _logger.LogWarning("Pipeline {PipelineId} not found (404) - it may have been deleted or never existed. Skipping...", pipelineId);
+            return string.Empty;
         }
         catch (Exception ex)
         {
