@@ -281,7 +281,7 @@ public class MergeRequestProcessor
         GitServerBase.Models.Abstractions.DetailedMergeRequest details,
         string failureLogs)
     {
-        return $@"Merge Request #{mr.IID}: {mr.Title}
+        return $@"We are working on escroting the merge request #{mr.IID}: {mr.Title}
 
 Pipeline Web URL: {details.Pipeline?.WebUrl}
 Pipeline Status: {details.Pipeline?.Status}
