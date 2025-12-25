@@ -222,7 +222,8 @@ public class Entry(
             var (code, output, error) = await commandService.RunCommandAsync(
                 bin: "/bin/bash",
                 arg: $"-c \"{geminiCommand}\"",
-                path: workPath);
+                path: workPath,
+                timeout: TimeSpan.FromMinutes(20));
 
             // Clean up temp file
             try { File.Delete(tempFile); } catch { /* ignore cleanup errors */ }
@@ -233,7 +234,7 @@ public class Entry(
                 return false;
             }
 
-            logger.LogInformation("Gemini CLI completed successfully");
+            logger.LogInformation("Gemini CLI completed successfully. Gemini said: {Output}", output);
             return true;
         }
         catch (Exception ex)
