@@ -88,17 +88,46 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
         });
     }
 
+    public async Task<Repository> GetRepository(string endPoint, string org, string repo, string patToken)
+    {
+        logger.LogInformation("Getting repository details for {Org}/{Repo} in GitLab...", org, repo);
+        var project = await GetProject(endPoint, org, repo, patToken);
+        if (project?.HttpUrlToRepo == null || project.DefaultBranch == null || project.PathWithNameSpace == null)
+            throw new InvalidOperationException($"Could not get complete project details for {org}/{repo}");
+        return new Repository
+        {
+            Id = project.Id,
+            Name = project.Path ?? throw new InvalidOperationException($"Project path is null for {org}/{repo}"),
+            FullName = project.PathWithNameSpace,
+            DefaultBranch = project.DefaultBranch,
+            CloneUrl = project.HttpUrlToRepo,
+            Archived = project.Archived,
+            Owner = new User { Login = project.Namespace?.FullPath ?? throw new InvalidOperationException($"Project namespace is null for {org}/{repo}") }
+        };
+    }
+
+    public async Task<bool> HasOpenPullRequestForIssue(string endPoint, int projectId, int issueId, string patToken)
+    {
+        logger.LogInformation("Checking if issue #{IssueId} has open merge requests...", issueId);
+        var endpoint = $"{endPoint}/api/v4/projects/{projectId}/merge_requests?state=opened&per_page=100";
+        var mrs = await httpClient.SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
+        foreach (var mr in mrs)
+            if (mr.Title?.Contains($"#{issueId}") == true || mr.Description?.Contains($"#{issueId}") == true)
+            {
+                logger.LogInformation("Found open MR referencing issue #{IssueId}", issueId);
+                return true;
+            }
+        return false;
+    }
+
     private async Task<GitLabProject> GetProject(string endpoint, string org, string repo, string patToken)
     {
-        //https://gitlab.aiursoft.com/api/v4/projects/aiursoft%2fscanner
         return await httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{org}%2f{repo}", HttpMethod.Get, patToken);
     }
 
     public string GetPushPath(Server connectionConfiguration, Repository repo)
     {
-        var pushPath = string.Format(connectionConfiguration.PushEndPoint,
-                           $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
-                       + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
+        var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}") + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
     }
 }
@@ -140,6 +169,12 @@ public class GitLabPullRequest
 
     [JsonPropertyName("state")]
     public string? State { get; set; }
+
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
 }
 
 public class GitLabUser

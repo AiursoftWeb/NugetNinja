@@ -78,40 +78,51 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
         }
     }
 
-    public async Task<bool> HasOpenMergeRequest(string endPoint, int projectId, int issueId, string patToken)
+    public async Task<bool> HasOpenPullRequestForIssue(string endPoint, int projectId, int issueId, string patToken)
     {
         logger.LogInformation("Checking if issue #{IssueId} has open merge requests...", issueId);
-        try
+
+        // Query merge requests for this project that are linked to this issue
+        var endpoint = $"{endPoint}/api/v4/projects/{projectId}/merge_requests?state=opened&per_page=100";
+        var mrs = await httpClient.SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
+
+        // Check if any MR references this issue in title or description
+        foreach (var mr in mrs)
         {
-            // Get project details to construct proper query
-            var project = await GetProjectById(endPoint, projectId, patToken);
-            if (project?.PathWithNameSpace == null)
+            if (mr.Title?.Contains($"#{issueId}") == true || mr.Description?.Contains($"#{issueId}") == true)
             {
-                logger.LogWarning("Could not get project details for project ID {ProjectId}", projectId);
-                return false;
+                logger.LogInformation("Found open MR referencing issue #{IssueId}", issueId);
+                return true;
             }
-
-            // Query merge requests for this project that are linked to this issue
-            var endpoint = $"{endPoint}/api/v4/projects/{projectId}/merge_requests?state=opened&per_page=100";
-            var mrs = await httpClient.SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
-
-            // Check if any MR references this issue in title or description
-            foreach (var mr in mrs)
-            {
-                if (mr.Title?.Contains($"#{issueId}") == true || mr.Description?.Contains($"#{issueId}") == true)
-                {
-                    logger.LogInformation("Found open MR referencing issue #{IssueId}", issueId);
-                    return true;
-                }
-            }
-
-            return false;
         }
-        catch (Exception ex)
+
+        return false;
+    }
+
+    public async Task<Repository> GetRepository(string endPoint, string org, string repo, string patToken)
+    {
+        logger.LogInformation("Getting repository details for {Org}/{Repo} in GitLab...", org, repo);
+
+        var project = await GetProject(endPoint, org, repo, patToken);
+
+        if (project?.HttpUrlToRepo == null || project.DefaultBranch == null || project.PathWithNameSpace == null)
         {
-            logger.LogError(ex, "Error checking for merge requests for issue #{IssueId}", issueId);
-            return false;
+            throw new InvalidOperationException($"Could not get complete project details for {org}/{repo}");
         }
+
+        return new Repository
+        {
+            Id = project.Id,
+            Name = project.Path ?? throw new InvalidOperationException($"Project path is null for {org}/{repo}"),
+            FullName = project.PathWithNameSpace,
+            DefaultBranch = project.DefaultBranch,
+            CloneUrl = project.HttpUrlToRepo,
+            Archived = project.Archived,
+            Owner = new User
+            {
+                Login = project.Namespace?.FullPath ?? throw new InvalidOperationException($"Project namespace is null for {org}/{repo}")
+            }
+        };
     }
 
     private async Task<GitLabProject> GetProjectById(string endpoint, int projectId, string patToken)

@@ -90,6 +90,44 @@ public class AzureDevOpsService(
         return Task.FromResult(true);
     }
 
+    public async Task<Repository> GetRepository(string endPoint, string org, string repo, string patToken)
+    {
+        logger.LogInformation("Getting repository details for {Repo} on Azure DevOps...", repo);
+
+        await foreach (var azureDevOpsRepo in GetGitRepositories(endPoint, patToken))
+        {
+            if (azureDevOpsRepo.Name == repo)
+            {
+                if (azureDevOpsRepo.DefaultBranch == null)
+                {
+                    throw new InvalidOperationException($"Repository {repo}'s default branch is null!");
+                }
+
+                return new Repository
+                {
+                    Name = azureDevOpsRepo.Name,
+                    FullName = azureDevOpsRepo.Name,
+                    Owner = new User
+                    {
+                        Login = azureDevOpsRepo.ProjectReference.Name
+                    },
+                    DefaultBranch = azureDevOpsRepo.DefaultBranch.Split('/').Last(),
+                    CloneUrl = azureDevOpsRepo.SshUrl
+                };
+            }
+        }
+
+        throw new InvalidOperationException($"Could not find Azure DevOps repository: {repo}");
+    }
+
+    public Task<bool> HasOpenPullRequestForIssue(string endPoint, int projectId, int issueId, string patToken)
+    {
+        // Azure DevOps uses Work Items, not the same issue/PR model as GitLab
+        // This method returns false for Azure DevOps
+        logger.LogInformation("Checking for open PRs for issue #{IssueId} (not supported for Azure DevOps)", issueId);
+        return Task.FromResult(false);
+    }
+
     public string GetPushPath(Server connectionConfiguration, Repository repo)
     {
         // Hack here, because Azure DevOps is so stupid that doesn't support pushing with HTTPS + PAT grammar.

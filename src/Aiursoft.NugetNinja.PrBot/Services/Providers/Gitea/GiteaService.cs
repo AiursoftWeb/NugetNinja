@@ -73,11 +73,24 @@ public class GiteaService(
         });
     }
 
+    public async Task<Repository> GetRepository(string endPoint, string org, string repo, string patToken)
+    {
+        logger.LogInformation("Getting repository details for {Org}/{Repo} on Gitea...", org, repo);
+        var endpoint = $@"{endPoint}/api/v1/repos/{org}/{repo}";
+        var repository = await httpClient.SendHttpAndGetJson<Repository>(endpoint, HttpMethod.Get, patToken);
+        if (repository == null) throw new InvalidOperationException($"Could not get repository details for {org}/{repo}");
+        return repository;
+    }
+
+    public Task<bool> HasOpenPullRequestForIssue(string endPoint, int projectId, int issueId, string patToken)
+    {
+        logger.LogInformation("Checking for open PRs for issue #{IssueId} (not supported for Gitea)", issueId);
+        return Task.FromResult(false);
+    }
+
     public string GetPushPath(Server connectionConfiguration, Repository repo)
     {
-        var pushPath = string.Format(connectionConfiguration.PushEndPoint,
-                           $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
-                       + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
+        var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}") + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
     }
 }
