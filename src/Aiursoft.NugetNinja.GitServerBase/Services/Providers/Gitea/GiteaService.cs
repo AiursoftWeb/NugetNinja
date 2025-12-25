@@ -119,6 +119,16 @@ public class GiteaService(
         throw new NotImplementedException("Merge requests are not supported for Gitea");
     }
 
+    public Task<IReadOnlyCollection<GitServerBase.Models.Abstractions.PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for Gitea");
+    }
+
+    public Task<string> GetJobLog(string endPoint, string patToken, int projectId, int jobId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for Gitea");
+    }
+
     public IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken)
     {
         throw new NotImplementedException("Gitea issue tracking is not implemented yet. Please use GitLab provider.");

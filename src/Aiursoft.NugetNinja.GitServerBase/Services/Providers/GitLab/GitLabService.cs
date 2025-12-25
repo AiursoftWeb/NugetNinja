@@ -153,6 +153,23 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
         await httpClient.SendHttp(endpoint, HttpMethod.Put, patToken);
     }
 
+    public async Task<IReadOnlyCollection<PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
+    {
+        logger.LogTrace("Getting jobs for pipeline {PipelineId} in GitLab...", pipelineId);
+        var endpoint = $"{endPoint}/api/v4/projects/{projectId}/pipelines/{pipelineId}/jobs";
+        var json = await httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
+        var jobs = JsonConvert.DeserializeObject<List<PipelineJob>>(json);
+        return jobs!;
+    }
+
+    public async Task<string> GetJobLog(string endPoint, string patToken, int projectId, int jobId)
+    {
+        logger.LogTrace("Getting log for job {JobId} in GitLab...", jobId);
+        var endpoint = $"{endPoint}/api/v4/projects/{projectId}/jobs/{jobId}/trace";
+        var log = await httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
+        return log;
+    }
+
     public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
     {
         logger.LogInformation("Forking repository in GitLab: {Org}/{Repo}...", org, repo);

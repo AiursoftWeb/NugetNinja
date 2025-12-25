@@ -149,6 +149,16 @@ public class AzureDevOpsService(
         throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
     }
 
+    public Task<IReadOnlyCollection<GitServerBase.Models.Abstractions.PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for Azure DevOps");
+    }
+
+    public Task<string> GetJobLog(string endPoint, string patToken, int projectId, int jobId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for Azure DevOps");
+    }
+
     private async Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken)
     {
         return await cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", async () =>

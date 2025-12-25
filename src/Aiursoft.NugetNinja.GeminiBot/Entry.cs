@@ -15,17 +15,20 @@ public class Entry
     private readonly List<Server> _servers;
     private readonly IEnumerable<IVersionControlService> _versionControls;
     private readonly IssueProcessor _issueProcessor;
+    private readonly MergeRequestProcessor _mergeRequestProcessor;
     private readonly ILogger<Entry> _logger;
 
     public Entry(
         IOptions<List<Server>> servers,
         IEnumerable<IVersionControlService> versionControls,
         IssueProcessor issueProcessor,
+        MergeRequestProcessor mergeRequestProcessor,
         ILogger<Entry> logger)
     {
         _servers = servers.Value;
         _versionControls = versionControls;
         _issueProcessor = issueProcessor;
+        _mergeRequestProcessor = mergeRequestProcessor;
         _logger = logger;
     }
 
@@ -54,6 +57,22 @@ public class Entry
 
     private async Task ProcessServerAsync(Server server, IVersionControlService versionControl)
     {
+        // PRIORITY 1: Check and fix failed merge requests first
+        _logger.LogInformation("\n\n================ CHECKING MERGE REQUESTS ================\n");
+        _logger.LogInformation("Checking merge requests before processing issues...");
+
+        try
+        {
+            await _mergeRequestProcessor.ProcessMergeRequestsAsync(server);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking merge requests for {UserName}", server.UserName);
+        }
+
+        _logger.LogInformation("\n\n================ CHECKING ISSUES ================\n");
+
+        // PRIORITY 2: Process assigned issues
         var assignedIssues = await versionControl
             .GetAssignedIssues(server.EndPoint, server.UserName, server.Token)
             .ToListAsync();

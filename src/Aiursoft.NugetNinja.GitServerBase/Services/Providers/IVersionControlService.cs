@@ -28,6 +28,10 @@ public interface IVersionControlService
     public Task<DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId);
     public Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId);
 
+    // Pipeline operations (for GeminiBot)
+    public Task<IReadOnlyCollection<PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId);
+    public Task<string> GetJobLog(string endPoint, string patToken, int projectId, int jobId);
+
     // Helper methods
     public string GetPushPath(Server connectionConfiguration, Repository repo);
 }

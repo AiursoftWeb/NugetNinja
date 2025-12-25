@@ -17,6 +17,9 @@ public class MergeRequestSearchResult
     [JsonProperty("title")]
     public string? Title { get; set; }
 
+    [JsonProperty("source_branch")]
+    public string? SourceBranch { get; set; }
+
     [JsonProperty("has_conflicts")]
     public bool HasConflicts { get; set; }
 

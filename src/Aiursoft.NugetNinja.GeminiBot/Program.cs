@@ -60,6 +60,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<WorkspaceManager>();
             services.AddTransient<CommandService>();
             services.AddTransient<IssueProcessor>();
+            services.AddTransient<MergeRequestProcessor>();
             new StartUp().ConfigureServices(services);
             services.AddTransient<RunAllOfficialPluginsService>();
             services.AddTransient<Entry>();
