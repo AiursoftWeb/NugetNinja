@@ -134,12 +134,12 @@ public class AzureDevOpsService(
         return repo.CloneUrl ?? throw new Exception($"Repo {repo}'s clone Url is null!");
     }
 
-    public Task<IReadOnlyCollection<GitServerBase.Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
+    public Task<IReadOnlyCollection<Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
     {
         throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
     }
 
-    public Task<GitServerBase.Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
+    public Task<Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
     {
         throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
     }
@@ -149,7 +149,7 @@ public class AzureDevOpsService(
         throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
     }
 
-    public Task<IReadOnlyCollection<GitServerBase.Models.Abstractions.PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
+    public Task<IReadOnlyCollection<Models.Abstractions.PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
     {
         throw new NotImplementedException("Pipeline operations are not supported for Azure DevOps");
     }

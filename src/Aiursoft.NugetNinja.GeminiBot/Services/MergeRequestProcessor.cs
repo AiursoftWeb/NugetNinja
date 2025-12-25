@@ -226,7 +226,7 @@ public class MergeRequestProcessor
                 projectId,
                 pipelineId);
 
-            if (jobs == null || jobs.Count == 0)
+            if (jobs.Count == 0)
             {
                 _logger.LogWarning("Pipeline {PipelineId} has no jobs (may have been deleted or not started yet)", pipelineId);
                 return string.Empty;
