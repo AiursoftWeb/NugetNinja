@@ -1,15 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Aiursoft.NugetNinja.GitServerBase</AssemblyName>
+    <RootNamespace>Aiursoft.NugetNinja.GitServerBase</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+    <IsPackable>false</IsPackable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Aiursoft.GitRunner" Version="10.0.4" />
-        <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Aiursoft.GitRunner" Version="10.0.4" />
+    <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj" />
+  </ItemGroup>
 </Project>

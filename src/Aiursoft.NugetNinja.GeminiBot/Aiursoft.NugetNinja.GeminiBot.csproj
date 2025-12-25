@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.6</Version>
+    <Version>10.0.7</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>ninja-gemini-bot</AssemblyName>
+    <RootNamespace>Aiursoft.NugetNinja.GeminiBot</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
@@ -38,10 +39,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="../../README.md" Pack="true" PackagePath="." />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Aiursoft.GitRunner" Version="10.0.4" />
-    <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />

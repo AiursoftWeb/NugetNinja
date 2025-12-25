@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.6</Version>
+    <Version>10.0.7</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>ninja-bot</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
@@ -40,7 +40,6 @@
     </Content>
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
     <ProjectReference Include="..\Aiursoft.NugetNinja.GitServerBase\Aiursoft.NugetNinja.GitServerBase.csproj" />

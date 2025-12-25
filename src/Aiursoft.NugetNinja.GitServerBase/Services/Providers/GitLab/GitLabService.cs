@@ -194,8 +194,22 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
 
     private async Task<GitLabProject> GetProject(string endpoint, string org, string repo, string patToken)
     {
-        //https://gitlab.aiursoft.com/api/v4/projects/aiursoft%2fscanner
-        return await httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{org}%2f{repo}", HttpMethod.Get, patToken);
+        // GitLab API supports both:
+        // - /api/v4/projects/{id} for numeric project IDs
+        // - /api/v4/projects/{org}%2F{repo} for org/repo paths
+        string projectIdentifier;
+        if (string.IsNullOrEmpty(repo) && int.TryParse(org, out _))
+        {
+            // Using numeric project ID directly
+            projectIdentifier = org;
+        }
+        else
+        {
+            // Using org/repo path format
+            projectIdentifier = $"{org}%2f{repo}";
+        }
+
+        return await httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{projectIdentifier}", HttpMethod.Get, patToken);
     }
 
     public string GetPushPath(Server connectionConfiguration, Repository repo)
