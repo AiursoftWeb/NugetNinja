@@ -1,9 +1,9 @@
 ﻿using Aiursoft.NugetNinja.Core.Services.Utils;
-using Aiursoft.NugetNinja.MergeBot.Models.Abstractions;
+using Aiursoft.NugetNinja.GitServerBase.Models.Abstractions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace Aiursoft.NugetNinja.MergeBot.Models.Providers;
+namespace Aiursoft.NugetNinja.GitServerBase.Models.Providers;
 
 public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger) : IGitServer
 {

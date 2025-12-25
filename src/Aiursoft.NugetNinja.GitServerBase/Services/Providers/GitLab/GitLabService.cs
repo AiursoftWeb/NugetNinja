@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 using Aiursoft.NugetNinja.Core.Services.Utils;
-using Aiursoft.NugetNinja.GeminiBot.Models;
+using Aiursoft.NugetNinja.GitServerBase.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.GeminiBot.Services.Providers.GitLab;
+namespace Aiursoft.NugetNinja.GitServerBase.Services.Providers.GitLab;
 
 public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger) : IVersionControlService
 {
@@ -47,6 +47,76 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
                 }
             };
         }
+    }
+
+    public async IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken)
+    {
+        logger.LogInformation("Listing all issues assigned to user: {UserName} in GitLab...", userName);
+        for (var i = 1; ; i++)
+        {
+            var endpoint = $"{endPoint}/api/v4/issues?assignee_username={userName}&scope=all&state=opened&per_page=100&page={i}";
+            var currentPageItems = await httpClient.SendHttpAndGetJson<List<GitLabIssue>>(endpoint, HttpMethod.Get, patToken);
+            if (!currentPageItems.Any()) yield break;
+
+            foreach (var issue in currentPageItems)
+            {
+                yield return new Issue
+                {
+                    Id = issue.Id,
+                    Iid = issue.Iid,
+                    ProjectId = issue.ProjectId,
+                    Title = issue.Title,
+                    Description = issue.Description,
+                    State = issue.State,
+                    WebUrl = issue.WebUrl,
+                    Author = new User
+                    {
+                        Login = issue.Author?.UserName ?? throw new NullReferenceException("Issue author is null!")
+                    }
+                };
+            }
+        }
+    }
+
+    public async Task<bool> HasOpenMergeRequest(string endPoint, int projectId, int issueId, string patToken)
+    {
+        logger.LogInformation("Checking if issue #{IssueId} has open merge requests...", issueId);
+        try
+        {
+            // Get project details to construct proper query
+            var project = await GetProjectById(endPoint, projectId, patToken);
+            if (project?.PathWithNameSpace == null)
+            {
+                logger.LogWarning("Could not get project details for project ID {ProjectId}", projectId);
+                return false;
+            }
+
+            // Query merge requests for this project that are linked to this issue
+            var endpoint = $"{endPoint}/api/v4/projects/{projectId}/merge_requests?state=opened&per_page=100";
+            var mrs = await httpClient.SendHttpAndGetJson<List<GitLabPullRequest>>(endpoint, HttpMethod.Get, patToken);
+
+            // Check if any MR references this issue in title or description
+            foreach (var mr in mrs)
+            {
+                if (mr.Title?.Contains($"#{issueId}") == true || mr.Description?.Contains($"#{issueId}") == true)
+                {
+                    logger.LogInformation("Found open MR referencing issue #{IssueId}", issueId);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error checking for merge requests for issue #{IssueId}", issueId);
+            return false;
+        }
+    }
+
+    private async Task<GitLabProject> GetProjectById(string endpoint, int projectId, string patToken)
+    {
+        return await httpClient.SendHttpAndGetJson<GitLabProject>($"{endpoint}/api/v4/projects/{projectId}", HttpMethod.Get, patToken);
     }
 
     public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
@@ -145,10 +215,42 @@ public class GitLabPullRequest
 
     [JsonPropertyName("state")]
     public string? State { get; set; }
+
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
 }
 
 public class GitLabUser
 {
     [JsonPropertyName("username")]
     public string? UserName { get; set; }
+}
+public class GitLabIssue
+{
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("iid")]
+    public int Iid { get; set; }
+
+    [JsonPropertyName("project_id")]
+    public int ProjectId { get; set; }
+
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    [JsonPropertyName("web_url")]
+    public string? WebUrl { get; set; }
+
+    [JsonPropertyName("author")]
+    public GitLabUser? Author { get; set; }
 }

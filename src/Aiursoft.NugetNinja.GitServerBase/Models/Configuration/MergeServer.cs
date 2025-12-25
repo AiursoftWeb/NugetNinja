@@ -1,4 +1,4 @@
-﻿namespace Aiursoft.NugetNinja.MergeBot.Models.Configuration;
+﻿namespace Aiursoft.NugetNinja.GitServerBase.Models.Configuration;
 
 public class MergeServer
 {

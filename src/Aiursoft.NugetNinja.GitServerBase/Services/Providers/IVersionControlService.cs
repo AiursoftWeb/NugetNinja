@@ -1,6 +1,6 @@
-﻿using Aiursoft.NugetNinja.GeminiBot.Models;
+﻿using Aiursoft.NugetNinja.GitServerBase.Models;
 
-namespace Aiursoft.NugetNinja.GeminiBot.Services.Providers;
+namespace Aiursoft.NugetNinja.GitServerBase.Services.Providers;
 
 public interface IVersionControlService
 {
@@ -9,6 +9,8 @@ public interface IVersionControlService
     public Task<bool> RepoExists(string endPoint, string orgName, string repoName, string patToken);
 
     public IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken);
+
+    public IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken);
 
     public Task ForkRepo(string endPoint, string org, string repo, string patToken);
 

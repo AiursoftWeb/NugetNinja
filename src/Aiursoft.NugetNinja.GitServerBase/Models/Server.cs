@@ -1,4 +1,4 @@
-﻿namespace Aiursoft.NugetNinja.GeminiBot.Models;
+﻿namespace Aiursoft.NugetNinja.GitServerBase.Models;
 
 public class Server
 {

@@ -1,8 +1,8 @@
 ﻿using Aiursoft.NugetNinja.Core.Services.Utils;
-using Aiursoft.NugetNinja.GeminiBot.Models;
+using Aiursoft.NugetNinja.GitServerBase.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.GeminiBot.Services.Providers.GitHub;
+namespace Aiursoft.NugetNinja.GitServerBase.Services.Providers.GitHub;
 
 public class GitHubService(
     HttpWrapper httpClient,
@@ -31,7 +31,7 @@ public class GitHubService(
     public async IAsyncEnumerable<Repository> GetMyStars(string endPoint, string userName, string patToken)
     {
         logger.LogInformation("Listing all stared repositories based on user\'s name: {UserName}...", userName);
-        for (var i = 1;; i++)
+        for (var i = 1; ; i++)
         {
             var endpoint = $@"{endPoint}/users/{userName}/starred?page={i}";
             var currentPageItems = await httpClient.SendHttpAndGetJson<List<Repository>>(endpoint, HttpMethod.Get, patToken);
@@ -40,6 +40,7 @@ public class GitHubService(
             foreach (var repo in currentPageItems) yield return repo;
         }
     }
+
 
     public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
     {
@@ -84,5 +85,10 @@ This pull request may break or change the behavior of this application. Review w
                            $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
                        + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
+    }
+
+    public IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken)
+    {
+        throw new NotImplementedException("GitHub issue tracking is not implemented yet. Please use GitLab provider.");
     }
 }

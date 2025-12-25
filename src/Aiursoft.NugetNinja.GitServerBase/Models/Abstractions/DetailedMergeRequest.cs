@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Aiursoft.NugetNinja.MergeBot.Models.Abstractions;
+namespace Aiursoft.NugetNinja.GitServerBase.Models.Abstractions;
 
 public class DetailedMergeRequest : MergeRequestSearchResult
 {

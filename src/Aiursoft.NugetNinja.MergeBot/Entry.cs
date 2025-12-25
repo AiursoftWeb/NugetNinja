@@ -1,6 +1,6 @@
 ﻿using Aiursoft.Canon;
-using Aiursoft.NugetNinja.MergeBot.Models.Abstractions;
-using Aiursoft.NugetNinja.MergeBot.Models.Configuration;
+using Aiursoft.NugetNinja.GitServerBase.Models.Abstractions;
+using Aiursoft.NugetNinja.GitServerBase.Models.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +24,7 @@ public class Entry(
                 logger.LogError("Provider {Provider} is not supported!", server.Provider);
                 continue;
             }
-            
+
             logger.LogInformation("Checking open merge requests for {ServerProvider}...", server.Provider);
             var mergeRequests = await gitServer.GetOpenMergeRequests(server.EndPoint!, server.UserName!, server.Token!);
             var validMergeRequests = mergeRequests
@@ -42,7 +42,7 @@ public class Entry(
                     logger.LogWarning("Merge request {MergeRequest} has a pipeline with status {Status}!", mergeRequest.Title, details.Pipeline?.Status);
                     continue;
                 }
-                
+
                 logger.LogInformation("Merge request {MergeRequest} has a successful pipeline!", mergeRequest.Title);
                 try
                 {

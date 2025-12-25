@@ -1,12 +1,12 @@
 ﻿using Aiursoft.Canon;
-using Aiursoft.NugetNinja.GeminiBot.Models;
+using Aiursoft.NugetNinja.GitServerBase.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.WebApi;
 
-namespace Aiursoft.NugetNinja.GeminiBot.Services.Providers.AzureDevOps;
+namespace Aiursoft.NugetNinja.GitServerBase.Services.Providers.AzureDevOps;
 
 public class AzureDevOpsService(
     CacheService cacheService,
@@ -122,5 +122,10 @@ This pull request may break or change the behavior of this application. Review w
             var repos = await client.GetRepositoriesAsync(project.Name);
             foreach (var repo in repos) yield return repo;
         }
+    }
+
+    public IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken)
+    {
+        throw new NotImplementedException("Azure DevOps issue tracking is not implemented yet. Please use GitLab provider.");
     }
 }

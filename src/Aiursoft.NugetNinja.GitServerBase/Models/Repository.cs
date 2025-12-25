@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Aiursoft.NugetNinja.GeminiBot.Models;
+namespace Aiursoft.NugetNinja.GitServerBase.Models;
 
 public class PullRequest
 {
