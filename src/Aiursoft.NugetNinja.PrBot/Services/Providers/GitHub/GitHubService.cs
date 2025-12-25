@@ -93,4 +93,19 @@ public class GitHubService(
         var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}") + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
     }
+
+    public Task<IReadOnlyCollection<GitServerBase.GitServerBase.Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
+    {
+        throw new NotImplementedException("Merge requests are not supported for GitHub");
+    }
+
+    public Task<GitServerBase.GitServerBase.Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
+    {
+        throw new NotImplementedException("Merge requests are not supported for GitHub");
+    }
+
+    public Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId)
+    {
+        throw new NotImplementedException("Merge requests are not supported for GitHub");
+    }
 }

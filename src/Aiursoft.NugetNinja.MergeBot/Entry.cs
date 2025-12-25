@@ -1,6 +1,6 @@
 ﻿using Aiursoft.Canon;
-using Aiursoft.NugetNinja.GitServerBase.Models.Abstractions;
 using Aiursoft.NugetNinja.GitServerBase.Models.Configuration;
+using Aiursoft.NugetNinja.GitServerBase.Services.Providers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -10,7 +10,7 @@ public class Entry(
     RetryEngine retryEngine,
     ILogger<Entry> logger,
     IOptions<List<MergeServer>> servers,
-    IEnumerable<IGitServer> gitServers)
+    IEnumerable<IVersionControlService> gitServers)
 {
     private readonly List<MergeServer> _servers = servers.Value;
 

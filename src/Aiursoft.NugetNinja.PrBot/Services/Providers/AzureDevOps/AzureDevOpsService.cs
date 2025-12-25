@@ -121,6 +121,21 @@ public class AzureDevOpsService(
         return repo.CloneUrl ?? throw new Exception($"Repo {repo}'s clone Url is null!");
     }
 
+    public Task<IReadOnlyCollection<GitServerBase.GitServerBase.Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
+    {
+        throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
+    }
+
+    public Task<GitServerBase.GitServerBase.Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
+    {
+        throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
+    }
+
+    public Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId)
+    {
+        throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
+    }
+
     private async Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken)
     {
         return await cacheService.RunWithCache($"azure-devops-client-{endPoint}-token-{patToken}", async () =>

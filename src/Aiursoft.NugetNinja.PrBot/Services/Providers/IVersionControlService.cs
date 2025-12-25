@@ -1,4 +1,5 @@
 ﻿using Aiursoft.NugetNinja.PrBot.Models;
+using Aiursoft.NugetNinja.GitServerBase.Models.Abstractions;
 
 namespace Aiursoft.NugetNinja.PrBot.Services.Providers;
 
@@ -20,6 +21,11 @@ public interface IVersionControlService
         string patToken);
     public Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch,
         string title, string body, string patToken);
+
+    // Merge Request operations (for MergeBot)
+    public Task<IReadOnlyCollection<MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken);
+    public Task<DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId);
+    public Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId);
 
     // Helper methods
     public string GetPushPath(Server connectionConfiguration, Repository repo);

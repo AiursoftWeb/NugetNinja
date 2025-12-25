@@ -130,6 +130,31 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
         var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}") + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
     }
+
+    public async Task<IReadOnlyCollection<GitServerBase.GitServerBase.Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
+    {
+        logger.LogTrace("Listing all open merge requests for user: {UserName} in GitLab...", userName);
+        var endpoint = $"{endPoint}/api/v4/merge_requests?state=opened&author_username={userName}&scope=all&per_page=100";
+        var json = await httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
+        var mergeRequests = Newtonsoft.Json.JsonConvert.DeserializeObject<List<GitServerBase.GitServerBase.Models.Abstractions.MergeRequestSearchResult>>(json);
+        return mergeRequests!;
+    }
+
+    public async Task<GitServerBase.GitServerBase.Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
+    {
+        logger.LogTrace("Getting details for merge request {MergeRequestId} in GitLab...", mergeRequestId);
+        var endpoint = $"{endPoint}/api/v4/projects/{projectId}/merge_requests/{mergeRequestId}";
+        var json = await httpClient.SendHttp(endpoint, HttpMethod.Get, patToken);
+        var mergeRequest = Newtonsoft.Json.JsonConvert.DeserializeObject<GitServerBase.GitServerBase.Models.Abstractions.DetailedMergeRequest>(json);
+        return mergeRequest!;
+    }
+
+    public async Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId)
+    {
+        logger.LogInformation("Merging merge request {MergeRequestId} in GitLab...", mergeRequestId);
+        var endpoint = $"{endPoint}/api/v4/projects/{projectId}/merge_requests/{mergeRequestId}/merge";
+        await httpClient.SendHttp(endpoint, HttpMethod.Put, patToken);
+    }
 }
 
 public class GitLabNamespace

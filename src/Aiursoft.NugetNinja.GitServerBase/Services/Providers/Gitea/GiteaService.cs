@@ -104,6 +104,21 @@ public class GiteaService(
         return pushPath;
     }
 
+    public Task<IReadOnlyCollection<GitServerBase.Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
+    {
+        throw new NotImplementedException("Merge requests are not supported for Gitea");
+    }
+
+    public Task<GitServerBase.Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
+    {
+        throw new NotImplementedException("Merge requests are not supported for Gitea");
+    }
+
+    public Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId)
+    {
+        throw new NotImplementedException("Merge requests are not supported for Gitea");
+    }
+
     public IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken)
     {
         throw new NotImplementedException("Gitea issue tracking is not implemented yet. Please use GitLab provider.");
