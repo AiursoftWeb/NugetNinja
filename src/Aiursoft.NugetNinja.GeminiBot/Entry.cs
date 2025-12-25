@@ -211,15 +211,21 @@ public class Entry(
     {
         try
         {
-            //Escape the task description for shell
-            var escapedTask = taskDescription.Replace("\"", "\\\"").Replace("$", "\\$").Replace("`", "\\`");
-            var geminiCommand = $"gemini \"{escapedTask}\" --yolo";
+            // Use a safer approach: write task to a temp file and pass filename to gemini
+            var tempFile = Path.Combine(workPath, ".gemini-task.txt");
+            await File.WriteAllTextAsync(tempFile, taskDescription);
 
-            logger.LogInformation("Running: gemini \"[task description]\" --yolo in {WorkPath}", workPath);
+            logger.LogInformation("Running: gemini --yolo with task from file in {WorkPath}", workPath);
+
+            // Use stdin redirection instead of pipe to avoid quoting issues
+            var geminiCommand = "gemini --yolo < .gemini-task.txt";
             var (code, output, error) = await commandService.RunCommandAsync(
                 bin: "/bin/bash",
-                arg: $"-c '{geminiCommand}'",
+                arg: $"-c \"{geminiCommand}\"",
                 path: workPath);
+
+            // Clean up temp file
+            try { File.Delete(tempFile); } catch { /* ignore cleanup errors */ }
 
             if (code != 0)
             {
