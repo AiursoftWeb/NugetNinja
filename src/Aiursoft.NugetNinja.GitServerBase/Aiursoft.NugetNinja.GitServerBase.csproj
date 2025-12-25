@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Aiursoft.GitRunner" Version="10.0.4" />
+        <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj" />
+    </ItemGroup>
+</Project>

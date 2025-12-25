@@ -4,7 +4,6 @@
     <Version>10.0.6</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>ninja-bot</AssemblyName>
-    <RootNamespace>Aiursoft.NugetNinja.PrBot</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
@@ -20,7 +19,7 @@
     <Product>NugetNinja Bot</Product>
     <Authors>anduin2017 codgician</Authors>
     <Description>A bot for detecting dependencies of .NET projects and create pull requests automatically.</Description>
-    <PackageId>Aiursoft.NugetNinja.PrBot</PackageId>
+    <PackageId>Aiursoft.NugetNinja.GeminiBot</PackageId>
     <PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</PackageProjectUrl>
@@ -40,7 +39,10 @@
     </Content>
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Aiursoft.GitRunner" Version="10.0.4" />
+    <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
     <ProjectReference Include="..\Aiursoft.NugetNinja.GitServerBase\Aiursoft.NugetNinja.GitServerBase.csproj" />
