@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.GitRunner" Version="10.0.4" />
+    <PackageReference Include="Aiursoft.GitRunner" Version="10.0.5" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
   </ItemGroup>
   <ItemGroup>
