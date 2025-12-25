@@ -18,7 +18,7 @@ public interface IVersionControlService
         string patToken);
 
     public Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch,
-        string patToken);
+        string title, string body, string patToken);
 
     public string GetPushPath(Server connectionConfiguration, Repository repo);
 }
