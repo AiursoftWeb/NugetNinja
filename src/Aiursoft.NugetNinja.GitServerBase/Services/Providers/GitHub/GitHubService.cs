@@ -1,8 +1,8 @@
 ﻿using Aiursoft.NugetNinja.Core.Services.Utils;
-using Aiursoft.NugetNinja.PrBot.Models;
+using Aiursoft.NugetNinja.GitServerBase.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.PrBot.Services.Providers.GitHub;
+namespace Aiursoft.NugetNinja.GitServerBase.Services.Providers.GitHub;
 
 public class GitHubService(
     HttpWrapper httpClient,
@@ -41,6 +41,7 @@ public class GitHubService(
         }
     }
 
+
     public async Task ForkRepo(string endPoint, string org, string repo, string patToken)
     {
         logger.LogInformation("Forking repository on GitHub with org: {Org}, repo: {Repo}...", org, repo);
@@ -61,7 +62,7 @@ public class GitHubService(
     public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string @base,
         string title, string body, string patToken)
     {
-        logger.LogInformation("Creating a new pull request on GitHub with org: {Org}, repo:  {Repo}...", org, repo);
+        logger.LogInformation("Creating a new pull request on GitHub with org: {Org}, repo: {Repo}...", org, repo);
 
         var endpoint = $@"{endPoint}/repos/{org}/{repo}/pulls";
         await httpClient.SendHttp(endpoint, HttpMethod.Post, patToken, new
@@ -76,14 +77,22 @@ public class GitHubService(
     public async Task<Repository> GetRepository(string endPoint, string org, string repo, string patToken)
     {
         logger.LogInformation("Getting repository details for {Org}/{Repo} on GitHub...", org, repo);
+
         var endpoint = $@"{endPoint}/repos/{org}/{repo}";
         var repository = await httpClient.SendHttpAndGetJson<Repository>(endpoint, HttpMethod.Get, patToken);
-        if (repository == null) throw new InvalidOperationException($"Could not get repository details for {org}/{repo}");
+
+        if (repository == null)
+        {
+            throw new InvalidOperationException($"Could not get repository details for {org}/{repo}");
+        }
+
         return repository;
     }
 
     public Task<bool> HasOpenPullRequestForIssue(string endPoint, int projectId, int issueId, string patToken)
     {
+        // GitHub doesn't have project IDs like GitLab, so we can't implement this the same way
+        // This method returns false for GitHub since issue-PR association is handled differently
         logger.LogInformation("Checking for open PRs for issue #{IssueId} (not supported for GitHub)", issueId);
         return Task.FromResult(false);
     }
@@ -94,12 +103,12 @@ public class GitHubService(
         return pushPath;
     }
 
-    public Task<IReadOnlyCollection<Aiursoft.NugetNinja.GitServerBase.Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
+    public Task<IReadOnlyCollection<Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
     {
         throw new NotImplementedException("Merge requests are not supported for GitHub");
     }
 
-    public Task<Aiursoft.NugetNinja.GitServerBase.Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
+    public Task<Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
     {
         throw new NotImplementedException("Merge requests are not supported for GitHub");
     }
@@ -107,5 +116,20 @@ public class GitHubService(
     public Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId)
     {
         throw new NotImplementedException("Merge requests are not supported for GitHub");
+    }
+
+    public Task<IReadOnlyCollection<Models.Abstractions.PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for GitHub");
+    }
+
+    public Task<string> GetJobLog(string endPoint, string patToken, int projectId, int jobId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for GitHub");
+    }
+
+    public IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken)
+    {
+        throw new NotImplementedException("GitHub issue tracking is not implemented yet. Please use GitLab provider.");
     }
 }

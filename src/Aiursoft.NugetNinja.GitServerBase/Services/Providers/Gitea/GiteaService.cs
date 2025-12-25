@@ -1,8 +1,8 @@
 ﻿using Aiursoft.NugetNinja.Core.Services.Utils;
-using Aiursoft.NugetNinja.PrBot.Models;
+using Aiursoft.NugetNinja.GitServerBase.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.PrBot.Services.Providers.Gitea;
+namespace Aiursoft.NugetNinja.GitServerBase.Services.Providers.Gitea;
 
 public class GiteaService(
     HttpWrapper httpClient,
@@ -76,30 +76,40 @@ public class GiteaService(
     public async Task<Repository> GetRepository(string endPoint, string org, string repo, string patToken)
     {
         logger.LogInformation("Getting repository details for {Org}/{Repo} on Gitea...", org, repo);
+
         var endpoint = $@"{endPoint}/api/v1/repos/{org}/{repo}";
         var repository = await httpClient.SendHttpAndGetJson<Repository>(endpoint, HttpMethod.Get, patToken);
-        if (repository == null) throw new InvalidOperationException($"Could not get repository details for {org}/{repo}");
+
+        if (repository == null)
+        {
+            throw new InvalidOperationException($"Could not get repository details for {org}/{repo}");
+        }
+
         return repository;
     }
 
     public Task<bool> HasOpenPullRequestForIssue(string endPoint, int projectId, int issueId, string patToken)
     {
+        // Gitea doesn't have project IDs like GitLab
+        // This method returns false for Gitea since issue-PR association is handled differently
         logger.LogInformation("Checking for open PRs for issue #{IssueId} (not supported for Gitea)", issueId);
         return Task.FromResult(false);
     }
 
     public string GetPushPath(Server connectionConfiguration, Repository repo)
     {
-        var pushPath = string.Format(connectionConfiguration.PushEndPoint, $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}") + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
+        var pushPath = string.Format(connectionConfiguration.PushEndPoint,
+                           $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}")
+                       + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
     }
 
-    public Task<IReadOnlyCollection<GitServerBase.Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
+    public Task<IReadOnlyCollection<Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
     {
         throw new NotImplementedException("Merge requests are not supported for Gitea");
     }
 
-    public Task<GitServerBase.Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
+    public Task<Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
     {
         throw new NotImplementedException("Merge requests are not supported for Gitea");
     }
@@ -107,5 +117,20 @@ public class GiteaService(
     public Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId)
     {
         throw new NotImplementedException("Merge requests are not supported for Gitea");
+    }
+
+    public Task<IReadOnlyCollection<Models.Abstractions.PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for Gitea");
+    }
+
+    public Task<string> GetJobLog(string endPoint, string patToken, int projectId, int jobId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for Gitea");
+    }
+
+    public IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken)
+    {
+        throw new NotImplementedException("Gitea issue tracking is not implemented yet. Please use GitLab provider.");
     }
 }

@@ -1,9 +1,9 @@
 ﻿using Aiursoft.Canon;
 using Aiursoft.NugetNinja.Core.Services.Utils;
+using Aiursoft.NugetNinja.GitServerBase.Models.Configuration;
+using Aiursoft.NugetNinja.GitServerBase.Services.Providers;
+using Aiursoft.NugetNinja.GitServerBase.Services.Providers.GitLab;
 using Aiursoft.NugetNinja.MergeBot;
-using Aiursoft.NugetNinja.MergeBot.Models.Abstractions;
-using Aiursoft.NugetNinja.MergeBot.Models.Configuration;
-using Aiursoft.NugetNinja.MergeBot.Models.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -38,6 +38,6 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.Configure<List<MergeServer>>(context.Configuration.GetSection("Servers"));
             services.AddTransient<Entry>();
             services.AddTransient<HttpWrapper>();
-            services.AddTransient<IGitServer, GitLabService>();
+            services.AddTransient<IVersionControlService, GitLabService>();
         });
 }

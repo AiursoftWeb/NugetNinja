@@ -1,12 +1,12 @@
 ﻿using Aiursoft.Canon;
-using Aiursoft.NugetNinja.PrBot.Models;
+using Aiursoft.NugetNinja.GitServerBase.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.WebApi;
 
-namespace Aiursoft.NugetNinja.PrBot.Services.Providers.AzureDevOps;
+namespace Aiursoft.NugetNinja.GitServerBase.Services.Providers.AzureDevOps;
 
 public class AzureDevOpsService(
     CacheService cacheService,
@@ -93,24 +93,37 @@ public class AzureDevOpsService(
     public async Task<Repository> GetRepository(string endPoint, string org, string repo, string patToken)
     {
         logger.LogInformation("Getting repository details for {Repo} on Azure DevOps...", repo);
+
         await foreach (var azureDevOpsRepo in GetGitRepositories(endPoint, patToken))
+        {
             if (azureDevOpsRepo.Name == repo)
             {
-                if (azureDevOpsRepo.DefaultBranch == null) throw new InvalidOperationException($"Repository {repo}'s default branch is null!");
+                if (azureDevOpsRepo.DefaultBranch == null)
+                {
+                    throw new InvalidOperationException($"Repository {repo}'s default branch is null!");
+                }
+
                 return new Repository
                 {
                     Name = azureDevOpsRepo.Name,
                     FullName = azureDevOpsRepo.Name,
-                    Owner = new User { Login = azureDevOpsRepo.ProjectReference.Name },
+                    Owner = new User
+                    {
+                        Login = azureDevOpsRepo.ProjectReference.Name
+                    },
                     DefaultBranch = azureDevOpsRepo.DefaultBranch.Split('/').Last(),
                     CloneUrl = azureDevOpsRepo.SshUrl
                 };
             }
+        }
+
         throw new InvalidOperationException($"Could not find Azure DevOps repository: {repo}");
     }
 
     public Task<bool> HasOpenPullRequestForIssue(string endPoint, int projectId, int issueId, string patToken)
     {
+        // Azure DevOps uses Work Items, not the same issue/PR model as GitLab
+        // This method returns false for Azure DevOps
         logger.LogInformation("Checking for open PRs for issue #{IssueId} (not supported for Azure DevOps)", issueId);
         return Task.FromResult(false);
     }
@@ -121,12 +134,12 @@ public class AzureDevOpsService(
         return repo.CloneUrl ?? throw new Exception($"Repo {repo}'s clone Url is null!");
     }
 
-    public Task<IReadOnlyCollection<Aiursoft.NugetNinja.GitServerBase.Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
+    public Task<IReadOnlyCollection<Models.Abstractions.MergeRequestSearchResult>> GetOpenMergeRequests(string endPoint, string userName, string patToken)
     {
         throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
     }
 
-    public Task<Aiursoft.NugetNinja.GitServerBase.Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
+    public Task<Models.Abstractions.DetailedMergeRequest> GetMergeRequestDetails(string endPoint, string userName, string patToken, int projectId, int mergeRequestId)
     {
         throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
     }
@@ -134,6 +147,16 @@ public class AzureDevOpsService(
     public Task MergeRequest(string endPoint, string patToken, int projectId, int mergeRequestId)
     {
         throw new NotImplementedException("Merge requests are not supported for Azure DevOps");
+    }
+
+    public Task<IReadOnlyCollection<Models.Abstractions.PipelineJob>> GetPipelineJobs(string endPoint, string patToken, int projectId, int pipelineId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for Azure DevOps");
+    }
+
+    public Task<string> GetJobLog(string endPoint, string patToken, int projectId, int jobId)
+    {
+        throw new NotImplementedException("Pipeline operations are not supported for Azure DevOps");
     }
 
     private async Task<VssConnection> GetAzureDevOpsConnection(string endPoint, string patToken)
@@ -157,5 +180,10 @@ public class AzureDevOpsService(
             var repos = await client.GetRepositoriesAsync(project.Name);
             foreach (var repo in repos) yield return repo;
         }
+    }
+
+    public IAsyncEnumerable<Issue> GetAssignedIssues(string endPoint, string userName, string patToken)
+    {
+        throw new NotImplementedException("Azure DevOps issue tracking is not implemented yet. Please use GitLab provider.");
     }
 }
