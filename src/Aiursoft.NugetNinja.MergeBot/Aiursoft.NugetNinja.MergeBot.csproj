@@ -46,5 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.GitServerBase\Aiursoft.NugetNinja.GitServerBase.csproj" />
   </ItemGroup>
 </Project>
