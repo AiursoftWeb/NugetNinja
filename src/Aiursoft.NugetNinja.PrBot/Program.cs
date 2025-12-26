@@ -5,7 +5,6 @@ using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.Core.Services.Nuget;
-using Aiursoft.NugetNinja.Core.Services.Utils;
 using Aiursoft.NugetNinja.GitServerBase.Models;
 using Aiursoft.NugetNinja.GitServerBase.Services;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers;

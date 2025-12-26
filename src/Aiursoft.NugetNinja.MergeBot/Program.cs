@@ -1,6 +1,6 @@
 ﻿using Aiursoft.Canon;
-using Aiursoft.NugetNinja.Core.Services.Utils;
 using Aiursoft.NugetNinja.GitServerBase.Models.Configuration;
+using Aiursoft.NugetNinja.GitServerBase.Services;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers.GitLab;
 using Aiursoft.NugetNinja.MergeBot;
