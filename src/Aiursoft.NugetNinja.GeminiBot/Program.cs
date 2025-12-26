@@ -1,7 +1,5 @@
-﻿using Aiursoft.NugetNinja.AllOfficialsPlugin;
-using Aiursoft.NugetNinja.GeminiBot;
+﻿using Aiursoft.NugetNinja.GeminiBot;
 using Aiursoft.GitRunner;
-using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.Core.Services.Nuget;
@@ -61,8 +59,6 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<CommandService>();
             services.AddTransient<IssueProcessor>();
             services.AddTransient<MergeRequestProcessor>();
-            new StartUp().ConfigureServices(services);
-            services.AddTransient<RunAllOfficialPluginsService>();
             services.AddTransient<Entry>();
         });
 }

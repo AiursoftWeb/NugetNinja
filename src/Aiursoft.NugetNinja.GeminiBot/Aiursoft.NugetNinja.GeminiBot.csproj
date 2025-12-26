@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.8</Version>
+    <Version>10.0.9</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>ninja-gemini-bot</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.GeminiBot</RootNamespace>
@@ -41,7 +41,6 @@
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
     <ProjectReference Include="..\Aiursoft.NugetNinja.GitServerBase\Aiursoft.NugetNinja.GitServerBase.csproj" />
   </ItemGroup>
 </Project>
