@@ -16,7 +16,7 @@
     <PackageId>Aiursoft.NugetNinja.GitServerBase</PackageId>
     <PackageTags>nuget package dotnet csproj dependencies</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>ssh://git@gitlab.aiursoft.com:2202/aiursoft/nugetninja</PackageProjectUrl>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>ssh://git@gitlab.aiursoft.com:2202/aiursoft/nugetninja.git</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
