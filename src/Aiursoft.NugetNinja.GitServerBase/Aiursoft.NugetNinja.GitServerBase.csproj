@@ -18,7 +18,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>ssh://git@gitlab.aiursoft.com:2202/aiursoft/nugetninja.git</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
