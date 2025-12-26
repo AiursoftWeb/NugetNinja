@@ -26,7 +26,4 @@
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Aiursoft.NugetNinja.Core\Aiursoft.NugetNinja.Core.csproj" />
-  </ItemGroup>
 </Project>

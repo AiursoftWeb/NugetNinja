@@ -1,5 +1,4 @@
-﻿using Aiursoft.NugetNinja.Core.Services.Utils;
-using Aiursoft.NugetNinja.GitServerBase.Models;
+﻿using Aiursoft.NugetNinja.GitServerBase.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.GitServerBase.Services.Providers.Gitea;

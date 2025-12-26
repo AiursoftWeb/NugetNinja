@@ -1,8 +1,9 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace Aiursoft.NugetNinja.Core.Services.Utils;
+namespace Aiursoft.NugetNinja.GitServerBase.Services;
+
 public class HttpWrapper(
     ILogger<HttpWrapper> logger,
     HttpClient httpClient)
