@@ -59,7 +59,10 @@ public class MissingPropertyDetector(
             var projectInfo = projectTypeDetector.Detect(project);
 
             // Output type.
-            var outputType = 
+            // Test projects should always be Library, not Exe.
+            // The test SDK (Microsoft.NET.Test.Sdk) will automatically generate the entry point.
+            var outputType =
+                projectInfo.IsUnitTest ? "Library" :
                 projectInfo.IsWindowsExecutable ? "WinExe" :
                 projectInfo.IsExecutable ? "Exe" : "Library";
             if (project.OutputType != outputType)
@@ -79,7 +82,7 @@ public class MissingPropertyDetector(
                 logger.LogTrace("Project {Project} is missing property AssemblyName", project);
                 yield return new MissingProperty(project, nameof(project.AssemblyName), assemblyName);
             }
-            
+
             // Root namespace.
             if (string.IsNullOrWhiteSpace(project.RootNamespace))
             {
@@ -94,14 +97,14 @@ public class MissingPropertyDetector(
                 logger.LogTrace("Project {Project} is missing property IsTestProject", project);
                 yield return new MissingProperty(project, nameof(project.IsTestProject), projectInfo.IsUnitTest.ToString().ToLower());
             }
-            
+
             // Is Packable
             if (project.IsPackable != projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower())
             {
                 logger.LogTrace("Project {Project} is missing property IsPackable", project);
                 yield return new MissingProperty(project, nameof(project.IsPackable), projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower());
             }
-            
+
             // GeneratePackageOnBuild
             if (projectInfo.ShouldPackAsNugetLibrary && project.GeneratePackageOnBuild.IsFalse())
             {
@@ -117,7 +120,7 @@ public class MissingPropertyDetector(
                     logger.LogTrace("Project {Project} is missing property PackAsTool", project);
                     yield return new MissingProperty(project, nameof(project.PackAsTool), projectInfo.ShouldPackAsNugetTool.ToString().ToLower());
                 }
-            
+
                 // Tool command name
                 if (project.ToolCommandName != project.AssemblyName)
                 {
@@ -126,7 +129,7 @@ public class MissingPropertyDetector(
                     yield return new MissingProperty(project, nameof(project.ToolCommandName), assemblyName);
                 }
             }
-            
+
             // Implicit using
             if (project.ImplicitUsings != "enable")
             {
@@ -144,7 +147,7 @@ public class MissingPropertyDetector(
                     logger.LogTrace("Project {Project} is missing property Company", project);
                     yield return new MissingProperty(project, nameof(project.Company), company);
                 }
-                
+
                 // Product
                 if (string.IsNullOrWhiteSpace(project.Product))
                 {
@@ -152,7 +155,7 @@ public class MissingPropertyDetector(
                     logger.LogTrace("Project {Project} is missing property Product", project);
                     yield return new MissingProperty(project, nameof(project.Product), product);
                 }
-                
+
                 // Description
                 if (string.IsNullOrWhiteSpace(project.Description))
                 {
@@ -161,14 +164,14 @@ public class MissingPropertyDetector(
                     logger.LogTrace("Project {Project} is missing property Description", project);
                     yield return new MissingProperty(project, nameof(project.Description), $"Nuget package of '{product}' provided by {company}");
                 }
-                
+
                 // PackageId
                 if (project.PackageId != project.FileName)
                 {
                     logger.LogTrace("Project {Project} is missing property PackageId", project);
                     yield return new MissingProperty(project, nameof(project.PackageId), project.FileName);
                 }
-                
+
                 // PackageTags
                 if (string.IsNullOrWhiteSpace(project.PackageTags))
                 {
@@ -180,7 +183,7 @@ public class MissingPropertyDetector(
                     logger.LogTrace("Project {Project} is missing property PackageTags", project);
                     yield return new MissingProperty(project, nameof(project.PackageTags), tags);
                 }
-                
+
                 // PackageLicenseExpression
                 var licenseExpression = GetLicenseExpression(project);
                 if (!string.IsNullOrWhiteSpace(licenseExpression) && string.IsNullOrWhiteSpace(project.PackageLicenseExpression))
@@ -188,7 +191,7 @@ public class MissingPropertyDetector(
                     logger.LogTrace("Project {Project} is missing property PackageLicenseExpression", project);
                     yield return new MissingProperty(project, nameof(project.PackageLicenseExpression), licenseExpression);
                 }
-                
+
                 // PackageProjectUrl
                 var gitRemoteUrl = await GetGitRemote(Path.GetDirectoryName(project.PathOnDisk)!);
                 var projectUrl = gitRemoteUrl.Replace(".git", string.Empty);
@@ -197,14 +200,14 @@ public class MissingPropertyDetector(
                     logger.LogTrace("Project {Project} is missing property PackageProjectUrl", project);
                     yield return new MissingProperty(project, nameof(project.PackageProjectUrl), projectUrl);
                 }
-                
+
                 // RepositoryType
                 if (string.IsNullOrWhiteSpace(project.RepositoryType))
                 {
                     logger.LogTrace("Project {Project} is missing property RepositoryType", project);
                     yield return new MissingProperty(project, nameof(project.RepositoryType), "git"); // NugetNinja only supports git repositories
                 }
-                
+
                 // RepositoryUrl
                 if (string.IsNullOrWhiteSpace(project.RepositoryUrl))
                 {
@@ -217,13 +220,13 @@ public class MissingPropertyDetector(
                 if (!string.IsNullOrWhiteSpace(readmePath) && string.IsNullOrWhiteSpace(project.PackageReadmeFile))
                 {
                     logger.LogTrace("Project {Project} is missing readme info. Suggested readme file is: {Readme}", project, readmePath);
-                    
+
                     var fileName = Path.GetFileName(readmePath);
                     yield return new MissingProperty(project, nameof(project.PackageReadmeFile), fileName);
                     yield return new PackFile(project, readmePath);
                 }
             }
-            
+
             logger.LogTrace("Project {Project} analyse finished", project);
         }
     }
@@ -280,7 +283,7 @@ public class MissingPropertyDetector(
     {
         return SearchInRepo(project, "readme.md");
     }
-    
+
     private string GetLicensePath(Project project)
     {
         var licensePath = SearchInRepo(project, "license");
@@ -290,7 +293,7 @@ public class MissingPropertyDetector(
         }
         return licensePath;
     }
-    
+
     private string GetLicenseExpression(Project project)
     {
         var licensePath = GetLicensePath(project);
@@ -298,25 +301,25 @@ public class MissingPropertyDetector(
         {
             return string.Empty;
         }
-        
+
         var absoluteLicensePath = Path.Combine(Path.GetDirectoryName(project.PathOnDisk)!, licensePath);
         var licenseContent = File.ReadAllText(absoluteLicensePath);
         var licenseExpression = LicenseExpressionParser.Parse(licenseContent);
         return licenseExpression;
     }
-    
+
     private async Task<string> GetGitRemote(string projectPath)
     {
         var commandService = new CommandService();
         var (code, output, err) = await commandService.RunCommandAsync(
-            bin: "git", 
+            bin: "git",
             arg: "remote get-url origin",
             path: projectPath);
         if (code != 0)
         {
             throw new Exception($"Failed to get git remote: {err}. Command executed: git remote get-url origin at {projectPath}");
         }
-        
+
         return output.Trim();
     }
 
@@ -349,7 +352,7 @@ public class MissingPropertyDetector(
             {
                 break;
             }
-            
+
             var isGitRoot = Directory.Exists(Path.Combine(path, ".git"));
             if (isGitRoot)
             {
@@ -363,7 +366,7 @@ public class MissingPropertyDetector(
         {
             return string.Empty;
         }
-        
+
         // Get relative path from project.PathOnDisk to readmePath:
         var relativePath = Path.GetRelativePath(csprojDirectoryPath, readmePath);
         return relativePath;
