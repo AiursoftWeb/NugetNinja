@@ -1,4 +1,5 @@
-﻿using Aiursoft.CSTools.Services;
+﻿using System.Text.RegularExpressions;
+using Aiursoft.CSTools.Services;
 using Aiursoft.CSTools.Tools;
 using Aiursoft.NugetNinja.Core.Abstracts;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
@@ -320,7 +321,45 @@ public class MissingPropertyDetector(
             throw new Exception($"Failed to get git remote: {err}. Command executed: git remote get-url origin at {projectPath}");
         }
 
-        return output.Trim();
+        var outputUrl = output.Trim();
+        return NormalizeGitUrlToHttps(outputUrl);
+    }
+
+    private string NormalizeGitUrlToHttps(string gitUrl)
+    {
+        // Handle SSH scp-style: git@host:path/repo.git
+        var scpMatch = Regex.Match(gitUrl, @"^git@([^:]+):(.+)$");
+        if (scpMatch.Success)
+        {
+            var host = scpMatch.Groups[1].Value;
+            var path = scpMatch.Groups[2].Value;
+            return $"https://{host}/{path}";
+        }
+
+        // Handle ssh:// URL format
+        if (gitUrl.StartsWith("ssh://", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var uri = new Uri(gitUrl);
+                return $"https://{uri.Host}{uri.AbsolutePath}";
+            }
+            catch (UriFormatException)
+            {
+                return gitUrl; // Fallback
+            }
+        }
+
+        // Handle HTTPS URLs - strip credentials
+        try
+        {
+            var uri = new Uri(gitUrl);
+            return uri.GetComponents(UriComponents.AbsoluteUri & ~UriComponents.UserInfo, UriFormat.UriEscaped);
+        }
+        catch (UriFormatException)
+        {
+            return gitUrl; // Fallback for unknown formats
+        }
     }
 
     /// <summary>
