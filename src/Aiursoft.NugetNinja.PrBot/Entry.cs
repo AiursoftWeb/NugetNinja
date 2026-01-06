@@ -3,6 +3,7 @@ using Aiursoft.GitRunner.Models;
 using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 using Aiursoft.NugetNinja.GitServerBase.Models;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers;
+using Aiursoft.NugetNinja.PrBot.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -13,6 +14,7 @@ public class Entry(
     IEnumerable<IVersionControlService> versionControls,
     RunAllOfficialPluginsService runAllOfficialPluginsService,
     WorkspaceManager workspaceManager,
+    LocalizationService localizationService,
     ILogger<Entry> logger)
 {
     private readonly List<Server> _servers = servers.Value;
@@ -80,6 +82,17 @@ public class Entry(
 
         // Run all plugins.
         await runAllOfficialPluginsService.RunAllPlugins(workPath, true, onlyRunUpdatePlugin: connectionConfiguration.OnlyUpdate);
+
+        // Run localization (nice to have, failures are acceptable).
+        try
+        {
+            logger.LogInformation("Starting localization for repository: {RepoName}...", repo.Name);
+            await localizationService.LocalizeProjectAsync(workPath);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Localization failed for repository: {RepoName}. Continuing anyway...", repo.Name);
+        }
 
         // Consider changes...
         if (!await workspaceManager.PendingCommit(workPath))
