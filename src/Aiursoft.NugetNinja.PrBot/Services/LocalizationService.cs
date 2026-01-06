@@ -39,7 +39,7 @@ public class LocalizationService
     {
         if (!_options.LocalizationEnabled)
         {
-            _logger.LogDebug("Localization is disabled. Skipping localization step.");
+            _logger.LogWarning("Localization is disabled. Skipping localization step.");
             return false;
         }
 
