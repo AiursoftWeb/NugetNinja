@@ -32,12 +32,28 @@ RUN crontab -l | { cat; echo "0 7 * * * /start-merge.sh > /config-merge/log.txt 
 RUN crontab -l | { cat; echo "0 8 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
 
 # Register a crontab job to run ninja-bot every day
+RUN crontab -l | { cat; echo "0 11 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
+
+# Register multiple auto merge jobs, because some CI may run very slow.
+RUN crontab -l | { cat; echo "0 12 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 13 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 14 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+
+# Register a crontab job to run ninja-bot every day
 RUN crontab -l | { cat; echo "0 17 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
 
 # Register multiple auto merge jobs, because some CI may run very slow.
 RUN crontab -l | { cat; echo "0 18 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
 RUN crontab -l | { cat; echo "0 19 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
 RUN crontab -l | { cat; echo "0 20 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+
+# Register a crontab job to run ninja-bot every day
+RUN crontab -l | { cat; echo "0 23 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
+
+# Register multiple auto merge jobs, because some CI may run very slow.
+RUN crontab -l | { cat; echo "0 0 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 1 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 2 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
 
 
 VOLUME /config
