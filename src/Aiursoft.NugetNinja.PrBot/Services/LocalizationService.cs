@@ -120,6 +120,12 @@ public class LocalizationService
     private async Task LocalizeProjectDirectoryAsync(string projectPath)
     {
         // Localize C# files
+        _logger.LogInformation("Auto-generating view injections in: {ProjectPath}...", projectPath);
+        await _translateEntry.AutoGenerateViewInjectionsAsync(
+            projectPath,
+            takeAction: true);
+
+        // Localize C# files
         _logger.LogInformation("Localizing C# files in: {ProjectPath}...", projectPath);
         await _translateEntry.StartLocalizeContentInCSharpAsync(
             projectPath,
