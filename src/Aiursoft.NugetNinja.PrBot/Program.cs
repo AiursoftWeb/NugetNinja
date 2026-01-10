@@ -74,6 +74,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<TranslateEntry>();
             services.AddTransient<LocalizationService>();
             services.AddTransient<Extractor>();
+            services.AddTransient<RenderInNavBarExtractor>();
             services.AddTransient<ProjectsEnumerator>();
             services.AddTransient<IVersionControlService, GitHubService>();
             services.AddTransient<IVersionControlService, GiteaService>();
