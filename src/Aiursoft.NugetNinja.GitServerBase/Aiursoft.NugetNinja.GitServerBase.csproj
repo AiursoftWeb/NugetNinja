@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>10.0.12</Version>
+    <Version>10.0.13</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Aiursoft.NugetNinja.GitServerBase</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.GitServerBase</RootNamespace>
@@ -22,7 +22,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.GitRunner" Version="10.0.6" />
+    <PackageReference Include="Aiursoft.GitRunner" Version="10.0.7" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.2" />
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
