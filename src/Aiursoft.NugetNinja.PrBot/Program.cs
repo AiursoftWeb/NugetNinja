@@ -70,6 +70,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTaskCanon();
             services.AddScoped<OllamaBasedTranslatorEngine>();
             services.AddScoped<CachedTranslateEngine>();
+            services.AddScoped<MarkdownShredder>();
             services.AddGptClient();
             services.AddTransient<TranslateEntry>();
             services.AddTransient<LocalizationService>();
