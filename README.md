@@ -141,3 +141,51 @@ There are many ways to contribute to the project: logging bugs, submitting pull 
 Even if you with push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your workflow cruft out of sight.
 
 We're also interested in your feedback on the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.
+
+## Docker & Bots
+
+Nuget Ninja provides two bots for automating dependency management:
+1. **PrBot**: Automatically scans your starred repositories and creates pull requests for dependency upgrades.
+2. **MergeBot**: Automatically merges open pull requests if the CI pipeline succeeds.
+
+### Deployment with Docker
+
+You can run the Nuget Ninja bots using Docker. The image includes both bots and runs them periodically via cron.
+
+```bash
+docker run -d \
+    --name nuget-ninja \
+    -e "Servers__0__Provider=GitHub" \
+    -e "Servers__0__Token=YOUR_GITHUB_TOKEN" \
+    -e "Servers__0__UserName=YOUR_GITHUB_USERNAME" \
+    -e "Servers__0__UserEmail=your-email@example.com" \
+    -e "Servers__0__DisplayName=Nuget Ninja Bot" \
+    -e "Servers__0__EndPoint=https://api.github.com" \
+    -e "Servers__0__PushEndPoint=https://{0}@github.com" \
+    -e "Servers__0__ContributionBranch=users/nugetninja/evergreen" \
+    hub.aiursoft.com/aiursoft/nugetninja
+```
+
+### Configuration via Environment Variables
+
+The bots support full configuration via environment variables. This is the recommended way to provide secrets and server information. Both **PrBot** and **MergeBot** share the same `Servers` configuration section.
+
+#### Server Configuration
+To configure multiple servers, use the `Servers__N__Property` pattern (where `N` is the index starting from 0):
+
+- `Servers__0__Provider`: The git provider (e.g., `GitHub`, `GitLab`, `Gitea`, `AzureDevOps`).
+- `Servers__0__EndPoint`: The API endpoint of the server.
+- `Servers__0__Token`: Your Personal Access Token (PAT).
+- `Servers__0__UserName`: Your username on the server.
+- `Servers__0__UserEmail`: Your email for git commits.
+- `Servers__0__DisplayName`: The name used for git commits.
+- `Servers__0__ContributionBranch`: The branch name used for creating PRs.
+- `Servers__0__OnlyUpdate`: (Optional) Set to `true` to only run the update plugin.
+
+#### PR Bot Options
+You can also configure PR Bot specific options:
+
+- `PrBot__LocalizationEnabled`: Set to `true` to enable automatic localization.
+- `PrBot__OllamaApiEndpoint`: The Ollama API endpoint for localization.
+- `PrBot__OllamaModel`: The Ollama model to use.
+- `PrBot__OllamaApiKey`: The API key for the localization service.

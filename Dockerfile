@@ -22,6 +22,7 @@ RUN echo "cd /config       && /root/.dotnet/tools/ninja-bot"       > /start.sh  
 RUN echo "cd /config-merge && /root/.dotnet/tools/ninja-merge-bot" > /start-merge.sh && chmod +x /start-merge.sh
 
 ENV PATH="/root/.dotnet/tools:${PATH}"
+ENV DOTNET_RUNNING_IN_CONTAINER=true
 
 # Register a crontab job to run ninja-bot every day
 RUN crontab -l | { cat; echo "0 5 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
@@ -61,4 +62,5 @@ VOLUME /config-merge
 VOLUME /root/.local/share/NugetNinjaWorkspace/
 
 # Run this job at the beginning with verbose output
-ENTRYPOINT ["cron", "-f", "-L 15"]
+
+ENTRYPOINT ["sh", "-c", "printenv | grep -v \"NO_PROXY\" >> /etc/environment && cron -f -L 15"]
