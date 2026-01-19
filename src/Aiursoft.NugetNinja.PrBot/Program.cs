@@ -49,7 +49,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
         {
             services.AddMemoryCache();
             services.AddHttpClient();
-            services.Configure<List<Server>>(context.Configuration.GetSection("Servers"));
+            services.Configure<List<Server>>(context.Configuration.GetSection("PrBot:Servers"));
             services.Configure<PrBotOptions>(context.Configuration.GetSection("PrBot"));
             services.AddGitRunner();
 

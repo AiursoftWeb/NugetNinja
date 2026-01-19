@@ -155,32 +155,44 @@ You can run the Nuget Ninja bots using Docker. The image includes both bots and 
 ```bash
 docker run -d \
     --name nuget-ninja \
-    -e "Servers__0__Provider=GitHub" \
-    -e "Servers__0__Token=YOUR_GITHUB_TOKEN" \
-    -e "Servers__0__UserName=YOUR_GITHUB_USERNAME" \
-    -e "Servers__0__UserEmail=your-email@example.com" \
-    -e "Servers__0__DisplayName=Nuget Ninja Bot" \
-    -e "Servers__0__EndPoint=https://api.github.com" \
-    -e "Servers__0__PushEndPoint=https://{0}@github.com" \
-    -e "Servers__0__ContributionBranch=users/nugetninja/evergreen" \
+    -e "PrBot__Servers__0__Provider=GitHub" \
+    -e "PrBot__Servers__0__Token=YOUR_GITHUB_TOKEN" \
+    -e "PrBot__Servers__0__UserName=YOUR_GITHUB_USERNAME" \
+    -e "PrBot__Servers__0__UserEmail=your-email@example.com" \
+    -e "PrBot__Servers__0__DisplayName=Nuget Ninja Bot" \
+    -e "PrBot__Servers__0__EndPoint=https://api.github.com" \
+    -e "PrBot__Servers__0__PushEndPoint=https://{0}@github.com" \
+    -e "PrBot__Servers__0__ContributionBranch=users/nugetninja/evergreen" \
+    -e "MergeBot__Servers__0__Provider=GitLab" \
+    -e "MergeBot__Servers__0__EndPoint=https://gitlab.aiursoft.com" \
+    -e "MergeBot__Servers__0__UserName=nuget-ninja" \
+    -e "MergeBot__Servers__0__Token=YOUR_GITLAB_TOKEN" \
     hub.aiursoft.com/aiursoft/nugetninja
 ```
 
 ### Configuration via Environment Variables
 
-The bots support full configuration via environment variables. This is the recommended way to provide secrets and server information. Both **PrBot** and **MergeBot** share the same `Servers` configuration section.
+The bots support full configuration via environment variables. This is the recommended way to provide secrets and server information. **PrBot** and **MergeBot** have their own configuration sections to avoid conflicts.
 
-#### Server Configuration
-To configure multiple servers, use the `Servers__N__Property` pattern (where `N` is the index starting from 0):
+#### PR Bot Server Configuration
+To configure servers for **PrBot**, use the `PrBot__Servers__N__Property` pattern:
 
-- `Servers__0__Provider`: The git provider (e.g., `GitHub`, `GitLab`, `Gitea`, `AzureDevOps`).
-- `Servers__0__EndPoint`: The API endpoint of the server.
-- `Servers__0__Token`: Your Personal Access Token (PAT).
-- `Servers__0__UserName`: Your username on the server.
-- `Servers__0__UserEmail`: Your email for git commits.
-- `Servers__0__DisplayName`: The name used for git commits.
-- `Servers__0__ContributionBranch`: The branch name used for creating PRs.
-- `Servers__0__OnlyUpdate`: (Optional) Set to `true` to only run the update plugin.
+- `PrBot__Servers__N__Provider`: The git provider (e.g., `GitHub`, `GitLab`, `Gitea`, `AzureDevOps`).
+- `PrBot__Servers__N__EndPoint`: The API endpoint of the server.
+- `PrBot__Servers__N__Token`: Your Personal Access Token (PAT).
+- `PrBot__Servers__N__UserName`: Your username on the server.
+- `PrBot__Servers__N__UserEmail`: Your email for git commits.
+- `PrBot__Servers__N__DisplayName`: The name used for git commits.
+- `PrBot__Servers__N__ContributionBranch`: The branch name used for creating PRs.
+- `PrBot__Servers__N__OnlyUpdate`: (Optional) Set to `true` to only run the update plugin.
+
+#### Merge Bot Server Configuration
+To configure servers for **MergeBot**, use the `MergeBot__Servers__N__Property` pattern:
+
+- `MergeBot__Servers__N__Provider`: The git provider (only `GitLab` is currently supported for MergeBot).
+- `MergeBot__Servers__N__EndPoint`: The API endpoint of the server.
+- `MergeBot__Servers__N__UserName`: Your username on the server.
+- `MergeBot__Servers__N__Token`: Your Personal Access Token (PAT).
 
 #### PR Bot Options
 You can also configure PR Bot specific options:
@@ -189,3 +201,5 @@ You can also configure PR Bot specific options:
 - `PrBot__OllamaApiEndpoint`: The Ollama API endpoint for localization.
 - `PrBot__OllamaModel`: The Ollama model to use.
 - `PrBot__OllamaApiKey`: The API key for the localization service.
+- `PrBot__LocalizationConcurrentRequests`: Maximum concurrent requests for localization (default 8).
+- `PrBot__LocalizationTargetLanguages__0`: Target language for localization (e.g. `en-GB`). Use `__0`, `__1` for multiple languages.

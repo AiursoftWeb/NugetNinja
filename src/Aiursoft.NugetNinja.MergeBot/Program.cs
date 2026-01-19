@@ -35,7 +35,7 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddMemoryCache();
             services.AddTaskCanon();
             services.AddHttpClient();
-            services.Configure<List<MergeServer>>(context.Configuration.GetSection("Servers"));
+            services.Configure<List<MergeServer>>(context.Configuration.GetSection("MergeBot:Servers"));
             services.AddTransient<Entry>();
             services.AddTransient<HttpWrapper>();
             services.AddTransient<IVersionControlService, GitLabService>();
