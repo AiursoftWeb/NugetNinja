@@ -90,7 +90,7 @@ files:
 
 When you run the `expect-files` command, NugetNinja will read this configuration and perform the following actions:
 
-1.  **Create Missing Files:** If a file specified in `files` (e.g., `LICENSE`) does not exist in your project's root directory, NugetNinja will create it.
+1.  **Create Missing Files:** If a file specified in `files` (e.g., `LICENSE`) does not exist in your project\'s root directory, NugetNinja will create it.
 
       * If a `contentUri` is provided, the tool will download the content from that URL and write it to the new file.
       * If no `contentUri` is provided, an empty file will be created.
@@ -141,3 +141,65 @@ There are many ways to contribute to the project: logging bugs, submitting pull 
 Even if you with push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your workflow cruft out of sight.
 
 We're also interested in your feedback on the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.
+
+## Docker & Bots
+
+Nuget Ninja provides two bots for automating dependency management:
+1. **PrBot**: Automatically scans your starred repositories and creates pull requests for dependency upgrades.
+2. **MergeBot**: Automatically merges open pull requests if the CI pipeline succeeds.
+
+### Deployment with Docker
+
+You can run the Nuget Ninja bots using Docker. The image includes both bots and runs them periodically via cron.
+
+```bash
+docker run -d \
+    --name nuget-ninja \
+    -e "PrBot__Servers__0__Provider=GitHub" \
+    -e "PrBot__Servers__0__Token=YOUR_GITHUB_TOKEN" \
+    -e "PrBot__Servers__0__UserName=YOUR_GITHUB_USERNAME" \
+    -e "PrBot__Servers__0__UserEmail=your-email@example.com" \
+    -e "PrBot__Servers__0__DisplayName=Nuget Ninja Bot" \
+    -e "PrBot__Servers__0__EndPoint=https://api.github.com" \
+    -e "PrBot__Servers__0__PushEndPoint=https://{0}@github.com" \
+    -e "PrBot__Servers__0__ContributionBranch=users/nugetninja/evergreen" \
+    -e "MergeBot__Servers__0__Provider=GitLab" \
+    -e "MergeBot__Servers__0__EndPoint=https://gitlab.aiursoft.com" \
+    -e "MergeBot__Servers__0__UserName=nuget-ninja" \
+    -e "MergeBot__Servers__0__Token=YOUR_GITLAB_TOKEN" \
+    hub.aiursoft.com/aiursoft/nugetninja
+```
+
+### Configuration via Environment Variables
+
+The bots support full configuration via environment variables. This is the recommended way to provide secrets and server information. **PrBot** and **MergeBot** have their own configuration sections to avoid conflicts.
+
+#### PR Bot Server Configuration
+To configure servers for **PrBot**, use the `PrBot__Servers__N__Property` pattern:
+
+- `PrBot__Servers__N__Provider`: The git provider (e.g., `GitHub`, `GitLab`, `Gitea`, `AzureDevOps`).
+- `PrBot__Servers__N__EndPoint`: The API endpoint of the server.
+- `PrBot__Servers__N__Token`: Your Personal Access Token (PAT).
+- `PrBot__Servers__N__UserName`: Your username on the server.
+- `PrBot__Servers__N__UserEmail`: Your email for git commits.
+- `PrBot__Servers__N__DisplayName`: The name used for git commits.
+- `PrBot__Servers__N__ContributionBranch`: The branch name used for creating PRs.
+- `PrBot__Servers__N__OnlyUpdate`: (Optional) Set to `true` to only run the update plugin.
+
+#### Merge Bot Server Configuration
+To configure servers for **MergeBot**, use the `MergeBot__Servers__N__Property` pattern:
+
+- `MergeBot__Servers__N__Provider`: The git provider (only `GitLab` is currently supported for MergeBot).
+- `MergeBot__Servers__N__EndPoint`: The API endpoint of the server.
+- `MergeBot__Servers__N__UserName`: Your username on the server.
+- `MergeBot__Servers__N__Token`: Your Personal Access Token (PAT).
+
+#### PR Bot Options
+You can also configure PR Bot specific options:
+
+- `PrBot__LocalizationEnabled`: Set to `true` to enable automatic localization.
+- `PrBot__OllamaApiEndpoint`: The Ollama API endpoint for localization.
+- `PrBot__OllamaModel`: The Ollama model to use.
+- `PrBot__OllamaApiKey`: The API key for the localization service.
+- `PrBot__LocalizationConcurrentRequests`: Maximum concurrent requests for localization (default 8).
+- `PrBot__LocalizationTargetLanguages__0`: Target language for localization (e.g. `en-GB`). Use `__0`, `__1` for multiple languages.

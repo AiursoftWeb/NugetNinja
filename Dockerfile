@@ -2,8 +2,6 @@ FROM hub.aiursoft.com/aiursoft/internalimages/dotnet
 
 RUN apt update
 RUN apt install -y git unzip wget cron
-RUN mkdir -p /config
-RUN mkdir -p /config-merge
 RUN mkdir -p /root/.local/share/NugetNinjaWorkspace/
 RUN mkdir -p /root/.dotnet/tools
 
@@ -18,46 +16,43 @@ RUN dotnet tool install --global Aiursoft.NugetNinja          --add-source /app/
      
 RUN /root/.dotnet/tools/ninja --version
 
-RUN echo "cd /config       && /root/.dotnet/tools/ninja-bot"       > /start.sh       && chmod +x /start.sh
-RUN echo "cd /config-merge && /root/.dotnet/tools/ninja-merge-bot" > /start-merge.sh && chmod +x /start-merge.sh
+RUN echo "/root/.dotnet/tools/ninja-bot"       > /start.sh       && chmod +x /start.sh
+RUN echo "/root/.dotnet/tools/ninja-merge-bot" > /start-merge.sh && chmod +x /start-merge.sh
 
 ENV PATH="/root/.dotnet/tools:${PATH}"
 
 # Register a crontab job to run ninja-bot every day
-RUN crontab -l | { cat; echo "0 5 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
+RUN crontab -l | { cat; echo "0 5 * * * /start.sh       > /var/log/ninja-bot.log 2>&1";       } | crontab -
 
 # Register multiple auto merge jobs, because some CI may run very slow.
-RUN crontab -l | { cat; echo "0 6 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
-RUN crontab -l | { cat; echo "0 7 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
-RUN crontab -l | { cat; echo "0 8 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 6 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 7 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 8 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
 
 # Register a crontab job to run ninja-bot every day
-RUN crontab -l | { cat; echo "0 11 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
+RUN crontab -l | { cat; echo "0 11 * * * /start.sh       > /var/log/ninja-bot.log 2>&1";       } | crontab -
 
 # Register multiple auto merge jobs, because some CI may run very slow.
-RUN crontab -l | { cat; echo "0 12 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
-RUN crontab -l | { cat; echo "0 13 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
-RUN crontab -l | { cat; echo "0 14 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 12 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 13 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 14 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
 
 # Register a crontab job to run ninja-bot every day
-RUN crontab -l | { cat; echo "0 17 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
+RUN crontab -l | { cat; echo "0 17 * * * /start.sh       > /var/log/ninja-bot.log 2>&1";       } | crontab -
 
 # Register multiple auto merge jobs, because some CI may run very slow.
-RUN crontab -l | { cat; echo "0 18 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
-RUN crontab -l | { cat; echo "0 19 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
-RUN crontab -l | { cat; echo "0 20 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 18 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 19 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 20 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
 
 # Register a crontab job to run ninja-bot every day
-RUN crontab -l | { cat; echo "0 23 * * * /start.sh       > /config/log.txt 2>&1";       } | crontab -
+RUN crontab -l | { cat; echo "0 23 * * * /start.sh       > /var/log/ninja-bot.log 2>&1";       } | crontab -
 
 # Register multiple auto merge jobs, because some CI may run very slow.
-RUN crontab -l | { cat; echo "0 0 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
-RUN crontab -l | { cat; echo "0 1 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
-RUN crontab -l | { cat; echo "0 2 * * * /start-merge.sh > /config-merge/log.txt 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 0 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 1 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
+RUN crontab -l | { cat; echo "0 2 * * * /start-merge.sh > /var/log/ninja-merge-bot.log 2>&1"; } | crontab -
 
-
-VOLUME /config
-VOLUME /config-merge
 VOLUME /root/.local/share/NugetNinjaWorkspace/
 
 # Run this job at the beginning with verbose output
