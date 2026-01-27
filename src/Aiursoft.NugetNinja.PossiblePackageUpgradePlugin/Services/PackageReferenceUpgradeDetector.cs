@@ -16,7 +16,7 @@ public class PackageReferenceUpgradeDetector(
         foreach (var project in context.AllProjects)
         foreach (var package in project.PackageReferences)
         {
-            NugetVersion? latest;
+            NugetVersion latest;
             try
             {
                 latest = await nugetService.GetLatestVersion(package.Name, project.GetTargetFrameworks());
