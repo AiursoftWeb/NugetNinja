@@ -25,7 +25,7 @@ public class NugetVersionTests
     public void TestNotNullEquals()
     {
         var version = new NugetVersion("10.1.0.0-Preview");
-        Assert.IsTrue(!version.Equals(null));
+        Assert.IsFalse(version.Equals(null));
     }
 
     [TestMethod]
@@ -130,6 +130,17 @@ public class NugetVersionTests
         var version2 = new NugetVersion("10.1.0.0-Preview");
         var hashVersion2 = version2.GetHashCode();
         Assert.AreEqual(hashVersion1, hashVersion2);
+    }
+
+    [TestMethod]
+    public void TestDefaultComparison()
+    {
+        var defaultVersion = default(NugetVersion);
+        var otherVersion = new NugetVersion("1.0.0");
+        
+        // This should not throw
+        Assert.IsFalse(defaultVersion.Equals(otherVersion));
+        Assert.IsFalse(otherVersion.Equals(defaultVersion));
     }
 
     private void AssertLeftLarger(NugetVersion big, NugetVersion sml)

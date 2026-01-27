@@ -23,6 +23,13 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
 
     public int CompareTo(NugetVersion otherNugetVersion)
     {
+        if (PrimaryVersion == null && otherNugetVersion.PrimaryVersion == null)
+            return 0;
+        if (PrimaryVersion == null)
+            return -1;
+        if (otherNugetVersion.PrimaryVersion == null)
+            return 1;
+
         if (!PrimaryVersion.Equals(otherNugetVersion.PrimaryVersion))
             return PrimaryVersion.CompareTo(otherNugetVersion.PrimaryVersion);
 
@@ -77,7 +84,7 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
     public bool Equals(NugetVersion otherNugetVersion)
     {
         return
-            PrimaryVersion.Equals(otherNugetVersion.PrimaryVersion) &&
+            Equals(PrimaryVersion, otherNugetVersion.PrimaryVersion) &&
             AdditionalText.Equals(otherNugetVersion.AdditionalText);
     }
 
