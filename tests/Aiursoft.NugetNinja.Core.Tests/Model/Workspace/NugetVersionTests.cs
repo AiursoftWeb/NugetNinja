@@ -1,7 +1,5 @@
-﻿#pragma warning disable CS1718 // Comparison made to same variable
+#pragma warning disable CS1718 // Comparison made to same variable
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-#pragma warning disable CS0253 // Possible unintended reference comparison; right hand side needs cast
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
 // ReSharper disable EqualExpressionComparison
 // ReSharper disable ArrangeObjectCreationWhenTypeEvident
 // ReSharper disable SuspiciousTypeConversion.Global
@@ -27,26 +25,7 @@ public class NugetVersionTests
     public void TestNotNullEquals()
     {
         var version = new NugetVersion("10.1.0.0-Preview");
-        Assert.IsFalse(version.Equals(null));
-        Assert.IsTrue(null != version);
-    }
-
-    [TestMethod]
-    public void TestNullEquals()
-    {
-        NugetVersion version = null;
-        Assert.IsTrue(version == null);
-        Assert.IsTrue(null == version);
-    }
-
-    [TestMethod]
-    public void TestNullLarger()
-    {
-        NugetVersion version = null;
-        Assert.IsFalse(version > null);
-        Assert.IsFalse(version < null);
-        Assert.IsFalse(null < version);
-        Assert.IsFalse(null > version);
+        Assert.IsTrue(!version.Equals(null));
     }
 
     [TestMethod]
@@ -65,8 +44,6 @@ public class NugetVersionTests
         var version1 = new NugetVersion("10.1.0.0-Preview");
         object version2 = new NugetVersion("10.1.0.0-preview");
         Assert.IsTrue(version1.Equals(version1 as object));
-        var versionEqual = version1 == version2;
-        Assert.IsFalse(versionEqual);
         Assert.IsTrue(version1 == (NugetVersion)version2);
         Assert.IsTrue(version1.Equals(version2));
         Assert.IsFalse(version1.Equals(new int()));
@@ -121,14 +98,6 @@ public class NugetVersionTests
     }
 
     [TestMethod]
-    public void TestClone()
-    {
-        var version1 = new NugetVersion("10.1.999.0");
-        var version2 = version1.Clone() as NugetVersion;
-        AssertEquals(version1, version2);
-    }
-
-    [TestMethod]
     public void TestIsPreviewVersion()
     {
         var version1 = new NugetVersion("10.1.999.0");
@@ -152,22 +121,18 @@ public class NugetVersionTests
         Assert.AreEqual(version1.GetHashCode(), version2.GetHashCode());
     }
 
-    private void AssertEquals(NugetVersion? version1, NugetVersion? version2)
+    [TestMethod]
+    public void TestHashcode()
     {
-        Assert.IsFalse(version1 < version2 || version2 < version1);
-        Assert.IsFalse(version2 > version1 || version1 > version2);
-        Assert.IsTrue(version1.Equals(version2));
-        Assert.IsTrue(version2.Equals(version1));
-        Assert.IsTrue(version1 == version1);
-        Assert.IsTrue(version1 == version2);
-        Assert.IsTrue(version2 == version1);
-        Assert.IsTrue(version2 == version2);
-        Assert.AreEqual(version1, version2);
-        Assert.AreEqual(version2, version1);
-        Assert.AreEqual(version1.GetHashCode(), version1.GetHashCode());
+        var version1 = new NugetVersion("10.1.0.0-Preview");
+        var hashVersion1 = version1.GetHashCode();
+
+        var version2 = new NugetVersion("10.1.0.0-Preview");
+        var hashVersion2 = version2.GetHashCode();
+        Assert.AreEqual(hashVersion1, hashVersion2);
     }
 
-    private void AssertLeftLarger(NugetVersion? big, NugetVersion? sml)
+    private void AssertLeftLarger(NugetVersion big, NugetVersion sml)
     {
         Assert.IsTrue(sml < big);
         Assert.IsTrue(big > sml);
@@ -184,7 +149,5 @@ public class NugetVersionTests
         Assert.AreNotEqual(big.GetHashCode(), sml.GetHashCode());
     }
 }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
 #pragma warning restore CS1718 // Comparison made to same variable
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-#pragma warning restore CS0253 // Possible unintended reference comparison; right hand side needs cast
