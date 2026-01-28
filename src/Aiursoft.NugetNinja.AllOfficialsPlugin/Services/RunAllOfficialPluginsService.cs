@@ -85,6 +85,10 @@ public class RunAllOfficialPluginsService(
     private static NugetVersion Increase(string versionInProject)
     {
         var parsedVersion = new NugetVersion(versionInProject);
+        if (parsedVersion.PrimaryVersion == null)
+        {
+            throw new InvalidOperationException($"Invalid version format: {versionInProject}");
+        }
         var addedVersion = new Version(
             major: parsedVersion.PrimaryVersion.Major,
             minor: parsedVersion.PrimaryVersion.Minor,

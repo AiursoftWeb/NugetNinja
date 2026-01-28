@@ -73,6 +73,7 @@ public class NugetService
                 packageName);
             var latest = allVersions.FirstOrDefault(v =>
             {
+                if (v.PrimaryVersion == null) return false;
                 var versionString = $"{v.PrimaryVersion.Major}.{v.PrimaryVersion.Minor}";
                 return runtimes.Any(r => r.Contains(versionString));
             });

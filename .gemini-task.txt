@@ -1,0 +1,135 @@
+You are working on an EXISTING Merge Request #219: 'Fix for issue #15: 这个项目对Docker的支持有问题'.
+Source Branch: fix-issue-15
+Target Branch: master
+
+Recent discussions and feedback (marked [NEW] if since last bot commit):
+
+
+Status: CI/CD PIPELINE FAILED.
+Pipeline URL: https://gitlab.aiursoft.com/gemini-bot/nugetninja/-/pipelines/43658
+
+Failure Logs:
+
+
+=== Job: lint (Stage: lint) ===
+2026-01-28T05:32:15.764853Z 00O [0KRunning with gitlab-runner 18.8.0 (9ffb4aa0)[0;m
+2026-01-28T05:32:15.764865Z 00O [0K  on 2ac54be7c246 wjuYPY19y, system ID: r_TvcrNHSMHhwv[0;m
+2026-01-28T05:32:15.764883Z 00O section_start:1769578335:prepare_executor
+2026-01-28T05:32:15.764884Z 00O+[0K[0K[36;1mPreparing the "shell" executor[0;m[0;m
+2026-01-28T05:32:15.764938Z 00O [0KUsing Shell (bash) executor...[0;m
+2026-01-28T05:32:15.764940Z 00O section_end:1769578335:prepare_executor
+2026-01-28T05:32:15.764940Z 00O+[0Ksection_start:1769578335:prepare_script
+2026-01-28T05:32:15.765015Z 00O+[0K[0K[36;1mPreparing environment[0;m[0;m
+2026-01-28T05:32:15.773785Z 01O Running on 2ac54be7c246...
+2026-01-28T05:32:15.776781Z 00O section_end:1769578335:prepare_script
+2026-01-28T05:32:15.776785Z 00O+[0Ksection_start:1769578335:get_sources
+2026-01-28T05:32:15.777081Z 00O+[0K[0K[36;1mGetting source from Git repository[0;m[0;m
+2026-01-28T05:32:15.801202Z 01O [32;1mGitaly correlation ID: 01KG1HD3A879G9A9PKEVFKES98[0;m
+2026-01-28T05:32:15.805248Z 01O [32;1mFetching changes with git depth set to 20...[0;m
+2026-01-28T05:32:15.806652Z 01O Initialized empty Git repository in /home/gitlab-runner/builds/nugetninja/43658/.git/
+2026-01-28T05:32:15.807751Z 01O [32;1mCreated fresh repository.[0;m
+2026-01-28T05:32:16.036087Z 01O [32;1mChecking out a37864ef as detached HEAD (ref is fix-issue-15)...[0;m
+2026-01-28T05:32:16.052353Z 01O [32;1mSkipping Git submodules setup[0;m
+2026-01-28T05:32:16.053168Z 00O section_end:1769578336:get_sources
+2026-01-28T05:32:16.053171Z 00O+[0Ksection_start:1769578336:step_script
+2026-01-28T05:32:16.053632Z 00O+[0K[0K[36;1mExecuting "step_script" stage of the job script[0;m[0;m
+2026-01-28T05:32:16.065843Z 01O [32;1m$ export DOTNET_CLI_TELEMETRY_OPTOUT=1[0;m
+2026-01-28T05:32:16.065857Z 01O [32;1m$ export PATH=$PATH:$HOME/.dotnet/tools[0;m
+2026-01-28T05:32:16.065860Z 01O [32;1m$ which jb || dotnet tool install JetBrains.ReSharper.GlobalTools --global --add-source https://nuget.aiursoft.com/v3/index.json --configfile ./nuget.config -v d[0;m
+2026-01-28T05:32:16.066545Z 01O /home/gitlab-runner/.dotnet/tools/jb
+2026-01-28T05:32:16.066769Z 01O [32;1m$ which reportgenerator || dotnet tool install dotnet-reportgenerator-globaltool --global --add-source https://nuget.aiursoft.com/v3/index.json --configfile ./nuget.config -v d[0;m
+2026-01-28T05:32:16.067320Z 01O /home/gitlab-runner/.dotnet/tools/reportgenerator
+2026-01-28T05:32:16.067480Z 01O [32;1m$ echo "Hostname: $(hostname)"[0;m
+2026-01-28T05:32:16.068142Z 01O Hostname: 2ac54be7c246
+2026-01-28T05:32:16.068152Z 01O [32;1m$ dotnet --info[0;m
+2026-01-28T05:32:16.136859Z 01O .NET SDK:
+2026-01-28T05:32:16.136867Z 01O  Version:           10.0.100
+2026-01-28T05:32:16.136868Z 01O  Commit:            b0f34d51fc
+2026-01-28T05:32:16.160661Z 01O  Workload version:  10.0.100-manifests.4eab3e0f
+2026-01-28T05:32:16.161111Z 01O  MSBuild version:   18.0.2+b0f34d51f
+2026-01-28T05:32:16.161115Z 01O 
+2026-01-28T05:32:16.161115Z 01O Runtime Environment:
+2026-01-28T05:32:16.161593Z 01O  OS Name:     ubuntu
+2026-01-28T05:32:16.161594Z 01O  OS Version:  25.10
+2026-01-28T05:32:16.163041Z 01O  OS Platform: Linux
+2026-01-28T05:32:16.167983Z 01O  RID:         ubuntu.25.10-x64
+2026-01-28T05:32:16.167984Z 01O  Base Path:   /usr/lib/dotnet/sdk/10.0.100/
+2026-01-28T05:32:16.167987Z 01O 
+2026-01-28T05:32:16.168009Z 01O .NET workloads installed:
+2026-01-28T05:32:16.169305Z 01O There are no installed workloads to display.
+2026-01-28T05:32:16.169333Z 01O Configured to use workload sets when installing new manifests.
+2026-01-28T05:32:16.169338Z 01O No workload sets are installed. Run "dotnet workload restore" to install a workload set.
+2026-01-28T05:32:16.170078Z 01O 
+2026-01-28T05:32:16.170079Z 01O Host:
+2026-01-28T05:32:16.170079Z 01O   Version:      10.0.0
+2026-01-28T05:32:16.170080Z 01O   Architecture: x64
+2026-01-28T05:32:16.170080Z 01O   Commit:       b0f34d51fc
+2026-01-28T05:32:16.170080Z 01O 
+2026-01-28T05:32:16.170080Z 01O .NET SDKs installed:
+2026-01-28T05:32:16.170080Z 01O   10.0.100 [/usr/lib/dotnet/sdk]
+2026-01-28T05:32:16.170094Z 01O 
+2026-01-28T05:32:16.170094Z 01O .NET runtimes installed:
+2026-01-28T05:32:16.170095Z 01O   Microsoft.AspNetCore.App 10.0.0 [/usr/lib/dotnet/shared/Microsoft.AspNetCore.App]
+2026-01-28T05:32:16.170095Z 01O   Microsoft.NETCore.App 10.0.0 [/usr/lib/dotnet/shared/Microsoft.NETCore.App]
+2026-01-28T05:32:16.170095Z 01O 
+2026-01-28T05:32:16.170095Z 01O Other architectures found:
+2026-01-28T05:32:16.170096Z 01O   None
+2026-01-28T05:32:16.170096Z 01O 
+2026-01-28T05:32:16.170096Z 01O Environment variables:
+2026-01-28T05:32:16.170096Z 01O   DOTNET_BUNDLE_EXTRACT_BASE_DIR           [/home/gitlab-runner/.cache/dotnet_bundle_extract]
+2026-01-28T05:32:16.170097Z 01O   DOTNET_CLI_TELEMETRY_OPTOUT              [1]
+2026-01-28T05:32:16.170097Z 01O 
+2026-01-28T05:32:16.170097Z 01O global.json file:
+2026-01-28T05:32:16.170097Z 01O   Not found
+2026-01-28T05:32:16.170097Z 01O 
+2026-01-28T05:32:16.170097Z 01O Learn more:
+2026-01-28T05:32:16.170098Z 01O   https://aka.ms/dotnet/info
+2026-01-28T05:32:16.170098Z 01O 
+2026-01-28T05:32:16.170098Z 01O Download .NET:
+2026-01-28T05:32:16.170098Z 01O   https://aka.ms/dotnet/download
+2026-01-28T05:32:16.172670Z 01O [32;1m$ chmod +x ./lint.sh[0;m
+2026-01-28T05:32:16.173602Z 01O [32;1m$ ./lint.sh[0;m
+2026-01-28T05:32:16.174421Z 01O Checking for JetBrains ReSharper Global Tools...
+2026-01-28T05:32:16.174423Z 01O jb is already installed.
+2026-01-28T05:32:16.174424Z 01O Restoring dependencies...
+2026-01-28T05:32:16.629159Z 01O   Determining projects to restore...
+2026-01-28T05:32:17.569888Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.UselessProjectReferencePlugin/Aiursoft.NugetNinja.UselessProjectReferencePlugin.csproj (in 607 ms).
+2026-01-28T05:32:17.569897Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.UselessPackageReferencePlugin/Aiursoft.NugetNinja.UselessPackageReferencePlugin.csproj (in 607 ms).
+2026-01-28T05:32:17.569898Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.VisualizerPlugin/Aiursoft.NugetNinja.VisualizerPlugin.csproj (in 607 ms).
+2026-01-28T05:32:17.569898Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.MissingPropertyPlugin/Aiursoft.NugetNinja.MissingPropertyPlugin.csproj (in 607 ms).
+2026-01-28T05:32:17.569899Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.PossiblePackageUpgradePlugin/Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.csproj (in 607 ms).
+2026-01-28T05:32:17.597197Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.ExpectFilesPlugin/Aiursoft.NugetNinja.ExpectFilesPlugin.csproj (in 4 ms).
+2026-01-28T05:32:17.603325Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.DeprecatedPackagePlugin/Aiursoft.NugetNinja.DeprecatedPackagePlugin.csproj (in 3 ms).
+2026-01-28T05:32:17.604653Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja/Aiursoft.NugetNinja.csproj (in 9 ms).
+2026-01-28T05:32:17.605772Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.PrBot/Aiursoft.NugetNinja.PrBot.csproj (in 664 ms).
+2026-01-28T05:32:17.609725Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.Core/Aiursoft.NugetNinja.Core.csproj (in 4 ms).
+2026-01-28T05:32:17.613686Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.AllOfficialsPlugin/Aiursoft.NugetNinja.AllOfficialsPlugin.csproj (in 4 ms).
+2026-01-28T05:32:17.621744Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.MergeBot/Aiursoft.NugetNinja.MergeBot.csproj (in 26 ms).
+2026-01-28T05:32:17.622574Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/src/Aiursoft.NugetNinja.GitServerBase/Aiursoft.NugetNinja.GitServerBase.csproj (in 30 ms).
+2026-01-28T05:32:17.898524Z 01O   Restored /home/gitlab-runner/builds/nugetninja/43658/tests/Aiursoft.NugetNinja.Core.Tests/Aiursoft.NugetNinja.Core.Tests.csproj (in 303 ms).
+2026-01-28T05:32:17.922683Z 01O Running ReSharper Code Inspection...
+2026-01-28T05:32:44.572773Z 01O Filtering known false positives...
+2026-01-28T05:32:44.578857Z 01O [0;31mLinting FAILED![0m
+2026-01-28T05:32:44.578865Z 01O Issues found:
+2026-01-28T05:32:44.587905Z 01O File: src/Aiursoft.NugetNinja.Core/Model/Workspace/NugetVersion.cs | Line: 26 | Reason: Expression is always false according to nullable reference types' annotations
+2026-01-28T05:32:44.593180Z 01O File: src/Aiursoft.NugetNinja.Core/Model/Workspace/NugetVersion.cs | Line: 30 | Reason: Expression is always false according to nullable reference types' annotations
+2026-01-28T05:32:44.595051Z 00O section_end:1769578364:step_script
+2026-01-28T05:32:44.595054Z 00O+[0Ksection_start:1769578364:upload_artifacts_on_failure
+2026-01-28T05:32:44.597977Z 00O+[0K[0K[36;1mUploading artifacts for failed job[0;m[0;m
+2026-01-28T05:32:44.650478Z 01O [32;1mUploading artifacts...[0;m
+2026-01-28T05:32:44.690438Z 01E Runtime platform                                  [0;m  arch[0;m=amd64 os[0;m=linux pid[0;m=2496 revision[0;m=9ffb4aa0 version[0;m=18.8.0
+2026-01-28T05:32:44.690469Z 01E ./analyze_output.xml: found 1 matching artifact files and directories[0;m 
+2026-01-28T05:32:44.853564Z 01E Uploading artifacts as "archive" to coordinator... 201 Created[0;m  correlation_id[0;m=01KG1HDZRK79YN3QJX7M9RC41P id[0;m=250884 responseStatus[0;m=201 Created token[0;m=64_fzGbLy
+2026-01-28T05:32:44.856787Z 00O section_end:1769578364:upload_artifacts_on_failure
+2026-01-28T05:32:44.856792Z 00O+[0Ksection_start:1769578364:cleanup_file_variables
+2026-01-28T05:32:44.856861Z 00O+[0K[0K[36;1mCleaning up project directory and file based variables[0;m[0;m
+2026-01-28T05:32:44.872785Z 00O section_end:1769578364:cleanup_file_variables
+2026-01-28T05:32:44.872792Z 00O+[0K
+2026-01-28T05:32:44.875917Z 00O [31;1mERROR: Job failed: exit status 1[0;m
+
+=== End of Job Log ===
+
+
+
+Please analyze the logs and the codebase to fix the failures.
+Don't forget to bump the version for updated nuget package projects after necessary changes, while do NOT add a version tag for projects doesn't publish nuget packages!

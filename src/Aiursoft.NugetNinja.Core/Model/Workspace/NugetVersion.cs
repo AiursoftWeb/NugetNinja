@@ -18,7 +18,7 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
     }
 
     public readonly string SourceString { get; }
-    public readonly Version PrimaryVersion { get; }
+    public readonly Version? PrimaryVersion { get; }
     public string AdditionalText { get; } = string.Empty;
 
     public int CompareTo(NugetVersion otherNugetVersion)
