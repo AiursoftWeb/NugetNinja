@@ -29,8 +29,9 @@ public class VersionCrossChecker
     {
         var dotnetVersions = GetDotNetVersionsNumbers();
         return inputList
-            .Select(inputVersion => new Version(inputVersion.PrimaryVersion.Major, inputVersion.PrimaryVersion.Minor))
-            .All(firstTwoVersion => dotnetVersions.Contains(firstTwoVersion));
+            .All(inputVersion => 
+                inputVersion.PrimaryVersion != null && 
+                dotnetVersions.Contains(new Version(inputVersion.PrimaryVersion.Major, inputVersion.PrimaryVersion.Minor)));
     }
 
     private List<Version> GetDotNetVersionsNumbers()

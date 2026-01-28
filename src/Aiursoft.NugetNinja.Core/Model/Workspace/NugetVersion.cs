@@ -1,6 +1,6 @@
 ﻿namespace Aiursoft.NugetNinja.Core.Model.Workspace;
 
-public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEquatable<NugetVersion?>
+public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
 {
     public NugetVersion(string versionString)
     {
@@ -17,18 +17,18 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
         }
     }
 
-    public string SourceString { get; }
-    public Version PrimaryVersion { get; }
+    public readonly string SourceString { get; }
+    public readonly Version? PrimaryVersion { get; }
     public string AdditionalText { get; } = string.Empty;
 
-    public object Clone()
+    public int CompareTo(NugetVersion otherNugetVersion)
     {
-        return new NugetVersion(SourceString);
-    }
-
-    public int CompareTo(NugetVersion? otherNugetVersion)
-    {
-        if (ReferenceEquals(otherNugetVersion, null)) throw new ArgumentNullException(nameof(otherNugetVersion));
+        if (PrimaryVersion == null && otherNugetVersion.PrimaryVersion == null)
+            return 0;
+        if (PrimaryVersion == null)
+            return -1;
+        if (otherNugetVersion.PrimaryVersion == null)
+            return 1;
 
         if (!PrimaryVersion.Equals(otherNugetVersion.PrimaryVersion))
             return PrimaryVersion.CompareTo(otherNugetVersion.PrimaryVersion);
@@ -41,32 +41,34 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
         return 0;
     }
 
-    public bool Equals(NugetVersion? otherNugetVersion)
+    public static bool operator ==(NugetVersion lvs, NugetVersion rvs)
     {
-        if (ReferenceEquals(otherNugetVersion, null)) return false;
-        return
-            PrimaryVersion.Equals(otherNugetVersion.PrimaryVersion) &&
-            AdditionalText.Equals(otherNugetVersion.AdditionalText);
+        return lvs.Equals(rvs);
     }
 
-    public static bool operator ==(NugetVersion? lvs, NugetVersion? rvs)
-    {
-        return lvs?.Equals(rvs) ?? ReferenceEquals(lvs, rvs);
-    }
-
-    public static bool operator !=(NugetVersion? lvs, NugetVersion? rvs)
+    public static bool operator !=(NugetVersion lvs, NugetVersion rvs)
     {
         return !(lvs == rvs);
     }
 
-    public static bool operator <(NugetVersion? lvs, NugetVersion? rvs)
+    public static bool operator <(NugetVersion lvs, NugetVersion rvs)
     {
-        return lvs?.CompareTo(rvs) < 0;
+        return lvs.CompareTo(rvs) < 0;
     }
 
-    public static bool operator >(NugetVersion? lvs, NugetVersion? rvs)
+    public static bool operator <=(NugetVersion lvs, NugetVersion rvs)
     {
-        return lvs?.CompareTo(rvs) > 0;
+        return lvs.Equals(rvs) || lvs.CompareTo(rvs) < 0;
+    }
+
+    public static bool operator >=(NugetVersion lvs, NugetVersion rvs)
+    {
+        return lvs.Equals(rvs) || lvs.CompareTo(rvs) > 0;
+    }
+
+    public static bool operator >(NugetVersion lvs, NugetVersion rvs)
+    {
+        return lvs.CompareTo(rvs) > 0;
     }
 
     public bool IsPreviewVersion()
@@ -79,18 +81,21 @@ public sealed class NugetVersion : ICloneable, IComparable<NugetVersion?>, IEqua
         return $"{PrimaryVersion}-{AdditionalText}".TrimEnd('-');
     }
 
+    public bool Equals(NugetVersion otherNugetVersion)
+    {
+        return
+            Equals(PrimaryVersion, otherNugetVersion.PrimaryVersion) &&
+            AdditionalText.Equals(otherNugetVersion.AdditionalText);
+    }
+
     public override bool Equals(object? obj)
     {
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (ReferenceEquals(this, null))
-            return false;
         if (obj is NugetVersion nuVersion)
             return Equals(nuVersion);
         return false;
     }
 
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
         return HashCode.Combine(PrimaryVersion, AdditionalText);
     }
