@@ -236,6 +236,38 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
         });
     }
 
+    public async Task<string> RotateToken(string endPoint, string oldToken)
+    {
+        var expiresAt = DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd");
+        logger.LogInformation("Attempting to rotate GitLab token for endpoint: {EndPoint}. New expiration: {ExpiresAt}", endPoint, expiresAt);
+
+        // GitLab supports passing expires_at as a query parameter for the rotate endpoint.
+        var rotateEndpoint = $"{endPoint}/api/v4/personal_access_tokens/self/rotate?expires_at={expiresAt}";
+        try
+        {
+            var jsonResponse = await httpClient.SendHttp(rotateEndpoint, HttpMethod.Post, oldToken);
+            var rotationResponse = System.Text.Json.JsonSerializer.Deserialize<GitLabRotateTokenResponse>(jsonResponse);
+
+            if (string.IsNullOrEmpty(rotationResponse?.Token))
+            {
+                throw new InvalidOperationException("GitLab token rotation response did not contain a new token.");
+            }
+
+            logger.LogInformation("Successfully rotated GitLab token. New token (partial): {NewToken}...", rotationResponse.Token.Substring(0, Math.Min(rotationResponse.Token.Length, 10)));
+            return rotationResponse.Token;
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "Failed to rotate GitLab token. Status code: {StatusCode}", ex.StatusCode);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An unexpected error occurred during GitLab token rotation.");
+            throw;
+        }
+    }
+
     private async Task<GitLabProject> GetProject(string endpoint, string org, string repo, string patToken)
     {
         // GitLab API supports both:
@@ -263,6 +295,12 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
                        + $"/{connectionConfiguration.UserName}/{repo.Name}.git";
         return pushPath;
     }
+}
+
+public class GitLabRotateTokenResponse
+{
+    [JsonPropertyName("token")]
+    public string? Token { get; set; }
 }
 
 public class GitLabNamespace

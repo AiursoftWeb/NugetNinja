@@ -186,4 +186,10 @@ public class AzureDevOpsService(
     {
         throw new NotImplementedException("Azure DevOps issue tracking is not implemented yet. Please use GitLab provider.");
     }
+
+    public Task<string> RotateToken(string endPoint, string oldToken)
+    {
+        logger.LogWarning("Token rotation is not implemented for Azure DevOps. Returning old token for endpoint: {EndPoint}", endPoint);
+        return Task.FromResult(oldToken);
+    }
 }

@@ -35,4 +35,9 @@ public class PrBotOptions
     /// Target languages for localization (e.g., ["zh-CN", "en-US", "ja-JP"]).
     /// </summary>
     public string[] LocalizationTargetLanguages { get; set; } = [];
+
+    /// <summary>
+    /// The path to the workspace directory where repositories will be cloned.
+    /// </summary>
+    public string WorkspacePath { get; set; } = "/root/.local/share/NugetNinjaWorkspace";
 }

@@ -132,4 +132,11 @@ public class GiteaService(
     {
         throw new NotImplementedException("Gitea issue tracking is not implemented yet. Please use GitLab provider.");
     }
+
+    public Task<string> RotateToken(string endPoint, string oldToken)
+    {
+        logger.LogWarning("Token rotation is not implemented for Gitea. Returning old token for endpoint: {EndPoint}", endPoint);
+        return Task.FromResult(oldToken);
+    }
 }
+

@@ -12,4 +12,5 @@ public class Server
     public string Token { get; set; } = string.Empty;
 
     public bool OnlyUpdate { get; set; } = false;
+    public bool IsPrBot { get; set; } = true;
 }
