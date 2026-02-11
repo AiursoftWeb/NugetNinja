@@ -2,6 +2,7 @@
 using Aiursoft.NugetNinja.AllOfficialsPlugin.App;
 using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin.App;
+using Aiursoft.NugetNinja.DuplicatePropertyPlugin.App;
 using Aiursoft.NugetNinja.ExpectFilesPlugin.App;
 using Aiursoft.NugetNinja.MissingPropertyPlugin.App;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.App;
@@ -12,6 +13,7 @@ using Aiursoft.NugetNinja.VisualizerPlugin;
 return await new NestedCommandApp()
     .WithFeature(new AllOfficialsHandler())
     .WithFeature(new MissingPropertyHandler())
+    .WithFeature(new DuplicatePropertyHandler())
     .WithFeature(new DeprecatedPackageHandler())
     .WithFeature(new PackageUpgradeHandler())
     .WithFeature(new PackageReferenceHandler())

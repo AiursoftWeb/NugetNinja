@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.12</Version>
+    <Version>10.0.13</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>ninja</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja</RootNamespace>
@@ -30,7 +30,16 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.DeprecatedPackagePlugin\Aiursoft.NugetNinja.DeprecatedPackagePlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.ExpectFilesPlugin\Aiursoft.NugetNinja.ExpectFilesPlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.MissingPropertyPlugin\Aiursoft.NugetNinja.MissingPropertyPlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.UselessPackageReferencePlugin\Aiursoft.NugetNinja.UselessPackageReferencePlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.UselessProjectReferencePlugin\Aiursoft.NugetNinja.UselessProjectReferencePlugin.csproj" />
     <ProjectReference Include="..\Aiursoft.NugetNinja.VisualizerPlugin\Aiursoft.NugetNinja.VisualizerPlugin.csproj" />
-    <None Include="../../README.md" Pack="true" PackagePath="." />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.DuplicatePropertyPlugin\Aiursoft.NugetNinja.DuplicatePropertyPlugin.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="." />
   </ItemGroup>
 </Project>
