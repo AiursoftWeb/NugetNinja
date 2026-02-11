@@ -82,6 +82,13 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<IVersionControlService, AzureDevOpsService>();
             services.AddTransient<IVersionControlService, GitLabService>();
             services.AddTransient<HttpWrapper>();
+            services.AddTransient<TokenStoreService>(s =>
+            {
+                var options = new PrBotOptions();
+                context.Configuration.GetSection("PrBot").Bind(options);
+                return new TokenStoreService(s.GetRequiredService<ILogger<TokenStoreService>>(), options.WorkspacePath);
+            });
+            services.AddTransient<TokenManagementService>();
             services.AddTransient<NugetService>();
             services.AddTransient<VersionCrossChecker>();
             new StartUp().ConfigureServices(services);

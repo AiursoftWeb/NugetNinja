@@ -34,5 +34,6 @@ public interface IVersionControlService
 
     // Helper methods
     public string GetPushPath(Server connectionConfiguration, Repository repo);
+    public bool SupportsTokenRotation { get; }
     public Task<string> RotateToken(string endPoint, string oldToken);
 }

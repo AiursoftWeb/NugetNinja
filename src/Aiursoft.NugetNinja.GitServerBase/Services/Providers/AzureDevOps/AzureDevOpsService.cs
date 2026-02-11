@@ -13,6 +13,8 @@ public class AzureDevOpsService(
     ILogger<AzureDevOpsService> logger)
     : IVersionControlService
 {
+    public bool SupportsTokenRotation => false;
+
     public async Task CreatePullRequest(string endPoint, string org, string repo, string head, string baseBranch,
         string title, string body, string patToken)
     {

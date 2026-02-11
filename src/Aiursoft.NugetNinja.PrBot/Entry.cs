@@ -2,7 +2,6 @@
 using Aiursoft.GitRunner.Models;
 using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 using Aiursoft.NugetNinja.GitServerBase.Models;
-using Aiursoft.NugetNinja.GitServerBase.Models.Configuration; // New using statement
 using Aiursoft.NugetNinja.GitServerBase.Services; // New using statement
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers;
 using Aiursoft.NugetNinja.PrBot.Configuration; // New using statement
@@ -18,13 +17,13 @@ public class Entry(
     RunAllOfficialPluginsService runAllOfficialPluginsService,
     WorkspaceManager workspaceManager,
     LocalizationService localizationService,
-    TokenStoreService tokenStoreService, // Injected
-    IOptions<PrBotOptions> prBotOptions, // Injected
+    TokenManagementService tokenManagementService, // Changed
+    IOptions<PrBotOptions> prBotOptions,
     ILogger<Entry> logger)
 {
     private readonly List<Server> _servers = servers.Value;
-    private readonly TokenStoreService _tokenStoreService = tokenStoreService;
-    private readonly string _workspaceFolder = prBotOptions.Value.WorkspacePath; // Initialized from options
+    private readonly TokenManagementService _tokenManagementService = tokenManagementService;
+    private readonly string _workspaceFolder = prBotOptions.Value.WorkspacePath;
     private readonly ILogger<Entry> _logger = logger;
     private readonly IEnumerable<IVersionControlService> _versionControls = versionControls;
     private readonly RunAllOfficialPluginsService _runAllOfficialPluginsService = runAllOfficialPluginsService;
@@ -35,63 +34,19 @@ public class Entry(
     {
         _logger.LogInformation("Starting Nuget Ninja PR bot...");
 
-        var gitLabTokens = await _tokenStoreService.ReadTokensAsync() ?? new GitLabTokens();
-
         foreach (var server in _servers)
         {
+            server.Validate();
             _logger.LogInformation("Processing server: {ServerProvider}...", server.Provider);
-            var serviceProvider = _versionControls.First(v => v.GetName() == server.Provider);
-
-            if (server.Provider.Equals("GitLab", StringComparison.OrdinalIgnoreCase))
-            {
-                var oldToken = server.Token;
-
-                // Prioritize token from file if available
-                if (server.IsPrBot && !string.IsNullOrEmpty(gitLabTokens.ContributeToken))
-                {
-                    oldToken = gitLabTokens.ContributeToken;
-                    _logger.LogInformation("Using GitLab contribute token from file for server: {EndPoint}", server.EndPoint);
-                }
-                else if (!server.IsPrBot && !string.IsNullOrEmpty(gitLabTokens.MergeToken))
-                {
-                    oldToken = gitLabTokens.MergeToken;
-                    _logger.LogInformation("Using GitLab merge token from file for server: {EndPoint}", server.EndPoint);
-                }
-                else
-                {
-                    _logger.LogInformation("Using GitLab token from environment variable for server: {EndPoint}", server.EndPoint);
-                }
-
-                try
-                {
-                    var newToken = await serviceProvider.RotateToken(server.EndPoint, oldToken);
-                    server.Token = newToken; // Update the server object with the new token
-
-                    // Store the new token in the gitLabTokens object
-                    if (server.IsPrBot)
-                    {
-                        gitLabTokens.ContributeToken = newToken;
-                    }
-                    else
-                    {
-                        gitLabTokens.MergeToken = newToken;
-                    }
-
-                    // Save immediately!
-                    await _tokenStoreService.SaveTokensAsync(gitLabTokens);
-                    _logger.LogInformation("New GitLab token saved to disk strictly.");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogCritical(ex, "Failed to rotate GitLab token for server: {EndPoint}. Crashing application.", server.EndPoint);
-                    throw; // Crash the application as per requirement
-                }
-            }
-            else
-            {
-                _logger.LogInformation("Token rotation not implemented for provider: {Provider}", server.Provider);
-            }
             
+            // Resolve the latest token (potentially rotated)
+            server.Token = await _tokenManagementService.GetCurrentTokenAsync(
+                server.Provider, 
+                server.EndPoint, 
+                server.Token, 
+                server.IsPrBot);
+
+            var serviceProvider = _versionControls.First(v => v.GetName() == server.Provider);
             await RunServerAsync(server, serviceProvider);
         }
     }

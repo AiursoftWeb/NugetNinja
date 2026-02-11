@@ -38,6 +38,10 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.Configure<List<MergeServer>>(context.Configuration.GetSection("MergeBot:Servers"));
             services.AddTransient<Entry>();
             services.AddTransient<HttpWrapper>();
+            services.AddTransient<TokenStoreService>(serviceProvider => new TokenStoreService(
+                serviceProvider.GetRequiredService<ILogger<TokenStoreService>>(), 
+                "/root/.local/share/NugetNinjaWorkspace"));
+            services.AddTransient<TokenManagementService>();
             services.AddTransient<IVersionControlService, GitLabService>();
         });
 }

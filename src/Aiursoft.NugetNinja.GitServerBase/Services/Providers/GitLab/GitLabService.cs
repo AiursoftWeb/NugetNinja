@@ -10,6 +10,8 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
 {
     public string GetName() => "GitLab";
 
+    public bool SupportsTokenRotation => true;
+
     public async Task<bool> RepoExists(string endPoint, string orgName, string repoName, string patToken)
     {
         logger.LogInformation("Checking if repository exists in GitLab: {OrgName}/{RepoName}...", orgName, repoName);

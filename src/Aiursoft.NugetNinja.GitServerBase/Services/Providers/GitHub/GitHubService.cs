@@ -12,6 +12,8 @@ public class GitHubService(
         return "GitHub";
     }
 
+    public bool SupportsTokenRotation => false;
+
     public async Task<bool> RepoExists(string endPoint, string orgName, string repoName, string patToken)
     {
         logger.LogInformation("Getting if repository exists based on org: {OrgName}, repo: {RepoName}...", orgName, repoName);
