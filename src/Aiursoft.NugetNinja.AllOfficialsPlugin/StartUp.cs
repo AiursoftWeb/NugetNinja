@@ -11,6 +11,7 @@ public class StartUp : IStartUp
         new UselessProjectReferencePlugin.StartUp().ConfigureServices(services);
         new PossiblePackageUpgradePlugin.StartUp().ConfigureServices(services);
         new MissingPropertyPlugin.StartUp().ConfigureServices(services);
+        new DuplicatePropertyPlugin.StartUp().ConfigureServices(services);
         new ExpectFilesPlugin.StartUp().ConfigureServices(services);
         new DeprecatedPackagePlugin.StartUp().ConfigureServices(services);
     }

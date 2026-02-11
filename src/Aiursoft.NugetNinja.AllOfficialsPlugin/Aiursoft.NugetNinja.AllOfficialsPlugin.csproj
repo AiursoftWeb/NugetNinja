@@ -16,5 +16,6 @@
         <ProjectReference Include="..\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.csproj" />
         <ProjectReference Include="..\Aiursoft.NugetNinja.UselessPackageReferencePlugin\Aiursoft.NugetNinja.UselessPackageReferencePlugin.csproj" />
         <ProjectReference Include="..\Aiursoft.NugetNinja.UselessProjectReferencePlugin\Aiursoft.NugetNinja.UselessProjectReferencePlugin.csproj" />
+        <ProjectReference Include="..\Aiursoft.NugetNinja.DuplicatePropertyPlugin\Aiursoft.NugetNinja.DuplicatePropertyPlugin.csproj" />
     </ItemGroup>
 </Project>

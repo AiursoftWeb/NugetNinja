@@ -3,6 +3,7 @@ using Aiursoft.NugetNinja.Core.Abstracts;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin.Services;
+using Aiursoft.NugetNinja.DuplicatePropertyPlugin.Services;
 using Aiursoft.NugetNinja.ExpectFilesPlugin.Services;
 using Aiursoft.NugetNinja.MissingPropertyPlugin.Services;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
@@ -16,6 +17,7 @@ public class RunAllOfficialPluginsService(
     ILogger<RunAllOfficialPluginsService> logger,
     Extractor extractor,
     MissingPropertyDetector missingPropertyDetector,
+    DuplicatePropertyDetector duplicatePropertyDetector,
     DeprecatedPackageDetector deprecatedPackageDetector,
     PackageReferenceUpgradeDetector packageReferenceUpgradeDetector,
     UselessPackageReferenceDetector uselessPackageReferenceDetector,
@@ -28,6 +30,7 @@ public class RunAllOfficialPluginsService(
         uselessPackageReferenceDetector,
         uselessProjectReferenceDetector,
         packageReferenceUpgradeDetector,
+        duplicatePropertyDetector,
         missingPropertyDetector,
         expectFilesDetector,
         deprecatedPackageDetector
