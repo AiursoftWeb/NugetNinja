@@ -85,7 +85,7 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
     {
         return
             Equals(PrimaryVersion, otherNugetVersion.PrimaryVersion) &&
-            AdditionalText.Equals(otherNugetVersion.AdditionalText);
+            string.Equals(AdditionalText, otherNugetVersion.AdditionalText);
     }
 
     public override bool Equals(object? obj)
