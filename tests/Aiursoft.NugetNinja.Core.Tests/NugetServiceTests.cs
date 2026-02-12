@@ -3,9 +3,6 @@ using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
 using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Nuget;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NugetNinja.Core.Tests;
@@ -14,7 +11,6 @@ namespace Aiursoft.NugetNinja.Core.Tests;
 public class NugetServiceTests
 {
     private NugetService _nugetService = null!;
-    private HttpClient _httpClient = null!;
     private ServiceProvider _serviceProvider = null!;
 
     [TestInitialize]
@@ -25,13 +21,12 @@ public class NugetServiceTests
         services.AddTaskCanon();
         services.AddHttpClient();
         services.AddLogging();
-        services.Configure<AppSettings>(options => { });
+        services.Configure<AppSettings>(_ => { });
         services.AddTransient<VersionCrossChecker>();
         services.AddTransient<NugetService>();
         
         _serviceProvider = services.BuildServiceProvider();
         _nugetService = _serviceProvider.GetRequiredService<NugetService>();
-        _httpClient = _serviceProvider.GetRequiredService<HttpClient>();
     }
 
     [TestCleanup]

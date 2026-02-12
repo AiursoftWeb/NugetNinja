@@ -112,7 +112,11 @@ public class NugetService
         if (serverRoot.EndsWith("/")) serverRoot = serverRoot.TrimEnd('/');
         if (!serverRoot.EndsWith("index.json"))
         {
-            serverRoot += "/v3/index.json";
+            if (!serverRoot.EndsWith("/v3"))
+            {
+                serverRoot += "/v3";
+            }
+            serverRoot += "/index.json";
         }
 
         var responseModel = await HttpGetJson<NugetServerIndex>(serverRoot, _patToken);
@@ -129,6 +133,14 @@ public class NugetService
                                        ?.Id
                                    ?? throw new WebException(
                                        $"Couldn't find a valid RegistrationsBaseUrl from nuget server with path: '{serverRoot}'!");
+        
+        // Rewrite URLs if using nuget.azure.cn
+        if (serverRoot.Contains("nuget.azure.cn"))
+        {
+            packageBaseAddress = packageBaseAddress.Replace("api.nuget.org", "nuget.azure.cn");
+            registrationsBaseUrl = registrationsBaseUrl.Replace("api.nuget.org", "nuget.azure.cn");
+        }
+        
         return new NugetServerEndPoints(packageBaseAddress, registrationsBaseUrl);
     }
 
@@ -160,6 +172,13 @@ public class NugetService
             var packageCatalogUrl = packageContext.CatalogEntry ??
                                     throw new WebException(
                                         $"Couldn't find a valid catalog entry for package: '{package}'!");
+
+            // Rewrite catalog URL if using nuget.azure.cn
+            if (server.Contains("nuget.azure.cn"))
+            {
+                packageCatalogUrl = packageCatalogUrl.Replace("api.nuget.org", "nuget.azure.cn");
+            }
+            
             return await HttpGetJson<CatalogInformation>(packageCatalogUrl, pat);
         }
         catch
@@ -192,8 +211,15 @@ public class NugetService
     private async Task<T> HttpGetJson<T>(string url, string patToken)
     {
         var json = await HttpGetString(url, patToken);
-        return JsonSerializer.Deserialize<T>(json) ??
-               throw new WebException($"The remote server returned non-json content: '{json}'");
+        try
+        {
+            return JsonSerializer.Deserialize<T>(json) ??
+                   throw new WebException($"The remote server returned null when deserializing: '{json}'");
+        }
+        catch (JsonException e)
+        {
+            throw new WebException($"The remote server returned non-json content: '{json}'", e);
+        }
     }
 
     private async Task<string> HttpGetString(string url, string patToken)
@@ -202,7 +228,7 @@ public class NugetService
         {
             return await HttpGetStringInternal(url, patToken);
         }
-        catch (WebException e)
+        catch (Exception e)
         {
             if (url.Contains("api.nuget.org"))
             {
