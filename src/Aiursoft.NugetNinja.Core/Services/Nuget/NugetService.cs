@@ -110,8 +110,10 @@ public class NugetService
     {
         var serverRoot = overrideServer ?? _customNugetServer;
         if (serverRoot.EndsWith("/")) serverRoot = serverRoot.TrimEnd('/');
-        if (!serverRoot.EndsWith("index.json")) serverRoot += "/index.json";
-        if (!serverRoot.EndsWith("v3/index.json")) serverRoot += "/v3/index.json";
+        if (!serverRoot.EndsWith("index.json"))
+        {
+            serverRoot += "/v3/index.json";
+        }
 
         var responseModel = await HttpGetJson<NugetServerIndex>(serverRoot, _patToken);
         var packageBaseAddress = responseModel
@@ -196,8 +198,28 @@ public class NugetService
 
     private async Task<string> HttpGetString(string url, string patToken)
     {
+        try
+        {
+            return await HttpGetStringInternal(url, patToken);
+        }
+        catch (WebException e)
+        {
+            if (url.Contains("api.nuget.org"))
+            {
+                var fallbackUrl = url.Replace("api.nuget.org", "globalcdn.nuget.org");
+                _logger.LogWarning(e, "Failed to fetch from {Url}. Retrying with fallback: {FallbackUrl}", url, fallbackUrl);
+                return await HttpGetStringInternal(fallbackUrl, patToken);
+            }
+
+            throw;
+        }
+    }
+
+    private async Task<string> HttpGetStringInternal(string url, string patToken)
+    {
         _logger.LogTrace("Sending request to: {Url}...", url);
         var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("User-Agent", "Aiursoft.NugetNinja");
         if (!string.IsNullOrWhiteSpace(patToken))
             request.Headers.Add("Authorization", StringExtensions.PatToHeader(patToken));
         using var response = await _httpClient.SendAsync(request);
@@ -212,11 +234,8 @@ public class NugetService
                 var text = await reader.ReadToEndAsync();
                 return text;
             }
-            else
-            {
-                var text = await response.Content.ReadAsStringAsync();
-                return text;
-            }
+
+            return await response.Content.ReadAsStringAsync();
         }
 
         throw new WebException(
