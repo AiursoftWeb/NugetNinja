@@ -62,38 +62,57 @@ public class LocalizationService(
         logger.LogInformation("Found {Count} .csproj file(s) to check for localization", csprojFiles.Count);
 
         var localizedCount = 0;
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(25));
 
-        foreach (var csprojFile in csprojFiles)
+        try
         {
-            var projectDir = Path.GetDirectoryName(csprojFile);
-            if (string.IsNullOrEmpty(projectDir))
+            foreach (var csprojFile in csprojFiles)
             {
-                continue;
-            }
-
-            var resourcesDir = Path.Combine(projectDir, "Resources");
-            if (!Directory.Exists(resourcesDir))
-            {
-                logger.LogDebug("No Resources directory found for project: {CsprojFile}", Path.GetFileName(csprojFile));
-                continue;
-            }
-
-            logger.LogInformation("Resources directory detected for project: {CsprojFile}. Starting localization...",
-                Path.GetFileName(csprojFile));
-
-            try
-            {
-                await retryEngine.RunWithRetry(async _ =>
+                if (cts.IsCancellationRequested)
                 {
-                    await LocalizeProjectDirectoryAsync(projectDir);
-                }, attempts: 3);
-                localizedCount++;
+                    logger.LogWarning("Localization timeout reached (25 minutes). Stopping localization to save progress.");
+                    break;
+                }
+
+                var projectDir = Path.GetDirectoryName(csprojFile);
+                if (string.IsNullOrEmpty(projectDir))
+                {
+                    continue;
+                }
+
+                var resourcesDir = Path.Combine(projectDir, "Resources");
+                if (!Directory.Exists(resourcesDir))
+                {
+                    logger.LogDebug("No Resources directory found for project: {CsprojFile}", Path.GetFileName(csprojFile));
+                    continue;
+                }
+
+                logger.LogInformation("Resources directory detected for project: {CsprojFile}. Starting localization...",
+                    Path.GetFileName(csprojFile));
+
+                try
+                {
+                    await retryEngine.RunWithRetry(async _ =>
+                    {
+                        await LocalizeProjectDirectoryAsync(projectDir, cts.Token);
+                    }, attempts: 3);
+                    localizedCount++;
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.LogWarning("Localization of project {CsprojFile} was canceled due to timeout.", csprojFile);
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error during localization of project: {CsprojFile} after 3 attempts", csprojFile);
+                    // Continue with other projects even if one fails
+                }
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error during localization of project: {CsprojFile} after 3 attempts", csprojFile);
-                // Continue with other projects even if one fails
-            }
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogWarning("Localization process was canceled due to timeout.");
         }
 
         if (localizedCount > 0)
@@ -106,13 +125,13 @@ public class LocalizationService(
         return false;
     }
 
-    private async Task LocalizeProjectDirectoryAsync(string projectPath)
+    private async Task LocalizeProjectDirectoryAsync(string projectPath, CancellationToken token)
     {
         // Localize C# files
         logger.LogInformation("Auto-generating view injections in: {ProjectPath}...", projectPath);
         await translateEntry.AutoGenerateViewInjectionsAsync(
             projectPath,
-            takeAction: true);
+            takeAction: true).WaitAsync(token);
 
         // Localize C# files
         logger.LogInformation("Localizing C# files in: {ProjectPath}...", projectPath);
@@ -120,7 +139,7 @@ public class LocalizationService(
             projectPath,
             _options.LocalizationTargetLanguages,
             takeAction: true,
-            concurrentRequests: _options.LocalizationConcurrentRequests);
+            concurrentRequests: _options.LocalizationConcurrentRequests).WaitAsync(token);
 
         // Localize DataAnnotations
         logger.LogInformation("Localizing DataAnnotations in: {ProjectPath}...", projectPath);
@@ -128,7 +147,7 @@ public class LocalizationService(
             projectPath,
             _options.LocalizationTargetLanguages,
             takeAction: true,
-            concurrentRequests: _options.LocalizationConcurrentRequests);
+            concurrentRequests: _options.LocalizationConcurrentRequests).WaitAsync(token);
 
         // Localize CSHTML files
         logger.LogInformation("Localizing CSHTML files in: {ProjectPath}...", projectPath);
@@ -136,7 +155,7 @@ public class LocalizationService(
             projectPath,
             _options.LocalizationTargetLanguages,
             takeAction: true,
-            concurentRequests: _options.LocalizationConcurrentRequests);
+            concurentRequests: _options.LocalizationConcurrentRequests).WaitAsync(token);
 
         logger.LogInformation("Localization completed for project: {ProjectPath}", projectPath);
     }
