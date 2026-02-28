@@ -131,7 +131,8 @@ public class LocalizationService(
         logger.LogInformation("Auto-generating view injections in: {ProjectPath}...", projectPath);
         await translateEntry.AutoGenerateViewInjectionsAsync(
             projectPath,
-            takeAction: true).WaitAsync(token);
+            takeAction: true,
+            cancellationToken: token);
 
         // Localize C# files
         logger.LogInformation("Localizing C# files in: {ProjectPath}...", projectPath);
@@ -139,7 +140,8 @@ public class LocalizationService(
             projectPath,
             _options.LocalizationTargetLanguages,
             takeAction: true,
-            concurrentRequests: _options.LocalizationConcurrentRequests).WaitAsync(token);
+            concurrentRequests: _options.LocalizationConcurrentRequests,
+            cancellationToken: token);
 
         // Localize DataAnnotations
         logger.LogInformation("Localizing DataAnnotations in: {ProjectPath}...", projectPath);
@@ -147,7 +149,8 @@ public class LocalizationService(
             projectPath,
             _options.LocalizationTargetLanguages,
             takeAction: true,
-            concurrentRequests: _options.LocalizationConcurrentRequests).WaitAsync(token);
+            concurrentRequests: _options.LocalizationConcurrentRequests,
+            cancellationToken: token);
 
         // Localize CSHTML files
         logger.LogInformation("Localizing CSHTML files in: {ProjectPath}...", projectPath);
@@ -155,7 +158,8 @@ public class LocalizationService(
             projectPath,
             _options.LocalizationTargetLanguages,
             takeAction: true,
-            concurentRequests: _options.LocalizationConcurrentRequests).WaitAsync(token);
+            concurentRequests: _options.LocalizationConcurrentRequests,
+            cancellationToken: token);
 
         logger.LogInformation("Localization completed for project: {ProjectPath}", projectPath);
     }
