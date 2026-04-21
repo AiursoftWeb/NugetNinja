@@ -127,6 +127,13 @@ public class LocalizationService(
 
     private async Task LocalizeProjectDirectoryAsync(string projectPath, CancellationToken token)
     {
+        // Dedup resource keys
+        logger.LogInformation("Auto-deduplicating resource keys in: {ProjectPath}...", projectPath);
+        await translateEntry.AutoDedupResxKeysAsync(
+            projectPath,
+            takeAction: true,
+            cancellationToken: token);
+
         // Localize C# files
         logger.LogInformation("Auto-generating view injections in: {ProjectPath}...", projectPath);
         await translateEntry.AutoGenerateViewInjectionsAsync(
