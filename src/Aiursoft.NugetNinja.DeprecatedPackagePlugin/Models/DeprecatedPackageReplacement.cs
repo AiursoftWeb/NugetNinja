@@ -22,4 +22,6 @@ public class DeprecatedPackageReplacement(Project source, Package target, Packag
         if (Alternative != null)
             await SourceProject.ReplacePackageReferenceAsync(Package.Name, Alternative);
     }
+
+    public bool IsModifyingAction => Alternative != null;
 }

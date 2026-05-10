@@ -103,7 +103,7 @@ public class RunAllOfficialPluginsService(
     private bool HasActionTaken(Project project, List<IAction> allActions)
     {
         return 
-            allActions.Any(a => a.SourceProject?.PathOnDisk == project.PathOnDisk) || 
+            allActions.Any(a => a.SourceProject?.PathOnDisk == project.PathOnDisk && a.IsModifyingAction) || 
             project.ProjectReferences.Any(projectReference => HasActionTaken(projectReference, allActions));
     }
 }

@@ -9,4 +9,6 @@ public interface IAction
     public Task TakeActionAsync();
 
     public Project? SourceProject { get; }
+
+    public bool IsModifyingAction => true;
 }

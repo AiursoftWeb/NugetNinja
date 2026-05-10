@@ -19,4 +19,6 @@ public class VulnerablePackageReplacement(Project source, Package target) : IAct
         // To DO: Remove this reference.
         throw new NotImplementedException();
     }
+
+    public bool IsModifyingAction => false;
 }
