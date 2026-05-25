@@ -1,22 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>Library</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
-    <Version>1.0.1</Version>
-        <AssemblyName>Aiursoft.NugetNinja.AllOfficialsPlugin</AssemblyName>
-        <RootNamespace>Aiursoft.NugetNinja.AllOfficialsPlugin</RootNamespace>
-        <IsTestProject>false</IsTestProject>
-        <IsPackable>false</IsPackable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Aiursoft.NugetNinja.DeprecatedPackagePlugin\Aiursoft.NugetNinja.DeprecatedPackagePlugin.csproj" />
-        <ProjectReference Include="..\Aiursoft.NugetNinja.ExpectFilesPlugin\Aiursoft.NugetNinja.ExpectFilesPlugin.csproj" />
-        <ProjectReference Include="..\Aiursoft.NugetNinja.MissingPropertyPlugin\Aiursoft.NugetNinja.MissingPropertyPlugin.csproj" />
-        <ProjectReference Include="..\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.csproj" />
-        <ProjectReference Include="..\Aiursoft.NugetNinja.UselessPackageReferencePlugin\Aiursoft.NugetNinja.UselessPackageReferencePlugin.csproj" />
-        <ProjectReference Include="..\Aiursoft.NugetNinja.UselessProjectReferencePlugin\Aiursoft.NugetNinja.UselessProjectReferencePlugin.csproj" />
-        <ProjectReference Include="..\Aiursoft.NugetNinja.DuplicatePropertyPlugin\Aiursoft.NugetNinja.DuplicatePropertyPlugin.csproj" />
-    </ItemGroup>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Version>1.0.2</Version>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Aiursoft.NugetNinja.AllOfficialsPlugin</AssemblyName>
+    <RootNamespace>Aiursoft.NugetNinja.AllOfficialsPlugin</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Company>Aiursoft</Company>
+    <Product>AllOfficialsPlugin</Product>
+    <Description>Nuget package of 'AllOfficialsPlugin' provided by Aiursoft</Description>
+    <PackageId>Aiursoft.NugetNinja.AllOfficialsPlugin</PackageId>
+    <PackageTags>nuget package dotnet csproj dependencies</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja.git</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aiursoft.NugetNinja.DeprecatedPackagePlugin\Aiursoft.NugetNinja.DeprecatedPackagePlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.ExpectFilesPlugin\Aiursoft.NugetNinja.ExpectFilesPlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.MissingPropertyPlugin\Aiursoft.NugetNinja.MissingPropertyPlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin\Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.UselessPackageReferencePlugin\Aiursoft.NugetNinja.UselessPackageReferencePlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.UselessProjectReferencePlugin\Aiursoft.NugetNinja.UselessProjectReferencePlugin.csproj" />
+    <ProjectReference Include="..\Aiursoft.NugetNinja.DuplicatePropertyPlugin\Aiursoft.NugetNinja.DuplicatePropertyPlugin.csproj" />
+    <None Include="../../README.md" Pack="true" PackagePath="." />
+  </ItemGroup>
 </Project>
