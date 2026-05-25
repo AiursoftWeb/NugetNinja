@@ -58,7 +58,7 @@ public class RunAllOfficialPluginsService(
             {
                 allActionsTaken.Add(action);
                 logger.LogWarning("Action {Action} built suggestion: {Suggestion}", action.GetType().Name, action.BuildMessage());
-                if (shouldTakeAction) await action.TakeActionAsync();
+                if (shouldTakeAction && action.IsModifyingAction) await action.TakeActionAsync();
             }
         }
 

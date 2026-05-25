@@ -211,16 +211,62 @@ public class NugetService
         var key = package.Name.ToLower();
         if (_vulnerabilityCache.TryGetValue(key, out var entries))
         {
-            return entries.Select(e => new Vulnerability
-            {
-                Id = e.Url,
-                Type = "PackageVulnerability",
-                AdvisoryUrl = e.Url,
-                Severity = e.Severity.ToString()
-            }).ToList().AsReadOnly();
+            var matching = entries
+                .Where(e => IsVersionInRange(package.Version, e.Versions))
+                .Select(e => new Vulnerability
+                {
+                    Id = e.Url,
+                    Type = "PackageVulnerability",
+                    AdvisoryUrl = e.Url,
+                    Severity = e.Severity.ToString()
+                })
+                .ToList();
+
+            return matching.Count > 0 ? matching.AsReadOnly() : null;
         }
 
         return null;
+    }
+
+    private static bool IsVersionInRange(NugetVersion version, string range)
+    {
+        if (string.IsNullOrWhiteSpace(range))
+            return true;
+
+        range = range.Trim();
+        // Exact version: [1.0.0]
+        if (!range.Contains(","))
+        {
+            var exact = range.Trim('[', ']', '(', ')').Trim();
+            if (string.IsNullOrWhiteSpace(exact))
+                return false;
+            return version.Equals(new NugetVersion(exact));
+        }
+
+        var lowerInclusive = range.StartsWith('[');
+        var upperInclusive = range.EndsWith(']');
+        var parts = range.Trim('[', ']', '(', ')').Split(',');
+
+        var lowerStr = parts[0].Trim();
+        var upperStr = parts.Length > 1 ? parts[1].Trim() : string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(lowerStr))
+        {
+            var lowerVersion = new NugetVersion(lowerStr);
+            var cmp = version.CompareTo(lowerVersion);
+            if (lowerInclusive ? cmp < 0 : cmp <= 0)
+                return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(upperStr))
+        {
+            var upperVersion = new NugetVersion(upperStr);
+            var cmp = version.CompareTo(upperVersion);
+            if (upperInclusive ? cmp > 0 : cmp >= 0)
+                return false;
+        }
+
+        return true;
     }
 
     private async Task<Package[]> GetPackageDependenciesFromNuget(Package package)
