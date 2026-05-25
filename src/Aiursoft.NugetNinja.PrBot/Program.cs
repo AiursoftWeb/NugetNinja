@@ -14,7 +14,6 @@ using Aiursoft.NugetNinja.Core.Services.Nuget;
 using Aiursoft.NugetNinja.GitServerBase.Models;
 using Aiursoft.NugetNinja.GitServerBase.Services;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers;
-using Aiursoft.NugetNinja.GitServerBase.Services.Providers.AzureDevOps;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers.Gitea;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers.GitHub;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers.GitLab;
@@ -79,7 +78,6 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddTransient<ProjectsEnumerator>();
             services.AddTransient<IVersionControlService, GitHubService>();
             services.AddTransient<IVersionControlService, GiteaService>();
-            services.AddTransient<IVersionControlService, AzureDevOpsService>();
             services.AddTransient<IVersionControlService, GitLabService>();
             services.AddTransient<HttpWrapper>();
             services.AddTransient<TokenStoreService>(s =>
