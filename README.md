@@ -177,7 +177,7 @@ The bots support full configuration via environment variables. This is the recom
 #### PR Bot Server Configuration
 To configure servers for **PrBot**, use the `PrBot__Servers__N__Property` pattern:
 
-- `PrBot__Servers__N__Provider`: The git provider (e.g., `GitHub`, `GitLab`, `Gitea`, `AzureDevOps`).
+- `PrBot__Servers__N__Provider`: The git provider (e.g., `GitHub`, `GitLab`, `Gitea`).
 - `PrBot__Servers__N__EndPoint`: The API endpoint of the server.
 - `PrBot__Servers__N__Token`: Your Personal Access Token (PAT).
 - `PrBot__Servers__N__UserName`: Your username on the server.
