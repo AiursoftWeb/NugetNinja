@@ -16,6 +16,8 @@ namespace Aiursoft.NugetNinja.Core.Services.Nuget;
 public class NugetService
 {
     private const string DefaultNugetServer = "https://api.nuget.org/v3/index.json";
+    private const string NuGetSearchUrl = "https://azuresearch-ea.nuget.org/query";
+    private const string NuGetVulnerabilityBaseUrl = "https://api.nuget.org/v3/vulnerabilities/vulnerability.base.json";
     private readonly string _customNugetServer = DefaultNugetServer;
     private readonly string _patToken;
     private readonly bool _allowPreview;
@@ -24,6 +26,7 @@ public class NugetService
     private readonly HttpClient _httpClient;
     private readonly ILogger<NugetService> _logger;
     private readonly VersionCrossChecker _versionCrossChecker;
+    private Dictionary<string, List<VulnerabilityBaseEntry>>? _vulnerabilityCache;
 
     public NugetService(
         CacheService cacheService,
@@ -158,36 +161,66 @@ public class NugetService
                ?? throw new WebException($"Couldn't find a valid version from Nuget with package: '{packageName}'!");
     }
 
-    private async Task<CatalogInformation> GetPackageDeprecationInfoFromNuget(Package package,
-        string? overrideServer = null, string? overridePat = null)
+    private async Task<CatalogInformation> GetPackageDeprecationInfoFromNuget(Package package)
     {
-        var server = overrideServer ?? _customNugetServer;
-        var pat = overridePat ?? _patToken;
         try
         {
-            var apiEndpoint = await GetApiEndpoint(server) ?? throw new InvalidOperationException("Can NOT locate a valid nuget API endpoint!");
-            var requestUrl =
-                $"{apiEndpoint.RegistrationsBaseUrl.TrimEnd('/')}/{package.Name.ToLower()}/{package.Version.ToString().ToLower()}.json";
-            var packageContext = await HttpGetJson<RegistrationIndex>(requestUrl, pat);
-            var packageCatalogUrl = packageContext.CatalogEntry ??
-                                    throw new WebException(
-                                        $"Couldn't find a valid catalog entry for package: '{package}'!");
+            var deprecation = await GetDeprecationFromSearch(package);
+            var vulnerabilities = await GetVulnerabilitiesForPackage(package);
 
-            // Rewrite catalog URL if using nuget.azure.cn
-            if (server.Contains("nuget.azure.cn"))
+            return new CatalogInformation
             {
-                packageCatalogUrl = packageCatalogUrl.Replace("api.nuget.org", "nuget.azure.cn");
-            }
-            
-            return await HttpGetJson<CatalogInformation>(packageCatalogUrl, pat);
+                Deprecation = deprecation,
+                Vulnerabilities = vulnerabilities
+            };
         }
-        catch
+        catch (Exception e)
         {
-            if (server != DefaultNugetServer)
-                // fall back to default server.
-                return await GetPackageDeprecationInfoFromNuget(package, DefaultNugetServer, string.Empty);
-            throw;
+            _logger.LogWarning(e, "Failed to get package deprecation/vulnerability info for '{Package}' from nuget.org",
+                package);
+            return new CatalogInformation();
         }
+    }
+
+    private async Task<Deprecation?> GetDeprecationFromSearch(Package package)
+    {
+        var searchUrl =
+            $"{NuGetSearchUrl}?q={Uri.EscapeDataString(package.Name)}&semVerLevel=2.0.0&prerelease=true&take=5";
+        var response = await HttpGetJson<NuGetSearchResponse>(searchUrl, string.Empty);
+        var match = response.Data.FirstOrDefault(d =>
+            string.Equals(d.Id, package.Name, StringComparison.OrdinalIgnoreCase));
+        return match?.Deprecation;
+    }
+
+    private async Task<IReadOnlyCollection<Vulnerability>?> GetVulnerabilitiesForPackage(Package package)
+    {
+        if (_vulnerabilityCache == null)
+        {
+            try
+            {
+                _vulnerabilityCache = await HttpGetJson<Dictionary<string, List<VulnerabilityBaseEntry>>>(
+                    NuGetVulnerabilityBaseUrl, string.Empty);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Failed to fetch vulnerability database from nuget.org");
+                _vulnerabilityCache = new Dictionary<string, List<VulnerabilityBaseEntry>>();
+            }
+        }
+
+        var key = package.Name.ToLower();
+        if (_vulnerabilityCache.TryGetValue(key, out var entries))
+        {
+            return entries.Select(e => new Vulnerability
+            {
+                Id = e.Url,
+                Type = "PackageVulnerability",
+                AdvisoryUrl = e.Url,
+                Severity = e.Severity.ToString()
+            }).ToList().AsReadOnly();
+        }
+
+        return null;
     }
 
     private async Task<Package[]> GetPackageDependenciesFromNuget(Package package)

@@ -24,8 +24,7 @@ public class DeprecatedPackageDetector(
             }
             catch (Exception e)
             {
-                logger.LogTrace(e, "Failed to get package deprecation info by name: \'{Package}\'", package);
-                logger.LogCritical("Failed to get package deprecation info by name: \'{Package}\'", package);
+                logger.LogWarning(e, "Failed to get package deprecation info by name: '{Package}'", package);
                 continue;
             }
 
