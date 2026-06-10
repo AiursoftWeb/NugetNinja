@@ -134,7 +134,9 @@ public class Project(string pathOnDisk, HtmlNode doc)
                           throw new IOException($"Couldn't find the project path based on: '{PathOnDisk}'.");
         var doc = new HtmlDocument
         {
-            OptionOutputOriginalCase = true
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
         };
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
@@ -149,12 +151,56 @@ public class Project(string pathOnDisk, HtmlNode doc)
         await RemoveNodeAndSaveToDisk(node, doc);
     }
 
+    public async Task DeduplicateProperty(string propertyName, string correctValue)
+    {
+        // This method removes all but the first occurrence of a property
+        // and ensures the first occurrence has the correct value.
+        // It does everything in a single read-modify-save cycle.
+        var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
+        var doc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
+        };
+        doc.LoadHtml(csprojContent);
+
+        var existingNodes = doc.DocumentNode
+            .Descendants(propertyName)
+            .ToArray();
+
+        if (existingNodes.Length > 1)
+        {
+            // Keep the first node, update it to the correct value, remove the rest
+            var firstNode = existingNodes[0];
+            foreach (var node in existingNodes.Skip(1))
+            {
+                node.Remove();
+            }
+
+            // Update the first node's value
+            if (firstNode.HasChildNodes)
+            {
+                firstNode.FirstChild.InnerHtml = correctValue;
+            }
+            else
+            {
+                var valueNode = HtmlNode.CreateNode(correctValue);
+                firstNode.AppendChild(valueNode);
+            }
+        }
+
+        await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
+    }
+
     public async Task RemoveProperty(string propertyName)
     {
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
         var doc = new HtmlDocument
         {
-            OptionOutputOriginalCase = true
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
         };
         doc.LoadHtml(csprojContent);
 
@@ -172,7 +218,9 @@ public class Project(string pathOnDisk, HtmlNode doc)
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
         var doc = new HtmlDocument
         {
-            OptionOutputOriginalCase = true
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
         };
         doc.LoadHtml(csprojContent);
 
@@ -204,7 +252,9 @@ public class Project(string pathOnDisk, HtmlNode doc)
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
         var doc = new HtmlDocument
         {
-            OptionOutputOriginalCase = true
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
         };
         doc.LoadHtml(csprojContent);
 
@@ -248,7 +298,9 @@ public class Project(string pathOnDisk, HtmlNode doc)
         var csprojContent = await File.ReadAllTextAsync(PathOnDisk);
         var doc = new HtmlDocument
         {
-            OptionOutputOriginalCase = true
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
         };
         doc.LoadHtml(csprojContent);
         var newline = HtmlNode.CreateNode("\r\n    ");

@@ -38,32 +38,42 @@ public class CsprojWriter
         "RepositoryUrl",
         "PackageReadmeFile"
     ];
-    
+
+    private static readonly string[] SelfClosingElements =
+    [
+        "PackageReference",
+        "ProjectReference",
+        "FrameworkReference",
+        "Compile",
+        "Content",
+        "None",
+        "Exec",
+        "Output",
+        "Message",
+        "Watch",
+        "Resource",
+        "Folder",
+        "AdditionalFiles",
+        "UserProperties",
+        "EmbeddedResource",
+        "ServiceWorker",
+        "Using",
+        "AssemblyAttribute"
+    ];
+
     public async Task SaveCsprojToDisk(HtmlDocument doc, string path)
     {
-        Sort(doc);
+        SortAllPropertyGroups(doc);
         var memoryStream = new MemoryStream();
         doc.Save(memoryStream);
         memoryStream.Seek(0, SeekOrigin.Begin);
         var csprojText = await new StreamReader(memoryStream).ReadToEndAsync();
-        csprojText = csprojText
-            .Replace(@"></PackageReference>", " />")
-            .Replace(@"></ProjectReference>", " />")
-            .Replace(@"></FrameworkReference>", " />")
-            .Replace(@"></Compile>", " />")
-            .Replace(@"></Content>", " />")
-            .Replace(@"></None>", " />")
-            .Replace(@"></Exec>", " />")
-            .Replace(@"></Output>", " />")
-            .Replace(@"></Message>", " />")
-            .Replace(@"></Watch>", " />")
-            .Replace(@"></Resource>", " />")
-            .Replace(@"></Folder>", " />")
-            .Replace(@"></AdditionalFiles>", " />")
-            .Replace(@"></UserProperties>", " />")
-            .Replace(@"></EmbeddedResource>", " />")
-            .Replace(@"></ServiceWorker>", " />")
-            .Replace(@"></Using>", " />");
+
+        // Apply self-closing tag replacements for known empty elements
+        foreach (var element in SelfClosingElements)
+        {
+            csprojText = csprojText.Replace($"></{element}>", " />");
+        }
 
         var indentedText = FormatXml(csprojText);
         await File.WriteAllTextAsync(path, indentedText);
@@ -73,12 +83,13 @@ public class CsprojWriter
     {
         try
         {
-            var doc = XDocument.Parse(xml);
+            var doc = XDocument.Parse(xml, LoadOptions.PreserveWhitespace);
             var settings = new XmlWriterSettings
             {
                 Indent = true,
                 IndentChars = "  ",
-                OmitXmlDeclaration = true
+                OmitXmlDeclaration = true,
+                NewLineChars = "\n"
             };
             var sw = new StringWriter();
             using (var writer = XmlWriter.Create(sw, settings))
@@ -86,30 +97,102 @@ public class CsprojWriter
                 doc.Save(writer);
             }
 
-            return sw.ToString();
+            var result = sw.ToString();
+            // XmlWriter adds a trailing newline; ensure we have exactly one
+            return result.TrimEnd('\n') + "\n";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Handle and throw if fatal exception here; don't just ignore them
-            return xml;
+            // If XDocument can't parse the HTML output, it means the document is malformed.
+            // This should never happen in normal operation, but HtmlAgilityPack may produce
+            // invalid XML for edge-case constructs. Try to salvage by re-parsing with
+            // HtmlAgilityPack and re-saving with proper options.
+            try
+            {
+                var recoveryDoc = new HtmlDocument
+                {
+                    OptionOutputOriginalCase = true,
+                    OptionAutoCloseOnEnd = true,
+                    OptionWriteEmptyNodes = true
+                };
+                recoveryDoc.LoadHtml(xml);
+                var recoveryStream = new MemoryStream();
+                recoveryDoc.Save(recoveryStream);
+                recoveryStream.Seek(0, SeekOrigin.Begin);
+                var recovered = new StreamReader(recoveryStream).ReadToEnd();
+
+                // Try to parse recovered output
+                var xdoc = XDocument.Parse(recovered, LoadOptions.PreserveWhitespace);
+                var settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = "  ",
+                    OmitXmlDeclaration = true,
+                    NewLineChars = "\n"
+                };
+                var sw = new StringWriter();
+                using (var writer = XmlWriter.Create(sw, settings))
+                {
+                    xdoc.Save(writer);
+                }
+                var result = sw.ToString();
+                return result.TrimEnd('\n') + "\n";
+            }
+            catch
+            {
+                // Last resort: return the original XML with a warning.
+                // We must not silently corrupt the file.
+                Console.Error.WriteLine(
+                    $"[NugetNinja Warning] CsprojWriter failed to format XML. " +
+                    $"Original parse error: {ex.Message}. The output may not be valid XML.");
+                return xml;
+            }
         }
     }
 
-    private void Sort(HtmlDocument doc)
+    private void SortAllPropertyGroups(HtmlDocument doc)
     {
-        var propertyGroup = doc.DocumentNode.Descendants("PropertyGroup").FirstOrDefault();
-        if (propertyGroup == null)
+        var propertyGroups = doc.DocumentNode.Descendants("PropertyGroup").ToList();
+        if (propertyGroups.Count == 0)
         {
             throw new InvalidOperationException("Can not find PropertyGroup node in the .csproj file!");
         }
 
-        var properties = propertyGroup.Descendants().Where(n => n.NodeType == HtmlNodeType.Element).ToList();
+        foreach (var propertyGroup in propertyGroups)
+        {
+            SortPropertyGroupChildren(propertyGroup);
+        }
+    }
+
+    private void SortPropertyGroupChildren(HtmlNode propertyGroup)
+    {
+        // Only sort direct child elements, not nested descendants.
+        // Using Descendants() would pull up nested elements from deeper levels,
+        // which can corrupt elements like AssemblyAttribute > _Parameter1
+        // if the HTML parser incorrectly nests them under a PropertyGroup.
+        var properties = propertyGroup.ChildNodes
+            .Where(n => n.NodeType == HtmlNodeType.Element)
+            .ToList();
+
+        // Preserve text nodes (whitespace) between elements
+        var allNodes = propertyGroup.ChildNodes.ToList();
+        var textNodes = allNodes.Where(n => n.NodeType == HtmlNodeType.Text).ToList();
+
         var sortedProperties = SortProperties(properties);
 
         propertyGroup.RemoveAllChildren();
-        foreach (var property in sortedProperties)
+
+        // Re-add elements in sorted order, interspersing with preserved text nodes
+        // We use the first text node as the indentation template
+        var indentTextNode = textNodes.FirstOrDefault();
+        for (var i = 0; i < sortedProperties.Count; i++)
         {
-            propertyGroup.AppendChild(property);
+            if (indentTextNode != null && i > 0)
+            {
+                // Clone the indentation text node to preserve formatting
+                propertyGroup.AppendChild(indentTextNode.Clone());
+            }
+            propertyGroup.AppendChild(sortedProperties[i]);
         }
     }
 

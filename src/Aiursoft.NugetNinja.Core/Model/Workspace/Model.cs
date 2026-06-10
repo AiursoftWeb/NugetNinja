@@ -35,7 +35,12 @@ public class Model
                            ?? throw new IOException(
                                $"Can not get the .csproj file location based on path: '{csprojPath}'!");
         var csprojContent = await File.ReadAllTextAsync(csprojPath);
-        var csprojDoc = new HtmlDocument();
+        var csprojDoc = new HtmlDocument
+        {
+            OptionOutputOriginalCase = true,
+            OptionAutoCloseOnEnd = true,
+            OptionWriteEmptyNodes = true
+        };
         csprojDoc.LoadHtml(csprojContent);
         var packageReferences = GetPackageReferences(csprojDoc);
         var projectReferences = GetProjectReferences(csprojDoc, csprojFolder);
