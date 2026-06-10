@@ -1,3 +1,4 @@
+using Aiursoft.NugetNinja.Core.Abstracts;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin.Models;
 using Aiursoft.NugetNinja.DuplicatePropertyPlugin.Services;
@@ -103,10 +104,10 @@ public class PluginDetectorTests
   </PropertyGroup>
 </Project>");
 
-        var context = new Aiursoft.NugetNinja.Core.Model.Workspace.Model { AllProjects = [project] };
+        var context = new Model { AllProjects = [project] };
         var detector = new DuplicatePropertyDetector(new LoggerFactory().CreateLogger<DuplicatePropertyDetector>());
 
-        var actions = new List<Aiursoft.NugetNinja.Core.Abstracts.IAction>();
+        var actions = new List<IAction>();
         await foreach (var action in detector.AnalyzeAsync(context))
         {
             actions.Add(action);
@@ -132,10 +133,10 @@ public class PluginDetectorTests
   </PropertyGroup>
 </Project>");
 
-        var context = new Aiursoft.NugetNinja.Core.Model.Workspace.Model { AllProjects = [project] };
+        var context = new Model { AllProjects = [project] };
         var detector = new DuplicatePropertyDetector(new LoggerFactory().CreateLogger<DuplicatePropertyDetector>());
 
-        var actions = new List<Aiursoft.NugetNinja.Core.Abstracts.IAction>();
+        var actions = new List<IAction>();
         await foreach (var action in detector.AnalyzeAsync(context))
         {
             actions.Add(action);
@@ -159,10 +160,10 @@ public class PluginDetectorTests
   </PropertyGroup>
 </Project>");
 
-        var context = new Aiursoft.NugetNinja.Core.Model.Workspace.Model { AllProjects = [project] };
+        var context = new Model { AllProjects = [project] };
         var detector = new DuplicatePropertyDetector(new LoggerFactory().CreateLogger<DuplicatePropertyDetector>());
 
-        var actions = new List<Aiursoft.NugetNinja.Core.Abstracts.IAction>();
+        var actions = new List<IAction>();
         await foreach (var action in detector.AnalyzeAsync(context))
         {
             actions.Add(action);
@@ -211,6 +212,6 @@ public class PluginDetectorTests
                 if (dir != null && Directory.Exists(dir)) Directory.Delete(dir, true);
             }
         }
-        catch { }
+        catch (IOException) { }
     }
 }

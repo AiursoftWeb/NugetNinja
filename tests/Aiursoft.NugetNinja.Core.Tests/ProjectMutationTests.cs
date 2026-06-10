@@ -1,5 +1,4 @@
 using Aiursoft.NugetNinja.Core.Model.Workspace;
-using Aiursoft.NugetNinja.Core.Services.IO;
 using HtmlAgilityPack;
 
 namespace Aiursoft.NugetNinja.Core.Tests;
@@ -418,7 +417,7 @@ public class ProjectMutationTests
 
     private static void Cleanup(string path)
     {
-        try { if (File.Exists(path)) File.Delete(path); } catch { }
+        try { if (File.Exists(path)) File.Delete(path); } catch (IOException) { }
     }
 
     private static int CountOccurrences(string text, string substring)
