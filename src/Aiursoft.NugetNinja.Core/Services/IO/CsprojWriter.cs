@@ -78,9 +78,10 @@ public class CsprojWriter
         // Fix HtmlAgilityPack bug: underscore-prefixed XML elements (like _Parameter1)
         // lose their closing tags during Save. HtmlAgilityPack doesn't recognize
         // underscore-prefixed names as valid HTML/XML tags.
+        // Use \S+ (non-whitespace) to capture just the text content, not trailing whitespace.
         csprojText = Regex.Replace(
             csprojText,
-            @"<(_\w+)>([^<]+)(?!\s*</\1>)",
+            @"<(_\w+)>(\S+)\s*(?!\s*</\1>)",
             @"<$1>$2</$1>");
 
         var indentedText = FormatXml(csprojText);

@@ -393,6 +393,36 @@ public class CsprojWriterTests
     }
 
     /// <summary>
+    /// Verifies that the _Parameter1 regex fix does not capture trailing whitespace
+    /// inside the text content of underscore-prefixed elements.
+    /// </summary>
+    [TestMethod]
+    public async Task SaveCsprojToDisk_Parameter1_NoWhitespaceCorruption()
+    {
+        var inputXml = @"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include=""System.Runtime.CompilerServices.InternalsVisibleTo"">
+      <_Parameter1>Aiursoft.Apkg.WebTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
+";
+
+        var result = await SaveAndReadBack(inputXml);
+
+        Console.WriteLine("Output:");
+        Console.WriteLine(result);
+
+        // _Parameter1 must have its closing tag right after the content,
+        // not with extra whitespace/newlines in between.
+        Assert.IsTrue(result.Contains(">Aiursoft.Apkg.WebTests</_Parameter1>"),
+            "_Parameter1 content should not have extra whitespace before closing tag.");
+    }
+
+    /// <summary>
     /// Helper to load, save, and read back a csproj string.
     /// </summary>
     private static async Task<string> SaveAndReadBack(string csprojContent)
