@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using HtmlAgilityPack;
@@ -57,8 +58,7 @@ public class CsprojWriter
         "UserProperties",
         "EmbeddedResource",
         "ServiceWorker",
-        "Using",
-        "AssemblyAttribute"
+        "Using"
     ];
 
     public async Task SaveCsprojToDisk(HtmlDocument doc, string path)
@@ -74,6 +74,14 @@ public class CsprojWriter
         {
             csprojText = csprojText.Replace($"></{element}>", " />");
         }
+
+        // Fix HtmlAgilityPack bug: underscore-prefixed XML elements (like _Parameter1)
+        // lose their closing tags during Save. HtmlAgilityPack doesn't recognize
+        // underscore-prefixed names as valid HTML/XML tags.
+        csprojText = Regex.Replace(
+            csprojText,
+            @"<(_\w+)>([^<]+)(?!\s*</\1>)",
+            @"<$1>$2</$1>");
 
         var indentedText = FormatXml(csprojText);
         await File.WriteAllTextAsync(path, indentedText);
@@ -182,18 +190,27 @@ public class CsprojWriter
 
         propertyGroup.RemoveAllChildren();
 
-        // Re-add elements in sorted order, interspersing with preserved text nodes
-        // We use the first text node as the indentation template
+        // Re-add elements in sorted order, interspersing with preserved text nodes.
+        // The first text node (newline+indent after <PropertyGroup>) is used for
+        // the leading gap and between elements. The last text node (newline+indent
+        // before </PropertyGroup>, may have different indentation) trails the elements.
         var indentTextNode = textNodes.FirstOrDefault();
+        var trailingTextNode = textNodes.LastOrDefault();
+
+        // Leading newline after <PropertyGroup>
+        if (indentTextNode != null)
+            propertyGroup.AppendChild(indentTextNode.Clone());
+
         for (var i = 0; i < sortedProperties.Count; i++)
         {
-            if (indentTextNode != null && i > 0)
-            {
-                // Clone the indentation text node to preserve formatting
-                propertyGroup.AppendChild(indentTextNode.Clone());
-            }
             propertyGroup.AppendChild(sortedProperties[i]);
+            if (i < sortedProperties.Count - 1 && indentTextNode != null)
+                propertyGroup.AppendChild(indentTextNode.Clone());
         }
+
+        // Trailing newline before </PropertyGroup>
+        if (trailingTextNode != null)
+            propertyGroup.AppendChild(trailingTextNode.Clone());
     }
 
     private List<HtmlNode> SortProperties(List<HtmlNode> properties)
