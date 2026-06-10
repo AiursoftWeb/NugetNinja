@@ -4,6 +4,7 @@ using Aiursoft.NugetNinja.DeprecatedPackagePlugin.Models;
 using Aiursoft.NugetNinja.DuplicatePropertyPlugin.Services;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using WorkspaceModel = Aiursoft.NugetNinja.Core.Model.Workspace.Model;
 
 namespace Aiursoft.NugetNinja.Core.Tests;
 
@@ -104,7 +105,7 @@ public class PluginDetectorTests
   </PropertyGroup>
 </Project>");
 
-        var context = new Model { AllProjects = [project] };
+        var context = new WorkspaceModel { AllProjects = [project] };
         var detector = new DuplicatePropertyDetector(new LoggerFactory().CreateLogger<DuplicatePropertyDetector>());
 
         var actions = new List<IAction>();
@@ -133,7 +134,7 @@ public class PluginDetectorTests
   </PropertyGroup>
 </Project>");
 
-        var context = new Model { AllProjects = [project] };
+        var context = new WorkspaceModel { AllProjects = [project] };
         var detector = new DuplicatePropertyDetector(new LoggerFactory().CreateLogger<DuplicatePropertyDetector>());
 
         var actions = new List<IAction>();
@@ -160,7 +161,7 @@ public class PluginDetectorTests
   </PropertyGroup>
 </Project>");
 
-        var context = new Model { AllProjects = [project] };
+        var context = new WorkspaceModel { AllProjects = [project] };
         var detector = new DuplicatePropertyDetector(new LoggerFactory().CreateLogger<DuplicatePropertyDetector>());
 
         var actions = new List<IAction>();
