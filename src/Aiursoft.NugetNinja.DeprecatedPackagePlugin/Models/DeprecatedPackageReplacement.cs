@@ -12,7 +12,7 @@ public class DeprecatedPackageReplacement(Project source, Package target, Packag
     public string BuildMessage()
     {
         var alternativeText =
-            Alternative != null ? string.Empty : $"Please consider to replace that to: '{Alternative}'.";
+            Alternative is not null ? $"Please consider to replace that to: '{Alternative}'." : string.Empty;
         return
             $"The project: '{SourceProject}' referenced a deprecated package: {Package} {Package.Version}! {alternativeText}";
     }

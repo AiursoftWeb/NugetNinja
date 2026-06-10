@@ -74,7 +74,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
 
         if (node == null)
             throw new InvalidOperationException(
-                $"Could remove PackageReference {refName} in project {this} because it was not found!");
+                $"Could not find PackageReference '{refName}' in project '{this}'.");
 
         if (!string.IsNullOrWhiteSpace(node.Attributes["Version"].Value))
         {
@@ -99,7 +99,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
 
         if (node == null)
             throw new InvalidOperationException(
-                $"Could remove PackageReference {refName} in project {this} because it was not found!");
+                $"Could not find PackageReference '{refName}' in project '{this}'.");
 
         node.Attributes["Include"].Value = newPackage.Name;
         node.Attributes["Version"].Value = newPackage.Version.ToString();
@@ -122,7 +122,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
 
         if (node == null)
             throw new InvalidOperationException(
-                $"Could remove PackageReference {refName} in project {this} because it was not found!");
+                $"Could not find PackageReference '{refName}' in project '{this}'.");
 
         await RemoveNodeAndSaveToDisk(node, doc);
     }
@@ -146,7 +146,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
 
         if (node == null)
             throw new InvalidOperationException(
-                $"Could remove PackageReference {absPath} in project {this} because it was not found!");
+                $"Could not find ProjectReference '{absPath}' in project '{this}'.");
 
         await RemoveNodeAndSaveToDisk(node, doc);
     }
