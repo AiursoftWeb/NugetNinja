@@ -91,7 +91,7 @@ public class CsprojWriter
     {
         try
         {
-            var doc = XDocument.Parse(xml, LoadOptions.PreserveWhitespace);
+            var doc = XDocument.Parse(xml);
             var settings = new XmlWriterSettings
             {
                 Indent = true,
@@ -109,7 +109,7 @@ public class CsprojWriter
             // XmlWriter adds a trailing newline; ensure we have exactly one
             return result.TrimEnd('\n') + "\n";
         }
-        catch (Exception ex)
+        catch (XmlException ex)
         {
             // If XDocument can't parse the HTML output, it means the document is malformed.
             // This should never happen in normal operation, but HtmlAgilityPack may produce
@@ -130,7 +130,7 @@ public class CsprojWriter
                 var recovered = new StreamReader(recoveryStream).ReadToEnd();
 
                 // Try to parse recovered output
-                var xdoc = XDocument.Parse(recovered, LoadOptions.PreserveWhitespace);
+                var xdoc = XDocument.Parse(recovered);
                 var settings = new XmlWriterSettings
                 {
                     Indent = true,
