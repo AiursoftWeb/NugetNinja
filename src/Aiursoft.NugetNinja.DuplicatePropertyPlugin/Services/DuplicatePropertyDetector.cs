@@ -13,7 +13,12 @@ public class DuplicatePropertyDetector(ILogger<DuplicatePropertyDetector> logger
         foreach (var project in context.AllProjects)
         {
             var csprojContent = await File.ReadAllTextAsync(project.PathOnDisk);
-            var doc = new HtmlDocument();
+            var doc = new HtmlDocument
+            {
+                OptionOutputOriginalCase = true,
+                OptionAutoCloseOnEnd = true,
+                OptionWriteEmptyNodes = true
+            };
             doc.LoadHtml(csprojContent);
             
             var propertyGroups = doc.DocumentNode.Descendants("PropertyGroup").ToList();

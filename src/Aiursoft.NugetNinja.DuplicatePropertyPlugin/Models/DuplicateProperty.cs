@@ -14,7 +14,9 @@ public class DuplicateProperty(Project project, string propertyName, string corr
 
     public async Task TakeActionAsync()
     {
-        await SourceProject.RemoveProperty(propertyName);
-        await SourceProject.AddOrUpdateProperty(propertyName, correctValue);
+        // Combine remove + add into a single file read-modify-save cycle
+        // to avoid multiple CsprojWriter.SaveCsprojToDisk calls that can
+        // compound XML formatting issues.
+        await SourceProject.DeduplicateProperty(propertyName, correctValue);
     }
 }
