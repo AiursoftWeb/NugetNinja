@@ -1,5 +1,6 @@
 using Aiursoft.Canon;
 using Aiursoft.Dotlang.AspNetTranslate.Services;
+using Aiursoft.NugetNinja.Core.Services.Utils;
 using Aiursoft.NugetNinja.PrBot.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -167,6 +168,12 @@ public class LocalizationService(
             takeAction: true,
             concurentRequests: _options.LocalizationConcurrentRequests,
             cancellationToken: token);
+
+        var updatedFiles = await ResxFormatSanitizer.EscapeInvalidFormatSpecifiersAsync(projectPath, token);
+        if (updatedFiles > 0)
+        {
+            logger.LogInformation("Escaped invalid format specifiers in {Count} resource file(s).", updatedFiles);
+        }
 
         logger.LogInformation("Localization completed for project: {ProjectPath}", projectPath);
     }
