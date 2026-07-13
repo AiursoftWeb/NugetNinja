@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>1.0.13</Version>
+    <Version>1.0.14</Version>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Aiursoft.NugetNinja.Core.Tests</RootNamespace>
     <IsTestProject>true</IsTestProject>
@@ -16,7 +16,7 @@
     </PackageReference>
     <PackageReference Include="JunitXml.TestLogger" Version="8.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="4.3.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.3.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />
