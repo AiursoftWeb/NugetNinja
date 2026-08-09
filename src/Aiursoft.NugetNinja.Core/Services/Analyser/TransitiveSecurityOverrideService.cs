@@ -14,7 +14,6 @@ public enum TransitiveSecurityOverrideState
 public sealed record TransitiveSecurityOverride(
     Project Project,
     Package DirectReference,
-    Package? TransitiveReference,
     TransitiveSecurityOverrideState State);
 
 /// <summary>
@@ -64,7 +63,6 @@ public class TransitiveSecurityOverrideService(
                     new TransitiveSecurityOverride(
                         project,
                         package,
-                        null,
                         TransitiveSecurityOverrideState.Indeterminate)));
                 continue;
             }
@@ -104,7 +102,6 @@ public class TransitiveSecurityOverrideService(
                         results.Add(new TransitiveSecurityOverride(
                             project,
                             directReference,
-                            transitiveReference,
                             TransitiveSecurityOverrideState.Confirmed));
                     }
                 }
@@ -116,7 +113,6 @@ public class TransitiveSecurityOverrideService(
                     results.Add(new TransitiveSecurityOverride(
                         project,
                         directReference,
-                        transitiveReference,
                         TransitiveSecurityOverrideState.Indeterminate));
                 }
             }
