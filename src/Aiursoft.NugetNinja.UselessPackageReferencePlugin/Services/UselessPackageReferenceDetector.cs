@@ -55,7 +55,12 @@ public class UselessPackageReferenceDetector(
                     logger.LogCritical("Failed to get package dependencies by name: \'{OtherDirectReference}\'", otherDirectReference);
                 }
 
-            if (accessiblePackagesForThisProject.Any(pa => pa.Name == directReference.Name))
+            // A direct reference is not redundant when it pins a package above the version
+            // that would otherwise be restored transitively. Removing it in that case can
+            // reintroduce vulnerabilities fixed by the newer direct version.
+            if (accessiblePackagesForThisProject.Any(pa =>
+                    string.Equals(pa.Name, directReference.Name, StringComparison.OrdinalIgnoreCase) &&
+                    pa.Version >= directReference.Version))
                 yield return new UselessPackageReference(context, directReference);
         }
     }
