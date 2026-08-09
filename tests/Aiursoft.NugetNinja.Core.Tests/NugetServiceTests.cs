@@ -24,7 +24,9 @@ public class NugetServiceTests
         services.Configure<AppSettings>(_ => { });
         services.AddTransient<VersionCrossChecker>();
         services.AddTransient<NugetService>();
-        
+        services.AddTransient<ProjectsEnumerator>();
+        services.AddTransient<TransitiveSecurityOverrideService>();
+
         _serviceProvider = services.BuildServiceProvider();
         _nugetService = _serviceProvider.GetRequiredService<NugetService>();
     }
@@ -62,5 +64,33 @@ public class NugetServiceTests
         var info = await _nugetService.GetPackageDeprecationInfo(package);
         Assert.IsNotNull(info);
         // Even if not deprecated, the response should be valid.
+    }
+
+    [TestMethod]
+    public async Task TestGetKnownVulnerabilitiesUsesCurrentNugetAuditPages()
+    {
+        var vulnerable = await _nugetService.GetKnownVulnerabilities(
+            new Package("SQLitePCLRaw.lib.e_sqlite3", new NugetVersion("2.1.11")));
+        var fixedVersion = await _nugetService.GetKnownVulnerabilities(
+            new Package("SQLitePCLRaw.lib.e_sqlite3", new NugetVersion("2.1.12")));
+
+        Assert.IsTrue(vulnerable.Any(advisory =>
+                advisory.AdvisoryUrl.Contains("GHSA-2m69-gcr7-jv3q", StringComparison.OrdinalIgnoreCase)),
+            "The current NuGet vulnerability pages should flag SQLitePCLRaw.lib.e_sqlite3 2.1.11.");
+        Assert.IsFalse(fixedVersion.Any(advisory =>
+                advisory.AdvisoryUrl.Contains("GHSA-2m69-gcr7-jv3q", StringComparison.OrdinalIgnoreCase)),
+            "SQLitePCLRaw.lib.e_sqlite3 2.1.12 should be outside the affected range.");
+    }
+
+    [TestMethod]
+    public async Task TestSqlite3ReplacementDependencyTreeCanBeSafelyAudited()
+    {
+        var scanner = _serviceProvider.GetRequiredService<TransitiveSecurityOverrideService>();
+
+        var vulnerabilities = await scanner.GetKnownVulnerabilityIdsInClosureAsync(
+            new Package("SQLitePCLRaw.bundle_e_sqlite3", new NugetVersion("3.0.5")));
+
+        Assert.AreEqual(0, vulnerabilities.Count,
+            "The real SQLitePCLRaw 3.x replacement tree must be completely auditable and vulnerability-free before NugetNinja can retire the 2.x override automatically.");
     }
 }

@@ -137,3 +137,12 @@ public class VulnerabilityBaseEntry
     [JsonPropertyName("versions")]
     public string Versions { get; set; } = string.Empty;
 }
+
+public class VulnerabilityIndexEntry
+{
+    [JsonPropertyName("@name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("@id")]
+    public string Id { get; set; } = string.Empty;
+}

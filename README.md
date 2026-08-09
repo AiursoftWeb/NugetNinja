@@ -58,6 +58,21 @@ Commands:
 
 ```
 
+### Transitive security overrides
+
+When a direct package reference raises a lower transitive dependency tree above a
+known vulnerability, Nuget Ninja treats it as a transitive security override (TSO):
+
+- the TSO is kept at its current safe version instead of being upgraded to the latest major;
+- parent packages are upgraded first;
+- after the parent upgrade, the TSO is removed automatically when the parent supplies
+  the same or a newer audited-safe dependency;
+- if dependency metadata or vulnerability data cannot be verified, the TSO is kept.
+
+The update-only bot mode also runs a targeted package-reference cleanup for TSOs
+recorded before the parent upgrade. Ordinary cleanup and formatting plugins remain
+disabled.
+
 ### Config file
 
 Beyond managing NuGet packages, NugetNinja can also enforce repository structure by ensuring common files (like `.gitignore`, `LICENSE`, or `.editorconfig`) are present and up-to-date.

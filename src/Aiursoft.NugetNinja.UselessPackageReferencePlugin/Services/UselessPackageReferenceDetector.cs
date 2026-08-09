@@ -10,7 +10,8 @@ namespace Aiursoft.NugetNinja.UselessPackageReferencePlugin.Services;
 public class UselessPackageReferenceDetector(
     ILogger<UselessPackageReferenceDetector> logger,
     NugetService nugetService,
-    ProjectsEnumerator enumerator)
+    ProjectsEnumerator enumerator,
+    TransitiveSecurityOverrideService securityOverrideService)
     : IActionDetector
 {
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
@@ -58,10 +59,46 @@ public class UselessPackageReferenceDetector(
             // A direct reference is not redundant when it pins a package above the version
             // that would otherwise be restored transitively. Removing it in that case can
             // reintroduce vulnerabilities fixed by the newer direct version.
-            if (accessiblePackagesForThisProject.Any(pa =>
-                    string.Equals(pa.Name, directReference.Name, StringComparison.OrdinalIgnoreCase) &&
-                    pa.Version >= directReference.Version))
-                yield return new UselessPackageReference(context, directReference);
+            var replacement = accessiblePackagesForThisProject
+                .Where(pa => string.Equals(
+                    pa.Name,
+                    directReference.Name,
+                    StringComparison.OrdinalIgnoreCase))
+                .Where(pa => pa.Version >= directReference.Version)
+                .OrderByDescending(pa => pa.Version)
+                .FirstOrDefault();
+            if (replacement == null)
+            {
+                continue;
+            }
+
+            // Equal package identities produce the same dependency subtree, so removing
+            // the direct edge cannot reintroduce a vulnerability. A higher replacement
+            // (especially a new major) is audited before the override is retired.
+            if (replacement.Version > directReference.Version)
+            {
+                try
+                {
+                    var vulnerabilities = await securityOverrideService
+                        .GetKnownVulnerabilityIdsInClosureAsync(replacement);
+                    if (vulnerabilities.Count > 0)
+                    {
+                        logger.LogWarning(
+                            "Keeping direct reference {Package} because the replacement dependency tree still has known vulnerabilities.",
+                            directReference.Name);
+                        continue;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception,
+                        "Keeping direct reference {Package} because the replacement dependency tree could not be audited.",
+                        directReference.Name);
+                    continue;
+                }
+            }
+
+            yield return new UselessPackageReference(context, directReference);
         }
     }
 }

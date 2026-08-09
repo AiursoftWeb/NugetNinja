@@ -17,7 +17,7 @@ public class NugetService
 {
     private const string DefaultNugetServer = "https://api.nuget.org/v3/index.json";
     private const string NuGetSearchUrl = "https://azuresearch-ea.nuget.org/query";
-    private const string NuGetVulnerabilityBaseUrl = "https://api.nuget.org/v3/vulnerabilities/vulnerability.base.json";
+    private const string NuGetVulnerabilityIndexUrl = "https://api.nuget.org/v3/vulnerabilities/index.json";
     private readonly string _customNugetServer = DefaultNugetServer;
     private readonly string _patToken;
     private readonly bool _allowPreview;
@@ -109,6 +109,17 @@ public class NugetService
             () => GetPackageDependenciesFromNuget(package));
     }
 
+    /// <summary>
+    /// Gets the known vulnerabilities for an exact package version.
+    /// Unlike <see cref="GetPackageDeprecationInfo"/>, this method deliberately
+    /// propagates feed failures so callers making safety decisions can fail closed.
+    /// </summary>
+    public async Task<IReadOnlyCollection<Vulnerability>> GetKnownVulnerabilities(Package package)
+    {
+        var vulnerabilities = await GetVulnerabilitiesForPackage(package);
+        return vulnerabilities ?? Array.Empty<Vulnerability>();
+    }
+
     private async Task<NugetServerEndPoints> GetApiEndpointFromNuget(string? overrideServer = null)
     {
         var serverRoot = overrideServer ?? _customNugetServer;
@@ -166,7 +177,19 @@ public class NugetService
         try
         {
             var deprecation = await GetDeprecationFromSearch(package);
-            var vulnerabilities = await GetVulnerabilitiesForPackage(package);
+            IReadOnlyCollection<Vulnerability>? vulnerabilities = null;
+            try
+            {
+                vulnerabilities = await GetVulnerabilitiesForPackage(package);
+            }
+            catch (Exception exception)
+            {
+                // Deprecation analysis remains useful when the audit feed is down.
+                // Safety-sensitive callers use GetKnownVulnerabilities, which propagates
+                // this failure and therefore fails closed.
+                _logger.LogWarning(exception,
+                    "Failed to fetch vulnerability info for '{Package}' from nuget.org", package);
+            }
 
             return new CatalogInformation
             {
@@ -196,16 +219,28 @@ public class NugetService
     {
         if (_vulnerabilityCache == null)
         {
-            try
+            var index = await HttpGetJson<List<VulnerabilityIndexEntry>>(
+                NuGetVulnerabilityIndexUrl, string.Empty);
+            var vulnerabilityCache = new Dictionary<string, List<VulnerabilityBaseEntry>>(
+                StringComparer.OrdinalIgnoreCase);
+
+            foreach (var page in index.Where(page => !string.IsNullOrWhiteSpace(page.Id)))
             {
-                _vulnerabilityCache = await HttpGetJson<Dictionary<string, List<VulnerabilityBaseEntry>>>(
-                    NuGetVulnerabilityBaseUrl, string.Empty);
+                var pageEntries = await HttpGetJson<Dictionary<string, List<VulnerabilityBaseEntry>>>(
+                    page.Id, string.Empty);
+                foreach (var (packageName, packageEntries) in pageEntries)
+                {
+                    if (!vulnerabilityCache.TryGetValue(packageName, out var existingEntries))
+                    {
+                        existingEntries = [];
+                        vulnerabilityCache[packageName] = existingEntries;
+                    }
+
+                    existingEntries.AddRange(packageEntries);
+                }
             }
-            catch (Exception e)
-            {
-                _logger.LogWarning(e, "Failed to fetch vulnerability database from nuget.org");
-                _vulnerabilityCache = new Dictionary<string, List<VulnerabilityBaseEntry>>();
-            }
+
+            _vulnerabilityCache = vulnerabilityCache;
         }
 
         var key = package.Name.ToLower();
