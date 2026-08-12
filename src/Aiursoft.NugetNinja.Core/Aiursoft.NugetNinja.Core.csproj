@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>1.0.15</Version>
+    <Version>1.0.16</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Aiursoft.NugetNinja.Core</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.Core</RootNamespace>
@@ -23,7 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Aiursoft.Canon" Version="10.0.12" />
-    <PackageReference Include="Aiursoft.CommandFramework" Version="10.0.13" />
+    <PackageReference Include="Aiursoft.CommandFramework" Version="10.0.14" />
     <PackageReference Include="Aiursoft.CSTools" Version="10.0.5" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />
