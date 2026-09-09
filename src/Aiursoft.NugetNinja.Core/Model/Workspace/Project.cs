@@ -24,7 +24,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
     ///   Microsoft.NET.Sdk.Worker
     ///   Microsoft.NET.Sdk.WindowsDesktop
     /// </summary>
-    public string? Sdk { get; init; } = doc.ChildNodes["Project"].Attributes[nameof(Sdk)].Value;
+    public string? Sdk { get; init; } = doc.ChildNodes["Project"]?.Attributes[nameof(Sdk)]?.Value;
 
     public List<Project> ProjectReferences { get; init; } = [];
 
@@ -70,15 +70,17 @@ public class Project(string pathOnDisk, HtmlNode doc)
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
             .Descendants("PackageReference")
-            .FirstOrDefault(d => d.Attributes["Include"].Value == refName);
+            .FirstOrDefault(d => d.Attributes["Include"]?.Value == refName);
 
         if (node == null)
             throw new InvalidOperationException(
                 $"Could not find PackageReference '{refName}' in project '{this}'.");
 
-        if (!string.IsNullOrWhiteSpace(node.Attributes["Version"].Value))
+        var versionAttribute = node.Attributes["Version"]
+                               ?? throw new InvalidDataException($"PackageReference '{refName}' has no Version attribute in project '{this}'.");
+        if (!string.IsNullOrWhiteSpace(versionAttribute.Value))
         {
-            node.Attributes["Version"].Value = newVersion.ToString();
+            versionAttribute.Value = newVersion.ToString();
             await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
         }
     }
@@ -95,14 +97,16 @@ public class Project(string pathOnDisk, HtmlNode doc)
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
             .Descendants("PackageReference")
-            .FirstOrDefault(d => d.Attributes["Include"].Value == refName);
+            .FirstOrDefault(d => d.Attributes["Include"]?.Value == refName);
 
         if (node == null)
             throw new InvalidOperationException(
                 $"Could not find PackageReference '{refName}' in project '{this}'.");
 
-        node.Attributes["Include"].Value = newPackage.Name;
-        node.Attributes["Version"].Value = newPackage.Version.ToString();
+        var versionAttribute = node.Attributes["Version"]
+                               ?? throw new InvalidDataException($"PackageReference '{refName}' has no Version attribute in project '{this}'.");
+        node.SetAttributeValue("Include", newPackage.Name);
+        versionAttribute.Value = newPackage.Version.ToString();
         await new CsprojWriter().SaveCsprojToDisk(doc, PathOnDisk);
     }
 
@@ -118,7 +122,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
         doc.LoadHtml(csprojContent);
         var node = doc.DocumentNode
             .Descendants("PackageReference")
-            .FirstOrDefault(d => d.Attributes["Include"].Value == refName);
+            .FirstOrDefault(d => d.Attributes["Include"]?.Value == refName);
 
         if (node == null)
             throw new InvalidOperationException(
@@ -142,7 +146,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
         var node = doc.DocumentNode
             .Descendants("ProjectReference")
             .FirstOrDefault(p =>
-                Equals(absPath, StringExtensions.GetAbsolutePath(contextPath, p.Attributes["Include"].Value)));
+                Equals(absPath, StringExtensions.GetAbsolutePath(contextPath, p.GetRequiredAttributeValue("Include"))));
 
         if (node == null)
             throw new InvalidOperationException(
@@ -179,9 +183,9 @@ public class Project(string pathOnDisk, HtmlNode doc)
             }
 
             // Update the first node's value
-            if (firstNode.HasChildNodes)
+            if (firstNode.FirstChild is { } firstChild)
             {
-                firstNode.FirstChild.InnerHtml = correctValue;
+                firstChild.InnerHtml = correctValue;
             }
             else
             {
@@ -232,8 +236,9 @@ public class Project(string pathOnDisk, HtmlNode doc)
         if (itemGroup == null)
         {
             itemGroup = doc.CreateElement("ItemGroup");
-            doc.DocumentNode.FirstChild.AppendChild(itemGroup);
-            doc.DocumentNode.FirstChild.AppendChild(newline);
+            var projectElement = doc.GetProjectElement();
+            projectElement.AppendChild(itemGroup);
+            projectElement.AppendChild(newline);
         }
 
         var none = doc.CreateElement("None");
@@ -265,9 +270,9 @@ public class Project(string pathOnDisk, HtmlNode doc)
         {
             foreach (var existingNode in existingNodes)
             {
-                if (existingNode.HasChildNodes)
+                if (existingNode.FirstChild is { } firstChild)
                 {
-                    existingNode.FirstChild.InnerHtml = propertyValue;
+                    firstChild.InnerHtml = propertyValue;
                 }
                 else
                 {
@@ -312,8 +317,9 @@ public class Project(string pathOnDisk, HtmlNode doc)
         if (itemGroup == null)
         {
             itemGroup = doc.CreateElement("ItemGroup");
-            doc.DocumentNode.FirstChild.AppendChild(itemGroup);
-            doc.DocumentNode.FirstChild.AppendChild(newline);
+            var projectElement = doc.GetProjectElement();
+            projectElement.AppendChild(itemGroup);
+            projectElement.AppendChild(newline);
         }
 
         var reference = doc.CreateElement("FrameworkReference");
@@ -328,7 +334,8 @@ public class Project(string pathOnDisk, HtmlNode doc)
 
     private async Task RemoveNodeAndSaveToDisk(HtmlNode node, HtmlDocument doc)
     {
-        var parent = node.ParentNode;
+        var parent = node.ParentNode
+                     ?? throw new InvalidDataException($"Cannot remove detached element '{node.Name}'.");
         if (!parent.Descendants(0).Where(n => n.NodeType == HtmlNodeType.Element).Except(new[] { node }).Any())
             parent.Remove();
         else
@@ -348,52 +355,52 @@ public class Project(string pathOnDisk, HtmlNode doc)
     ///   Exe
     ///   WinExe
     /// </summary>
-    public string? OutputType { get; init; } = doc.Descendants(nameof(OutputType)).FirstOrDefault()?.FirstChild.InnerText;
+    public string? OutputType { get; init; } = doc.Descendants(nameof(OutputType)).FirstOrDefault()?.FirstChild?.InnerText;
 
     // ReSharper disable once InconsistentNaming
-    public string? UseWPF { get; init; } = doc.Descendants(nameof(UseWPF)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? UseWindowsForms { get; init; } = doc.Descendants(nameof(UseWindowsForms)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? Version { get; init; } = doc.Descendants(nameof(Version)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? TargetFramework { get; init; } = doc.Descendants(nameof(TargetFramework)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? TargetFrameworks { get; init; } = doc.Descendants(nameof(TargetFrameworks)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? AssemblyName { get; init; } = doc.Descendants(nameof(AssemblyName)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? RootNamespace { get; init; } = doc.Descendants(nameof(RootNamespace)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? IsTestProject { get; init; } = doc.Descendants(nameof(IsTestProject)).FirstOrDefault()?.FirstChild.InnerText;
+    public string? UseWPF { get; init; } = doc.Descendants(nameof(UseWPF)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? UseWindowsForms { get; init; } = doc.Descendants(nameof(UseWindowsForms)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? Version { get; init; } = doc.Descendants(nameof(Version)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? TargetFramework { get; init; } = doc.Descendants(nameof(TargetFramework)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? TargetFrameworks { get; init; } = doc.Descendants(nameof(TargetFrameworks)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? AssemblyName { get; init; } = doc.Descendants(nameof(AssemblyName)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? RootNamespace { get; init; } = doc.Descendants(nameof(RootNamespace)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? IsTestProject { get; init; } = doc.Descendants(nameof(IsTestProject)).FirstOrDefault()?.FirstChild?.InnerText;
 
     #endregion
 
     #region Tool
-    public string? IsPackable { get; init; } = doc.Descendants(nameof(IsPackable)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? GeneratePackageOnBuild { get; init; } = doc.Descendants(nameof(GeneratePackageOnBuild)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PackAsTool { get; init; } = doc.Descendants(nameof(PackAsTool)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? ToolCommandName { get; init; } = doc.Descendants(nameof(ToolCommandName)).FirstOrDefault()?.FirstChild.InnerText;
+    public string? IsPackable { get; init; } = doc.Descendants(nameof(IsPackable)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? GeneratePackageOnBuild { get; init; } = doc.Descendants(nameof(GeneratePackageOnBuild)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PackAsTool { get; init; } = doc.Descendants(nameof(PackAsTool)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? ToolCommandName { get; init; } = doc.Descendants(nameof(ToolCommandName)).FirstOrDefault()?.FirstChild?.InnerText;
 
     #endregion
 
     #region Best practice
 
-    public string? ImplicitUsings { get; init; } = doc.Descendants(nameof(ImplicitUsings)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? Nullable { get; init; } = doc.Descendants(nameof(Nullable)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? SelfContained { get; set; } = doc.Descendants(nameof(SelfContained)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PublishTrimmed { get; set; } = doc.Descendants(nameof(PublishTrimmed)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PublishReadyToRun { get; set; } = doc.Descendants(nameof(PublishReadyToRun)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PublishSingleFile { get; set; } = doc.Descendants(nameof(PublishSingleFile)).FirstOrDefault()?.FirstChild.InnerText;
+    public string? ImplicitUsings { get; init; } = doc.Descendants(nameof(ImplicitUsings)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? Nullable { get; init; } = doc.Descendants(nameof(Nullable)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? SelfContained { get; set; } = doc.Descendants(nameof(SelfContained)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PublishTrimmed { get; set; } = doc.Descendants(nameof(PublishTrimmed)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PublishReadyToRun { get; set; } = doc.Descendants(nameof(PublishReadyToRun)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PublishSingleFile { get; set; } = doc.Descendants(nameof(PublishSingleFile)).FirstOrDefault()?.FirstChild?.InnerText;
 
     #endregion
 
     #region Nuget Packaging
 
-    public string? Company { get; init; } = doc.Descendants(nameof(Company)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? Product { get; init; } = doc.Descendants(nameof(Product)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? Authors { get; set; } = doc.Descendants(nameof(Authors)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? Description { get; init; } = doc.Descendants(nameof(Description)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PackageId { get; init; } = doc.Descendants(nameof(PackageId)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PackageTags { get; init; } = doc.Descendants(nameof(PackageTags)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PackageLicenseExpression { get; set; } = doc.Descendants(nameof(PackageLicenseExpression)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PackageProjectUrl { get; set; } = doc.Descendants(nameof(PackageProjectUrl)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? RepositoryType { get; set; } = doc.Descendants(nameof(RepositoryType)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? RepositoryUrl { get; set; } = doc.Descendants(nameof(RepositoryUrl)).FirstOrDefault()?.FirstChild.InnerText;
-    public string? PackageReadmeFile { get; set; } = doc.Descendants(nameof(PackageReadmeFile)).FirstOrDefault()?.FirstChild.InnerText;
+    public string? Company { get; init; } = doc.Descendants(nameof(Company)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? Product { get; init; } = doc.Descendants(nameof(Product)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? Authors { get; set; } = doc.Descendants(nameof(Authors)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? Description { get; init; } = doc.Descendants(nameof(Description)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PackageId { get; init; } = doc.Descendants(nameof(PackageId)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PackageTags { get; init; } = doc.Descendants(nameof(PackageTags)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PackageLicenseExpression { get; set; } = doc.Descendants(nameof(PackageLicenseExpression)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PackageProjectUrl { get; set; } = doc.Descendants(nameof(PackageProjectUrl)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? RepositoryType { get; set; } = doc.Descendants(nameof(RepositoryType)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? RepositoryUrl { get; set; } = doc.Descendants(nameof(RepositoryUrl)).FirstOrDefault()?.FirstChild?.InnerText;
+    public string? PackageReadmeFile { get; set; } = doc.Descendants(nameof(PackageReadmeFile)).FirstOrDefault()?.FirstChild?.InnerText;
 
     #endregion
 }

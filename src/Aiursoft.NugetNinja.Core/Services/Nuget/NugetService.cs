@@ -315,8 +315,8 @@ public class NugetService
         var packageReferences = doc.DocumentNode
             .Descendants("dependency")
             .Select(p => new Package(
-                p.Attributes["id"].Value,
-                p.Attributes["version"].Value))
+                p.GetRequiredAttributeValue("id"),
+                p.GetRequiredAttributeValue("version")))
             .DistinctBy(p => p.Name)
             .ToArray();
         return packageReferences;

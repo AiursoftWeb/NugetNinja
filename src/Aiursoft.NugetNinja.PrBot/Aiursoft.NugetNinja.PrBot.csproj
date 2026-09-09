@@ -46,7 +46,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.Dotlang.AspNetTranslate" Version="10.0.63" />
+    <PackageReference Include="Aiursoft.Dotlang.AspNetTranslate" Version="10.0.67" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aiursoft.NugetNinja.AllOfficialsPlugin\Aiursoft.NugetNinja.AllOfficialsPlugin.csproj" />

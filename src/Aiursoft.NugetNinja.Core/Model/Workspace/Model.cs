@@ -68,8 +68,8 @@ public class Model
         var packageReferences = doc.DocumentNode
             .Descendants("PackageReference")
             .Select(p => new Package(
-                p.Attributes["Include"].Value,
-                p.Attributes["Version"].Value))
+                p.GetRequiredAttributeValue("Include"),
+                p.GetRequiredAttributeValue("Version")))
             .ToArray();
 
         foreach (var package in packageReferences)
@@ -85,7 +85,7 @@ public class Model
     {
         var projectReferences = doc.DocumentNode
             .Descendants("ProjectReference")
-            .Select(p => p.Attributes["Include"].Value)
+            .Select(p => p.GetRequiredAttributeValue("Include"))
             .Select(p => StringExtensions.GetAbsolutePath(csprojFolder, p))
             .ToArray();
 
@@ -96,7 +96,7 @@ public class Model
     {
         var projectReferences = doc.DocumentNode
             .Descendants("FrameworkReference")
-            .Select(p => p.Attributes["Include"].Value)
+            .Select(p => p.GetRequiredAttributeValue("Include"))
             .ToArray();
 
         return projectReferences;
