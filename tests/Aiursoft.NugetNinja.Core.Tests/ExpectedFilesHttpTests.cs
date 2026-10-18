@@ -94,6 +94,23 @@ public class ExpectedFilesHttpTests
     }
 
     [TestMethod]
+    [DataRow("Date")]
+    [DataRow("If-Modified-Since")]
+    public async Task RepositoryHeaderNamesCannotExposeCredentialsThroughTypedParsers(string header)
+    {
+        using var handler = new FileHandler(headerName: header);
+        using var client = new HttpClient(handler);
+        var detector = new ExpectFilesDetector(client, NullLogger<ExpectFilesDetector>.Instance, client);
+        var model = Workspace();
+        model.NinjaConfig.Http!.Profiles["source"]!.HeadersFromEnv = new Dictionary<string, string>
+        {
+            [header] = SecretVariable
+        };
+        Assert.HasCount(1, await Analyze(detector, model));
+        Assert.AreEqual("first-fixture-value", handler.Headers.Single());
+    }
+
+    [TestMethod]
     public async Task SubsequentAnalysisUsesCurrentCredential()
     {
         Configure();
@@ -238,13 +255,13 @@ public class ExpectedFilesHttpTests
         Assert.AreEqual("config.txt", model.NinjaConfig.Files.Single().Name);
     }
 
-    private sealed class FileHandler(HttpStatusCode status = HttpStatusCode.OK) : HttpMessageHandler
+    private sealed class FileHandler(HttpStatusCode status = HttpStatusCode.OK, string headerName = "X-Source-Key") : HttpMessageHandler
     {
         public List<string?> Headers { get; } = [];
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            Headers.Add(request.Headers.TryGetValues("X-Source-Key", out var values) ? values.Single() : null);
+            Headers.Add(request.Headers.TryGetValues(headerName, out var values) ? values.Single() : null);
             var response = new HttpResponseMessage(status) { Content = new StringContent("expected file") };
             if (status == HttpStatusCode.Found)
             {

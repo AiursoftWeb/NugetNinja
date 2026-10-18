@@ -91,7 +91,9 @@ internal class ExpectedContentDownloader
         using var request = new HttpRequestMessage(HttpMethod.Get, uri);
         foreach (var (header, value) in headers)
         {
-            request.Headers.Add(header, value);
+            // Typed header parsers can include rejected values in exceptions.
+            // Names and newline-free values were already checked without exposing credentials.
+            request.Headers.TryAddWithoutValidation(header, value);
         }
         using var response = await _authenticated.SendAsync(request);
         // This client does not follow redirects. A sign-in page is not expected file content.
