@@ -49,6 +49,8 @@ public class NinjaConfig
 {
     // ReSharper disable once UnusedMember.Global
     public int ConfigVersion { get; set; }
+
+    public List<string> HttpProfiles { get; set; } = [];
     
     // ReSharper disable once CollectionNeverUpdated.Global
     public List<NinjaConfigFile> Files { get; set; } = [];

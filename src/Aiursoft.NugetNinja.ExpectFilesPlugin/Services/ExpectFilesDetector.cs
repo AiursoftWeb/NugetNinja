@@ -5,19 +5,38 @@ using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NugetNinja.ExpectFilesPlugin.Services;
 
-public class ExpectFilesDetector(
-    HttpClient http,
-    ILogger<ExpectFilesDetector> logger) : IActionDetector
+public class ExpectFilesDetector : IActionDetector
 {
+    private static readonly HttpClient DefaultAuthenticatedClient = new(new HttpClientHandler
+    {
+        AllowAutoRedirect = false
+    });
+    private readonly HttpClient _http;
+    private readonly HttpClient _authenticatedHttp;
+    private readonly ILogger<ExpectFilesDetector> _logger;
+
+    public ExpectFilesDetector(HttpClient http, ILogger<ExpectFilesDetector> logger)
+        : this(http, logger, DefaultAuthenticatedClient)
+    {
+    }
+
+    public ExpectFilesDetector(HttpClient http, ILogger<ExpectFilesDetector> logger, HttpClient authenticatedHttp)
+    {
+        _http = http;
+        _logger = logger;
+        _authenticatedHttp = authenticatedHttp;
+    }
+
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
-        logger.LogTrace("Analyzing expected {Count} files...", context.NinjaConfig.Files.Count);
+        var downloader = new ExpectedContentDownloader(_http, _authenticatedHttp, context.NinjaConfig.HttpProfiles);
+        _logger.LogTrace("Analyzing expected {Count} files...", context.NinjaConfig.Files.Count);
 
         foreach (var fileExpected in context.NinjaConfig.Files)
         {
             if (string.IsNullOrWhiteSpace(fileExpected.Name))
             {
-                logger.LogWarning("File expected with empty Name is skipped.");
+                _logger.LogWarning("File expected with empty Name is skipped.");
                 continue;
             }
 
@@ -31,7 +50,7 @@ public class ExpectFilesDetector(
 
             if (matches.Count > 1)
             {
-                logger.LogError("Multiple files matching {ExpectedName} (ignoring case) found in {Directory}.", expectedName, context.RootPath);
+                _logger.LogError("Multiple files matching {ExpectedName} (ignoring case) found in {Directory}.", expectedName, context.RootPath);
                 throw new Exception($"Multiple files matching {expectedName} (ignoring case) found in {context.RootPath}.");
             }
             if (matches.Count == 1)
@@ -41,7 +60,7 @@ public class ExpectFilesDetector(
 
                 if (!isExactName)
                 {
-                    logger.LogInformation("File {ExistingName} found (ignoring case match for {ExpectedName}). Renaming...", existingFile.Name, expectedName);
+                    _logger.LogInformation("File {ExistingName} found (ignoring case match for {ExpectedName}). Renaming...", existingFile.Name, expectedName);
                     yield return new RenameFileAction
                     {
                         SourcePath = existingFile.FullName,
@@ -51,7 +70,7 @@ public class ExpectFilesDetector(
 
                 if (!string.IsNullOrWhiteSpace(fileExpected.ContentUri))
                 {
-                    var expectedContent = await http.GetStringAsync(fileExpected.ContentUri);
+                    var expectedContent = await downloader.GetStringAsync(fileExpected.ContentUri);
                     string actualContent;
                     try
                     {
@@ -59,13 +78,13 @@ public class ExpectFilesDetector(
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "Failed to read file content from {FilePath}", existingFile.FullName);
+                        _logger.LogError(ex, "Failed to read file content from {FilePath}", existingFile.FullName);
                         actualContent = string.Empty;
                     }
 
                     if (actualContent != expectedContent)
                     {
-                        logger.LogInformation("File {ExpectedName} content does not match expected content. Patching...", expectedName);
+                        _logger.LogInformation("File {ExpectedName} content does not match expected content. Patching...", expectedName);
                         yield return new PatchFileAction
                         {
                             FilePath = expectedPath,
@@ -74,7 +93,7 @@ public class ExpectFilesDetector(
                     }
                     else
                     {
-                        logger.LogTrace("File {ExpectedName} content matches expected. No patch needed.", expectedName);
+                        _logger.LogTrace("File {ExpectedName} content matches expected. No patch needed.", expectedName);
                     }
                 }
             }
@@ -82,8 +101,8 @@ public class ExpectFilesDetector(
             {
                 if (!string.IsNullOrWhiteSpace(fileExpected.ContentUri))
                 {
-                    var expectedContent = await http.GetStringAsync(fileExpected.ContentUri);
-                    logger.LogInformation("File {ExpectedName} does not exist. Creating with expected content...", expectedName);
+                    var expectedContent = await downloader.GetStringAsync(fileExpected.ContentUri);
+                    _logger.LogInformation("File {ExpectedName} does not exist. Creating with expected content...", expectedName);
                     yield return new PatchFileAction
                     {
                         FilePath = expectedPath,
@@ -92,7 +111,7 @@ public class ExpectFilesDetector(
                 }
                 else
                 {
-                    logger.LogInformation("File {ExpectedName} does not exist. Creating an empty file...", expectedName);
+                    _logger.LogInformation("File {ExpectedName} does not exist. Creating an empty file...", expectedName);
                     yield return new PatchFileAction
                     {
                         FilePath = expectedPath,
