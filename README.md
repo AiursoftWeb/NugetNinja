@@ -1,6 +1,6 @@
 # Nuget Ninja
 
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/blob/master/LICENSE)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AiursoftWeb/nugetninja/blob/master/LICENSE)
 [![Pipeline stat](https://gitlab.aiursoft.com/aiursoft/nugetninja/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.com/aiursoft/nugetninja/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
 [![NuGet version (Aiursoft.NugetNinja)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja/)
@@ -87,19 +87,19 @@ Here is a sample `ninja.yaml`:
 configVersion: 1
 files:
   - name: .editorconfig
-    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/.editorconfig
+    contentUri: https://raw.githubusercontent.com/AiursoftWeb/tracer/master/.editorconfig
   - name: .gitignore
-    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/.gitignore
+    contentUri: https://raw.githubusercontent.com/AiursoftWeb/tracer/master/.gitignore
   - name: .gitlab-ci.yml
-    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/.gitlab-ci.yml
+    contentUri: https://raw.githubusercontent.com/AiursoftWeb/tracer/master/.gitlab-ci.yml
   - name: LICENSE
-    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/LICENSE
+    contentUri: https://raw.githubusercontent.com/AiursoftWeb/tracer/master/LICENSE
   - name: CODE_OF_CONDUCT.md
-    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/CODE_OF_CONDUCT.md
+    contentUri: https://raw.githubusercontent.com/AiursoftWeb/tracer/master/CODE_OF_CONDUCT.md
   - name: ninja.yaml
-    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/ninja.yaml
+    contentUri: https://raw.githubusercontent.com/AiursoftWeb/tracer/master/ninja.yaml
   - name: nuget.config
-    contentUri: https://gitlab.aiursoft.com/aiursoft/tracer/-/raw/master/nuget.config
+    contentUri: https://raw.githubusercontent.com/AiursoftWeb/tracer/master/nuget.config
   - name: README.md
 ```
 
@@ -179,7 +179,7 @@ docker run -d \
     -e "PrBot__Servers__0__PushEndPoint=https://{0}@github.com" \
     -e "PrBot__Servers__0__ContributionBranch=users/nugetninja/evergreen" \
     -e "MergeBot__Servers__0__Provider=GitLab" \
-    -e "MergeBot__Servers__0__EndPoint=https://gitlab.aiursoft.com" \
+    -e "MergeBot__Servers__0__EndPoint=https://gitlab.example.com" \
     -e "MergeBot__Servers__0__UserName=nuget-ninja" \
     -e "MergeBot__Servers__0__Token=YOUR_GITLAB_TOKEN" \
     hub.aiursoft.com/aiursoft/nugetninja

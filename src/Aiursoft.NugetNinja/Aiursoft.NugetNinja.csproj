@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.55</Version>
+    <Version>10.0.56</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>ninja</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja</RootNamespace>
@@ -23,9 +23,9 @@
     <PackageId>Aiursoft.NugetNinja</PackageId>
     <PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/AiursoftWeb/nugetninja</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</RepositoryUrl>
+    <RepositoryUrl>https://github.com/AiursoftWeb/nugetninja</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
