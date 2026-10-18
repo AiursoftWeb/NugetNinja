@@ -221,33 +221,38 @@ You can also configure PR Bot specific options:
 
 ### Authenticated expected files
 
-Expected files can select optional HTTP profiles without storing credentials in the repository:
+Expected files declare optional HTTP profiles in `ninja.yaml`, without storing credentials:
 
 ```yaml
 configVersion: 1
-httpProfiles:
-  - company-source
+http:
+  profiles:
+    company-source:
+      origin: https://source.example
+      headersFromEnv:
+        X-Source-Key: NINJA_SOURCE_TOKEN
 files:
   - name: .editorconfig
     contentUri: https://source.example/api/files/editorconfig
 ```
 
-Define profiles in the trusted runtime environment using `NINJA_HTTP_PROFILES`:
-
-```json
-{"company-source":{"origin":"https://source.example","headersFromEnv":{"X-Source-Key":"NINJA_SOURCE_TOKEN"}}}
-```
-
-Set `NINJA_SOURCE_TOKEN` to the credential. Profiles match the exact HTTPS origin,
-including the port. Headers apply only to the matching request, and authenticated
-requests reject redirects and unsuccessful responses. Missing profiles or
-credentials fail explicitly. An origin configured in the runtime also requires
-explicit profile selection; it never falls back to anonymous access. Other
-origins retain anonymous download behavior.
+The runtime supplies two plain environment values: `NINJA_SOURCE_TOKEN` contains
+the credential, and `NINJA_SOURCE_TOKEN_ORIGIN=https://source.example` authorizes
+its destination. Every variable referenced by `headersFromEnv` requires its own
+`<VARIABLE>_ORIGIN` binding outside the repository. Request, profile and credential
+origins must match exactly, including the HTTPS port. Editing the YAML cannot
+redirect a credential to another origin. Missing credentials or bindings fail
+before downloading. Authenticated requests reject redirects and HTTP failures;
+other origins and configurations without profiles retain anonymous downloads.
 
 For PR bots, set `PrBot:Servers:0:HttpTokenEnvironmentVariable` (environment form:
-`PrBot__Servers__0__HttpTokenEnvironmentVariable`) to `NINJA_SOURCE_TOKEN` to reuse
-that server's current contribution token. The bot supplies the value after token
-rotation, and restores the previous environment value after processing the server.
-No second token is needed. Use an authenticated file API rather than a web URL
-that redirects to a sign-in page.
+`PrBot__Servers__0__HttpTokenEnvironmentVariable`) to `NINJA_SOURCE_TOKEN`. After
+token rotation, the bot automatically exports the current contribution token and
+its `_ORIGIN` from the configured server endpoint. Both previous environment
+values are restored after processing the server. No second token or structured
+environment value is needed. CLI users supply the same two plain values with
+their own credential when accessing authenticated sources. Use a file API rather
+than a web URL that redirects to a sign-in page.
+
+Legacy `httpProfiles` selections must move to `http.profiles`; JSON environment
+profiles are no longer read. Existing anonymous configurations need no changes.

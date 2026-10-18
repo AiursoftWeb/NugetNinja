@@ -50,7 +50,10 @@ public class NinjaConfig
     // ReSharper disable once UnusedMember.Global
     public int ConfigVersion { get; set; }
 
+    // Retained for binary compatibility; use Http.Profiles for new configuration.
     public List<string> HttpProfiles { get; set; } = [];
+
+    public NinjaHttpConfig? Http { get; set; } = new();
     
     // ReSharper disable once CollectionNeverUpdated.Global
     public List<NinjaConfigFile> Files { get; set; } = [];
@@ -60,4 +63,15 @@ public class NinjaConfigFile
 {
     public string? Name { get; set; }
     public string? ContentUri { get; set; }
+}
+
+public class NinjaHttpConfig
+{
+    public Dictionary<string, NinjaHttpProfile?> Profiles { get; set; } = [];
+}
+
+public class NinjaHttpProfile
+{
+    public string Origin { get; set; } = string.Empty;
+    public Dictionary<string, string> HeadersFromEnv { get; set; } = [];
 }

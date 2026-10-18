@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text.Json;
 using Aiursoft.NugetNinja.Core.Abstracts;
 using WorkspaceModel = Aiursoft.NugetNinja.Core.Model.Workspace.Model;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
@@ -13,39 +12,33 @@ namespace Aiursoft.NugetNinja.Core.Tests;
 public class ExpectedFilesHttpTests
 {
     private const string SecretVariable = "NINJA_HTTP_TEST_SECRET";
-    private string? _previousProfiles;
+    private string? _previousOrigin;
+    private string _profileOrigin = "https://source.example";
     private string? _previousSecret;
     private string _root = null!;
 
     [TestInitialize]
     public void Initialize()
     {
-        _previousProfiles = Environment.GetEnvironmentVariable("NINJA_HTTP_PROFILES");
+        _previousOrigin = Environment.GetEnvironmentVariable(SecretVariable + "_ORIGIN");
         _previousSecret = Environment.GetEnvironmentVariable(SecretVariable);
         _root = Path.Combine(Path.GetTempPath(), "ninja-http-" + Guid.NewGuid());
         Directory.CreateDirectory(_root);
-        Environment.SetEnvironmentVariable("NINJA_HTTP_PROFILES", null);
+        Environment.SetEnvironmentVariable(SecretVariable + "_ORIGIN", "https://source.example");
         Environment.SetEnvironmentVariable(SecretVariable, "first-fixture-value");
     }
 
     [TestCleanup]
     public void Cleanup()
     {
-        Environment.SetEnvironmentVariable("NINJA_HTTP_PROFILES", _previousProfiles);
+        Environment.SetEnvironmentVariable(SecretVariable + "_ORIGIN", _previousOrigin);
         Environment.SetEnvironmentVariable(SecretVariable, _previousSecret);
         Directory.Delete(_root, true);
     }
 
-    private static void Configure(string origin = "https://source.example")
+    private void Configure(string origin = "https://source.example")
     {
-        Environment.SetEnvironmentVariable("NINJA_HTTP_PROFILES", JsonSerializer.Serialize(new
-        {
-            source = new
-            {
-                origin,
-                headersFromEnv = new Dictionary<string, string> { ["X-Source-Key"] = SecretVariable }
-            }
-        }));
+        _profileOrigin = origin;
     }
 
     private WorkspaceModel Workspace(string uri = "https://source.example/files/config", bool selectProfile = true)
@@ -55,7 +48,17 @@ public class ExpectedFilesHttpTests
             RootPath = _root,
             NinjaConfig = new NinjaConfig
             {
-                HttpProfiles = selectProfile ? ["source"] : [],
+                Http = new NinjaHttpConfig
+                {
+                    Profiles = selectProfile ? new Dictionary<string, NinjaHttpProfile?>
+                    {
+                        ["source"] = new()
+                        {
+                            Origin = _profileOrigin,
+                            HeadersFromEnv = new Dictionary<string, string> { ["X-Source-Key"] = SecretVariable }
+                        }
+                    } : []
+                },
                 Files = [new NinjaConfigFile { Name = "config.txt", ContentUri = uri }]
             }
         };
@@ -159,8 +162,27 @@ public class ExpectedFilesHttpTests
     }
 
     [TestMethod]
-    public async Task MissingProfileNeverFallsBackToAnonymous()
+    public async Task LegacyProfileSelectionFailsWithMigrationInstructions()
     {
+        using var handler = new FileHandler();
+        using var client = new HttpClient(handler);
+        var detector = new ExpectFilesDetector(client, NullLogger<ExpectFilesDetector>.Instance, client);
+        var model = Workspace(selectProfile: false);
+        model.NinjaConfig.HttpProfiles = ["source"];
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => Analyze(detector, model));
+        Assert.Contains("http.profiles", error.Message);
+        Assert.IsEmpty(handler.Headers);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("https://other.example")]
+    [DataRow("https://source.example:444")]
+    [DataRow("http://source.example")]
+    [DataRow("https://source.example/path")]
+    public async Task MissingOrDifferentCredentialOriginFailsBeforeDownloading(string? origin)
+    {
+        Environment.SetEnvironmentVariable(SecretVariable + "_ORIGIN", origin);
         using var handler = new FileHandler();
         using var client = new HttpClient(handler);
         var detector = new ExpectFilesDetector(client, NullLogger<ExpectFilesDetector>.Instance, client);
@@ -169,24 +191,14 @@ public class ExpectedFilesHttpTests
     }
 
     [TestMethod]
-    public async Task ProtectedOriginRequiresExplicitProfileSelection()
+    public async Task RepositoryCannotRedirectCredentialByChangingProfileAndUrl()
     {
-        Configure();
+        Configure("https://other.example");
         using var handler = new FileHandler();
         using var client = new HttpClient(handler);
         var detector = new ExpectFilesDetector(client, NullLogger<ExpectFilesDetector>.Instance, client);
-        await Assert.ThrowsAsync<InvalidOperationException>(() => Analyze(detector, Workspace(selectProfile: false)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Analyze(detector, Workspace("https://other.example/file")));
         Assert.IsEmpty(handler.Headers);
-    }
-
-    [TestMethod]
-    public async Task InvalidRuntimeJsonDoesNotExposeConfigurationValues()
-    {
-        Environment.SetEnvironmentVariable("NINJA_HTTP_PROFILES", "{\"private-value-must-not-appear\":");
-        using var client = new HttpClient(new FileHandler());
-        var detector = new ExpectFilesDetector(client, NullLogger<ExpectFilesDetector>.Instance, client);
-        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => Analyze(detector, Workspace()));
-        Assert.DoesNotContain("private-value-must-not-appear", error.ToString());
     }
 
     [TestMethod]
@@ -204,18 +216,25 @@ public class ExpectedFilesHttpTests
     }
 
     [TestMethod]
-    public async Task ExtractorReadsOptionalProfileNames()
+    public async Task ExtractorReadsHttpRulesFromYaml()
     {
         await File.WriteAllTextAsync(Path.Combine(_root, "ninja.yaml"), """
             configVersion: 1
-            httpProfiles:
-              - source
+            http:
+              profiles:
+                source:
+                  origin: https://source.example
+                  headersFromEnv:
+                    X-Source-Key: NINJA_HTTP_TEST_SECRET
             files:
               - name: config.txt
                 contentUri: https://source.example/files/config
             """);
         var model = await new Extractor(NullLogger<Extractor>.Instance).Parse(_root);
-        CollectionAssert.AreEqual(new[] { "source" }, model.NinjaConfig.HttpProfiles);
+        Assert.IsEmpty(model.NinjaConfig.HttpProfiles);
+        var profile = model.NinjaConfig.Http!.Profiles["source"]!;
+        Assert.AreEqual("https://source.example", profile.Origin);
+        Assert.AreEqual(SecretVariable, profile.HeadersFromEnv["X-Source-Key"]);
         Assert.AreEqual("config.txt", model.NinjaConfig.Files.Single().Name);
     }
 
