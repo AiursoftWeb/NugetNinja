@@ -59,10 +59,7 @@ public class TokenStoreService
 
         try
         {
-            // Log the new tokens (double-safety)
-            _logger.LogInformation("Saving new GitLab tokens. Contribute token (partial): {ContributeTokenPartial}, Merge token (partial): {MergeTokenPartial}",
-                tokens.ContributeToken?.Substring(0, Math.Min(tokens.ContributeToken.Length, 10)),
-                tokens.MergeToken?.Substring(0, Math.Min(tokens.MergeToken.Length, 10)));
+            _logger.LogInformation("Saving rotated server tokens.");
 
             await using (var stream = File.Create(tempFilePath))
             {

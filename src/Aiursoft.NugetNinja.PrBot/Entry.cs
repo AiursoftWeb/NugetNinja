@@ -50,7 +50,24 @@ public class Entry(
                 server.IsPrBot);
 
             var serviceProvider = _versionControls.First(v => v.GetName() == server.Provider);
-            await RunServerAsync(server, serviceProvider);
+            var variable = server.HttpTokenEnvironmentVariable;
+            var previousValue = string.IsNullOrWhiteSpace(variable) ? null : Environment.GetEnvironmentVariable(variable);
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(variable))
+                {
+                    // Export the current token after rotation, rather than the stale startup value.
+                    Environment.SetEnvironmentVariable(variable, server.Token);
+                }
+                await RunServerAsync(server, serviceProvider);
+            }
+            finally
+            {
+                if (!string.IsNullOrWhiteSpace(variable))
+                {
+                    Environment.SetEnvironmentVariable(variable, previousValue);
+                }
+            }
         }
     }
 

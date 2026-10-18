@@ -218,3 +218,36 @@ You can also configure PR Bot specific options:
 - `PrBot__OllamaApiKey`: The API key for the localization service.
 - `PrBot__LocalizationConcurrentRequests`: Maximum concurrent requests for localization (default 8).
 - `PrBot__LocalizationTargetLanguages__0`: Target language for localization (e.g. `en-GB`). Use `__0`, `__1` for multiple languages.
+
+### Authenticated expected files
+
+Expected files can select optional HTTP profiles without storing credentials in the repository:
+
+```yaml
+configVersion: 1
+httpProfiles:
+  - company-source
+files:
+  - name: .editorconfig
+    contentUri: https://source.example/api/files/editorconfig
+```
+
+Define profiles in the trusted runtime environment using `NINJA_HTTP_PROFILES`:
+
+```json
+{"company-source":{"origin":"https://source.example","headersFromEnv":{"X-Source-Key":"NINJA_SOURCE_TOKEN"}}}
+```
+
+Set `NINJA_SOURCE_TOKEN` to the credential. Profiles match the exact HTTPS origin,
+including the port. Headers apply only to the matching request, and authenticated
+requests reject redirects and unsuccessful responses. Missing profiles or
+credentials fail explicitly. An origin configured in the runtime also requires
+explicit profile selection; it never falls back to anonymous access. Other
+origins retain anonymous download behavior.
+
+For PR bots, set `PrBot:Servers:0:HttpTokenEnvironmentVariable` (environment form:
+`PrBot__Servers__0__HttpTokenEnvironmentVariable`) to `NINJA_SOURCE_TOKEN` to reuse
+that server's current contribution token. The bot supplies the value after token
+rotation, and restores the previous environment value after processing the server.
+No second token is needed. Use an authenticated file API rather than a web URL
+that redirects to a sign-in page.
