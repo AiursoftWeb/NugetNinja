@@ -1,4 +1,4 @@
-using System.Text.Json;
+using Aiursoft.NugetNinja.Core.Services.Extractor;
 
 namespace Aiursoft.NugetNinja.ExpectFilesPlugin.Services;
 
@@ -7,50 +7,26 @@ internal class ExpectedContentDownloader
     private readonly HttpClient _anonymous;
     private readonly HttpClient _authenticated;
     private readonly Dictionary<string, Dictionary<string, string>> _headers = new(StringComparer.OrdinalIgnoreCase);
-    private readonly HashSet<string> _protectedOrigins = new(StringComparer.OrdinalIgnoreCase);
 
-    public ExpectedContentDownloader(HttpClient anonymous, HttpClient authenticated, IEnumerable<string> selectedProfiles)
+    public ExpectedContentDownloader(HttpClient anonymous, HttpClient authenticated, NinjaConfig config)
     {
         _anonymous = anonymous;
         _authenticated = authenticated;
-        var json = Environment.GetEnvironmentVariable("NINJA_HTTP_PROFILES");
-        Dictionary<string, Profile?> definitions;
-        try
+        if (config.HttpProfiles.Count != 0)
         {
-            definitions = string.IsNullOrWhiteSpace(json)
-                ? []
-                : JsonSerializer.Deserialize<Dictionary<string, Profile?>>(json,
-                    new JsonSerializerOptions(JsonSerializerDefaults.Web))
-                  ?? throw new InvalidOperationException("NINJA_HTTP_PROFILES must contain an object.");
+            throw new InvalidOperationException("Move legacy httpProfiles selections to http.profiles in ninja.yaml.");
         }
-        catch (JsonException)
+        var profiles = config.Http?.Profiles ?? throw new InvalidOperationException("HTTP profiles must contain a mapping.");
+        foreach (var definition in profiles.Values)
         {
-            // Parser exceptions can include configuration values. Do not expose them.
-            throw new InvalidOperationException("NINJA_HTTP_PROFILES contains invalid JSON.");
-        }
-
-        foreach (var definition in definitions.Values)
-        {
-            if (definition == null || !Uri.TryCreate(definition.Origin, UriKind.Absolute, out var origin) ||
-                origin.Scheme != Uri.UriSchemeHttps || origin.AbsolutePath != "/" ||
-                !string.IsNullOrEmpty(origin.Query) || !string.IsNullOrEmpty(origin.Fragment) ||
-                !string.IsNullOrEmpty(origin.UserInfo))
+            if (definition == null)
             {
-                throw new InvalidOperationException("HTTP profiles require an HTTPS origin without a path, query or credentials.");
+                throw new InvalidOperationException("HTTP profiles must define an HTTPS origin and headersFromEnv.");
             }
-            _protectedOrigins.Add(origin.GetLeftPart(UriPartial.Authority));
-        }
-
-        foreach (var name in selectedProfiles.Distinct(StringComparer.Ordinal))
-        {
-            if (!definitions.TryGetValue(name, out var definition) || definition == null)
-            {
-                throw new InvalidOperationException($"HTTP profile '{name}' is not configured in the runtime environment.");
-            }
-            var origin = new Uri(definition.Origin).GetLeftPart(UriPartial.Authority);
+            var origin = ParseOrigin(definition.Origin);
             if (_headers.ContainsKey(origin))
             {
-                throw new InvalidOperationException("Multiple selected HTTP profiles match the same origin.");
+                throw new InvalidOperationException("Multiple HTTP profiles match the same origin.");
             }
 
             var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -60,6 +36,13 @@ internal class ExpectedContentDownloader
                 if (string.IsNullOrWhiteSpace(variable))
                 {
                     throw new InvalidOperationException("HTTP profile headers must name a credential environment variable.");
+                }
+                // The repository cannot authorize a new destination for a runtime credential.
+                var authorizedOrigin = Environment.GetEnvironmentVariable(variable + "_ORIGIN");
+                if (string.IsNullOrWhiteSpace(authorizedOrigin) ||
+                    !string.Equals(origin, ParseOrigin(authorizedOrigin), StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("HTTP profile origin is not authorized by the credential's runtime origin binding.");
                 }
                 var value = Environment.GetEnvironmentVariable(variable);
                 if (string.IsNullOrWhiteSpace(value))
@@ -75,10 +58,22 @@ internal class ExpectedContentDownloader
             }
             if (headers.Count == 0)
             {
-                throw new InvalidOperationException("A selected HTTP profile must define at least one header.");
+                throw new InvalidOperationException("An HTTP profile must define at least one header.");
             }
             _headers.Add(origin, headers);
         }
+    }
+
+    private static string ParseOrigin(string value)
+    {
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var origin) ||
+            origin.Scheme != Uri.UriSchemeHttps || origin.AbsolutePath != "/" ||
+            !string.IsNullOrEmpty(origin.Query) || !string.IsNullOrEmpty(origin.Fragment) ||
+            !string.IsNullOrEmpty(origin.UserInfo))
+        {
+            throw new InvalidOperationException("HTTP credentials require an HTTPS origin without a path, query or credentials.");
+        }
+        return origin.GetLeftPart(UriPartial.Authority);
     }
 
     public async Task<string> GetStringAsync(string contentUri)
@@ -87,10 +82,6 @@ internal class ExpectedContentDownloader
         var origin = uri.GetLeftPart(UriPartial.Authority);
         if (!_headers.TryGetValue(origin, out var headers))
         {
-            if (_protectedOrigins.Contains(origin))
-            {
-                throw new InvalidOperationException("This origin requires an HTTP profile selected in ninja.yaml.");
-            }
             return await _anonymous.GetStringAsync(uri);
         }
         if (!string.IsNullOrEmpty(uri.UserInfo))
@@ -100,17 +91,13 @@ internal class ExpectedContentDownloader
         using var request = new HttpRequestMessage(HttpMethod.Get, uri);
         foreach (var (header, value) in headers)
         {
-            request.Headers.Add(header, value);
+            // Typed header parsers can include rejected values in exceptions.
+            // Names and newline-free values were already checked without exposing credentials.
+            request.Headers.TryAddWithoutValidation(header, value);
         }
         using var response = await _authenticated.SendAsync(request);
         // This client does not follow redirects. A sign-in page is not expected file content.
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync();
-    }
-
-    private class Profile
-    {
-        public string Origin { get; set; } = string.Empty;
-        public Dictionary<string, string> HeadersFromEnv { get; set; } = [];
     }
 }

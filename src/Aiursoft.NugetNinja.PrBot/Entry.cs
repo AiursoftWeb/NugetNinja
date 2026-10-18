@@ -51,12 +51,20 @@ public class Entry(
 
             var serviceProvider = _versionControls.First(v => v.GetName() == server.Provider);
             var variable = server.HttpTokenEnvironmentVariable;
+            var originVariable = variable + "_ORIGIN";
+            var previousOrigin = string.IsNullOrWhiteSpace(variable) ? null : Environment.GetEnvironmentVariable(originVariable);
             var previousValue = string.IsNullOrWhiteSpace(variable) ? null : Environment.GetEnvironmentVariable(variable);
             try
             {
                 if (!string.IsNullOrWhiteSpace(variable))
                 {
                     // Export the current token after rotation, rather than the stale startup value.
+                    var endpoint = new Uri(server.EndPoint, UriKind.Absolute);
+                    if (endpoint.Scheme != Uri.UriSchemeHttps || !string.IsNullOrEmpty(endpoint.UserInfo))
+                    {
+                        throw new InvalidOperationException("HTTP token export requires an HTTPS server endpoint without credentials.");
+                    }
+                    Environment.SetEnvironmentVariable(originVariable, endpoint.GetLeftPart(UriPartial.Authority));
                     Environment.SetEnvironmentVariable(variable, server.Token);
                 }
                 await RunServerAsync(server, serviceProvider);
@@ -66,6 +74,7 @@ public class Entry(
                 if (!string.IsNullOrWhiteSpace(variable))
                 {
                     Environment.SetEnvironmentVariable(variable, previousValue);
+                    Environment.SetEnvironmentVariable(originVariable, previousOrigin);
                 }
             }
         }

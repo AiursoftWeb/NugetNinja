@@ -29,7 +29,7 @@ public class ExpectFilesDetector : IActionDetector
 
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
-        var downloader = new ExpectedContentDownloader(_http, _authenticatedHttp, context.NinjaConfig.HttpProfiles);
+        var downloader = new ExpectedContentDownloader(_http, _authenticatedHttp, context.NinjaConfig);
         _logger.LogTrace("Analyzing expected {Count} files...", context.NinjaConfig.Files.Count);
 
         foreach (var fileExpected in context.NinjaConfig.Files)
