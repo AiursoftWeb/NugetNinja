@@ -9,7 +9,7 @@ public class PrBotOptions
     /// <summary>
     /// Whether to enable automatic localization after NugetNinja processing.
     /// </summary>
-    public bool LocalizationEnabled { get; set; } = false;
+    public bool LocalizationEnabled { get; set; }
 
     /// <summary>
     /// The Ollama API endpoint for localization (e.g., "https://api.deepseek.com/chat/completions").

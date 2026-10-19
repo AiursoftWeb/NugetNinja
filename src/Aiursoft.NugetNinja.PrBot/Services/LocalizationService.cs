@@ -1,6 +1,7 @@
 using Aiursoft.Canon;
 using Aiursoft.Dotlang.AspNetTranslate.Services;
 using Aiursoft.NugetNinja.PrBot.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -11,7 +12,7 @@ namespace Aiursoft.NugetNinja.PrBot.Services;
 /// Detects projects with Resources directories and generates localization files.
 /// </summary>
 public class LocalizationService(
-    TranslateEntry translateEntry,
+    IServiceScopeFactory scopeFactory,
     RetryEngine retryEngine,
     IOptions<PrBotOptions> options,
     ILogger<LocalizationService> logger)
@@ -62,6 +63,11 @@ public class LocalizationService(
         logger.LogInformation("Found {Count} .csproj file(s) to check for localization", csprojFiles.Count);
 
         var localizedCount = 0;
+        var resourceProjectCount = 0;
+        // A canceled translation can leave queued work in TranslateEntry's task pool.
+        // Do not carry that work and its captured token into another repository.
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var translateEntry = scope.ServiceProvider.GetRequiredService<TranslateEntry>();
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(25));
 
         try
@@ -87,6 +93,7 @@ public class LocalizationService(
                     continue;
                 }
 
+                resourceProjectCount++;
                 logger.LogInformation("Resources directory detected for project: {CsprojFile}. Starting localization...",
                     Path.GetFileName(csprojFile));
 
@@ -94,13 +101,20 @@ public class LocalizationService(
                 {
                     await retryEngine.RunWithRetry(async _ =>
                     {
-                        await LocalizeProjectDirectoryAsync(projectDir, cts.Token);
+                        await LocalizeProjectDirectoryAsync(translateEntry, projectDir, cts.Token);
                     }, attempts: 3);
                     localizedCount++;
                 }
                 catch (OperationCanceledException)
                 {
-                    logger.LogWarning("Localization of project {CsprojFile} was canceled due to timeout.", csprojFile);
+                    if (cts.IsCancellationRequested)
+                    {
+                        logger.LogWarning("Localization of project {CsprojFile} reached the repository timeout (25 minutes).", csprojFile);
+                    }
+                    else
+                    {
+                        logger.LogWarning("Localization of project {CsprojFile} was canceled before the repository timeout elapsed.", csprojFile);
+                    }
                     break;
                 }
                 catch (Exception ex)
@@ -112,7 +126,7 @@ public class LocalizationService(
         }
         catch (OperationCanceledException)
         {
-            logger.LogWarning("Localization process was canceled due to timeout.");
+            logger.LogWarning("Localization process was canceled. Repository timeout reached: {TimeoutReached}.", cts.IsCancellationRequested);
         }
 
         if (localizedCount > 0)
@@ -121,11 +135,18 @@ public class LocalizationService(
             return true;
         }
 
-        logger.LogInformation("No projects with Resources directories found for localization");
+        if (resourceProjectCount == 0)
+        {
+            logger.LogInformation("No projects with Resources directories found for localization");
+        }
+        else
+        {
+            logger.LogWarning("No projects completed localization. Found {Count} project(s) with Resources directories.", resourceProjectCount);
+        }
         return false;
     }
 
-    private async Task LocalizeProjectDirectoryAsync(string projectPath, CancellationToken token)
+    private async Task LocalizeProjectDirectoryAsync(TranslateEntry translateEntry, string projectPath, CancellationToken token)
     {
         // Dedup resource keys
         logger.LogInformation("Auto-deduplicating resource keys in: {ProjectPath}...", projectPath);
