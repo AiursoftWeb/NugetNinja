@@ -16,8 +16,14 @@ RUN dotnet tool install --global Aiursoft.NugetNinja          --add-source /app/
      
 RUN /root/.dotnet/tools/ninja --version
 
-RUN echo "/root/.dotnet/tools/ninja-bot"       > /start.sh       && chmod +x /start.sh
-RUN echo "/root/.dotnet/tools/ninja-merge-bot" > /start-merge.sh && chmod +x /start-merge.sh
+# Both bots mutate the shared workspace and must not overlap, including manual runs.
+RUN command -v flock
+RUN printf '%s\n' '#!/bin/sh' \
+    'exec flock --nonblock --conflict-exit-code 0 --verbose /root/.local/share/NugetNinjaWorkspace/.bot.lock /root/.dotnet/tools/ninja-bot "$@"' \
+    > /start.sh && chmod +x /start.sh
+RUN printf '%s\n' '#!/bin/sh' \
+    'exec flock --nonblock --conflict-exit-code 0 --verbose /root/.local/share/NugetNinjaWorkspace/.bot.lock /root/.dotnet/tools/ninja-merge-bot "$@"' \
+    > /start-merge.sh && chmod +x /start-merge.sh
 
 ENV PATH="/root/.dotnet/tools:${PATH}"
 ENV DOTNET_RUNNING_IN_CONTAINER=true
