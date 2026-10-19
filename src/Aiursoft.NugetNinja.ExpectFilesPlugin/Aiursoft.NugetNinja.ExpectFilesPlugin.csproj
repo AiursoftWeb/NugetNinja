@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>1.0.21</Version>
+    <Version>1.0.22</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Aiursoft.NugetNinja.ExpectFilesPlugin</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.ExpectFilesPlugin</RootNamespace>
@@ -16,9 +16,9 @@
     <PackageId>Aiursoft.NugetNinja.ExpectFilesPlugin</PackageId>
     <PackageTags>nuget package dotnet csproj dependencies</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/AiursoftWeb/nugetninja</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/AiursoftWeb/nugetninja.git</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>

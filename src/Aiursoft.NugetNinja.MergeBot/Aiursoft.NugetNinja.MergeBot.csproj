@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.70</Version>
+    <Version>10.0.71</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>ninja-merge-bot</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.MergeBot</RootNamespace>
@@ -23,9 +23,9 @@
     <PackageId>Aiursoft.NugetNinja.MergeBot</PackageId>
     <PackageTags>cli nuget dotnet csproj dependencies</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/AiursoftWeb/nugetninja</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nugetninja</RepositoryUrl>
+    <RepositoryUrl>https://github.com/AiursoftWeb/nugetninja</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
