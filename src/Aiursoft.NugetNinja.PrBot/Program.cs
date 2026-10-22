@@ -41,7 +41,8 @@ static IHostBuilder CreateHostBuilder(string[] args)
             {
                 options.IncludeScopes = false;
                 options.SingleLine = true;
-                options.TimestampFormat = "mm:ss ";
+                options.UseUtcTimestamp = true;
+                options.TimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.fff'Z' ";
             });
         })
         .ConfigureServices((context, services) =>
