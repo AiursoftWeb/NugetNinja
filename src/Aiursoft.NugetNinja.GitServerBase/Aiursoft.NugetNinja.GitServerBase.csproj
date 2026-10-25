@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>10.0.57</Version>
+    <Version>10.0.58</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Aiursoft.NugetNinja.GitServerBase</AssemblyName>
     <RootNamespace>Aiursoft.NugetNinja.GitServerBase</RootNamespace>
@@ -24,7 +24,7 @@
   <ItemGroup>
     <PackageReference Include="Aiursoft.GitRunner" Version="10.0.42" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.13" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.14" />
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
 </Project>
