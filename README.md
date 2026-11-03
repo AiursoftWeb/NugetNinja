@@ -1,8 +1,8 @@
 # Nuget Ninja
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AiursoftWeb/nugetninja/blob/master/LICENSE)
-[![Pipeline stat](https://gitlab.aiursoft.com/aiursoft/nugetninja/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
-[![Test Coverage](https://gitlab.aiursoft.com/aiursoft/nugetninja/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
+[![Pipeline stat](https://badge-proxy.aiursoft.com/aiursoft/nugetninja/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
+[![Test Coverage](https://badge-proxy.aiursoft.com/aiursoft/nugetninja/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
 [![S360 compliance](https://s360.aiursoft.com/badge.svg?project=aiursoft%2Fnugetninja)](https://s360.aiursoft.com/SupplyChain?tab=projects&project=aiursoft%2Fnugetninja&scope=baseline&ecosystem=all)
 [![NuGet version (Aiursoft.NugetNinja)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja/)
 [![NuGet version (Aiursoft.NugetNinja.PrBot)](https://img.shields.io/nuget/v/Aiursoft.NugetNinja.PrBot.svg)](https://www.nuget.org/packages/Aiursoft.NugetNinja.PrBot/)
