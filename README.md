@@ -59,6 +59,11 @@ Commands:
 
 ```
 
+### npm packages
+
+Opt in to [compatible npm updates](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/blob/master/docs/npm-updates.md) through `ninja.yaml`.
+The existing `upgrade-pkg`, `all` and PR bot workflows update the manifest and lockfile together.
+
 ### Transitive security overrides
 
 When a direct package reference raises a lower transitive dependency tree above a
