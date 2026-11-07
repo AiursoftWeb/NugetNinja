@@ -465,6 +465,7 @@ public class PluginDetectorTests
         services.AddTransient<NugetService>();
         services.AddTransient<ProjectsEnumerator>();
         services.AddTransient<TransitiveSecurityOverrideService>();
+        services.AddTransient<NpmPackageUpgradeDetector>();
         services.AddTransient<PackageReferenceUpgradeDetector>();
         return services.BuildServiceProvider();
     }

@@ -11,6 +11,7 @@ public class StartUp : IStartUp
     public void ConfigureServices(IServiceCollection services)
     {
         services.TryAddTransient<TransitiveSecurityOverrideService>();
+        services.AddTransient<NpmPackageUpgradeDetector>();
         services.AddTransient<PackageReferenceUpgradeDetector>();
     }
 }

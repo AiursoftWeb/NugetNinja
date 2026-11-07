@@ -10,7 +10,8 @@ namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 public class PackageReferenceUpgradeDetector(
     ILogger<PackageReferenceUpgradeDetector> logger,
     NugetService nugetService,
-    TransitiveSecurityOverrideService securityOverrideService)
+    TransitiveSecurityOverrideService securityOverrideService,
+    NpmPackageUpgradeDetector npmPackageUpgradeDetector)
     : IActionDetector
 {
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
@@ -50,6 +51,11 @@ public class PackageReferenceUpgradeDetector(
             }
 
             if (package.Version < latest) yield return new PossiblePackageUpgrade(project, package, latest);
+        }
+
+        await foreach (var action in npmPackageUpgradeDetector.AnalyzeAsync(context))
+        {
+            yield return action;
         }
     }
 }

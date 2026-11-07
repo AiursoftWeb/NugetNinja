@@ -1,0 +1,54 @@
+using Aiursoft.NugetNinja.Core.Services.Extractor;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
+using WorkspaceModel = Aiursoft.NugetNinja.Core.Model.Workspace.Model;
+
+namespace Aiursoft.NugetNinja.Core.Tests;
+
+[TestClass]
+public class NpmUpdateTests
+{
+    [TestMethod]
+    [DataRow("1.2.3", "1.2.4", true)]
+    [DataRow("1.2.3", "1.9.0", true)]
+    [DataRow("1.2.3", "2.0.0", false)]
+    [DataRow("1.2.3", "1.2.2", false)]
+    [DataRow("0.4.1", "0.4.9", true)]
+    [DataRow("0.4.1", "0.5.0", false)]
+    [DataRow("0.4.1", "1.0.0", false)]
+    [DataRow("0.0.1", "0.0.2", true)]
+    [DataRow("0.0.1", "0.1.0", false)]
+    public void CompatibleUpdatesNeverCrossTheApprovedLine(string current, string candidate, bool allowed)
+    {
+        Assert.AreEqual(allowed, NpmVersion.Parse(current).Allows(NpmVersion.Parse(candidate)));
+    }
+
+    [TestMethod]
+    [DataRow("1.2.3", ">=1.2.3 <2.0.0")]
+    [DataRow("0.4.1", ">=0.4.1 <0.5.0")]
+    [DataRow("0.0.1", ">=0.0.1 <0.1.0")]
+    public void NpmReceivesAnExplicitLowerAndUpperBound(string version, string range)
+    {
+        Assert.AreEqual(range, NpmVersion.Parse(version).UpdateRange);
+    }
+
+    [TestMethod]
+    [DataRow("latest")]
+    [DataRow("1.*")]
+    [DataRow("1.2.3-beta.1")]
+    [DataRow("file:../local-package")]
+    [DataRow("npm:other@1.2.3")]
+    public void UnsupportedVersionsCannotSilentlyExpandTheUpdateRange(string version)
+    {
+        Assert.ThrowsExactly<NotSupportedException>(() => NpmVersion.Parse(version));
+    }
+
+    [TestMethod]
+    public async Task ExistingRepositoriesDoNotInvokeNpmWithoutOptIn()
+    {
+        var detector = new NpmPackageUpgradeDetector();
+        var model = new WorkspaceModel { RootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()) };
+        Assert.AreEqual(0, (await detector.AnalyzeAsync(model).ToListAsync()).Count);
+        model.NinjaConfig.Npm = new NinjaNpmConfig { UpdateDependencies = false };
+        Assert.AreEqual(0, (await detector.AnalyzeAsync(model).ToListAsync()).Count);
+    }
+}

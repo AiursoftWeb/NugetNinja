@@ -54,9 +54,16 @@ public class NinjaConfig
     public List<string> HttpProfiles { get; set; } = [];
 
     public NinjaHttpConfig? Http { get; set; } = new();
+
+    public NinjaNpmConfig? Npm { get; set; }
     
     // ReSharper disable once CollectionNeverUpdated.Global
     public List<NinjaConfigFile> Files { get; set; } = [];
+}
+
+public class NinjaNpmConfig
+{
+    public bool UpdateDependencies { get; set; }
 }
 
 public class NinjaConfigFile
