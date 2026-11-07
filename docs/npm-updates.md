@@ -29,6 +29,14 @@ not increment it. Builds, tests, review and publishing remain the existing CI jo
 Valid locked transitive versions are retained unless npm resolution needs to change them;
 this is a direct-dependency updater, not a recursive vulnerability remediation command.
 
+For packages in separate repositories, the dependency must first be published and
+visible in the configured registry. A subsequent bot run updates the consumer's
+declaration and lockfile, including any newly required transitive versions, and
+increments the consumer's patch version once. This is eventual propagation through
+normal PRs and CI, not a simultaneous release of every dependent repository.
+Stale registry metadata must never cause a downgrade: if no candidate satisfies the
+installed version floor, resolution fails without changing the consumer's files.
+
 The generated lockfile uses npm-style JSON formatting. Exclude `package-lock.json`
 from source-only formatter checks; keep validating it with `npm ci`.
 

@@ -88,6 +88,49 @@ public class NpmUpgradeIntegrationTests
         CollectionAssert.AreEqual(changed, await fixture.ReadFilesAsync());
     }
 
+    [TestMethod]
+    public async Task DependencyReleasesUpdateConsumerAndItsTransitiveLockOncePerRelease()
+    {
+        await using var fixture = new RegistryFixture();
+        fixture.IncludeTransitive = true;
+        await fixture.CreateLockAsync(3);
+        foreach (var patch in new[] { 1, 2 })
+        {
+            fixture.SetAvailableVersions("stable", $"1.0.{patch}");
+            fixture.SetAvailableVersions("leaf", $"1.{patch}.0");
+            var before = await fixture.ReadFilesAsync();
+            var actions = await new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model).ToListAsync();
+            Assert.HasCount(1, actions);
+            CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync());
+            await actions.Single().TakeActionAsync();
+            var files = await fixture.ReadFilesAsync();
+            var manifest = JsonNode.Parse(files[0])!;
+            var packageLock = JsonNode.Parse(files[1])!;
+            Assert.AreEqual($"1.0.{patch}", manifest["version"]!.GetValue<string>());
+            Assert.AreEqual($"1.0.{patch}", manifest["dependencies"]!["stable"]!.GetValue<string>());
+            Assert.AreEqual($"1.0.{patch}", packageLock["packages"]!["node_modules/stable"]!["version"]!.GetValue<string>());
+            Assert.AreEqual($"1.{patch}.0", packageLock["packages"]!["node_modules/leaf"]!["version"]!.GetValue<string>());
+            Assert.HasCount(0, await new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model).ToListAsync());
+            CollectionAssert.AreEqual(files, await fixture.ReadFilesAsync());
+        }
+    }
+
+    [TestMethod]
+    public async Task StaleRegistryCannotDowngradeAnAlreadyUpdatedConsumer()
+    {
+        await using var fixture = new RegistryFixture();
+        await fixture.CreateLockAsync(3);
+        fixture.PublishUpdates = true;
+        var actions = await new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model).ToListAsync();
+        await actions.Single().TakeActionAsync();
+        var before = await fixture.ReadFilesAsync();
+        fixture.PublishUpdates = false;
+        var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () =>
+            await new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model).ToListAsync());
+        StringAssert.Contains(exception.Message, "npm dependency resolution failed");
+        CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync());
+    }
+
     // A local metadata-only registry keeps these native npm regressions independent of public releases.
     private sealed class RegistryFixture : IAsyncDisposable
     {
@@ -123,6 +166,8 @@ public class NpmUpgradeIntegrationTests
             _origin = $"http://127.0.0.1:{((IPEndPoint)_listener.LocalEndpoint).Port}";
             _server = ServeAsync();
         }
+
+        public void SetAvailableVersions(string name, params string[] versions) => _versions[name] = versions;
 
         public async Task CreateLockAsync(int lockVersion)
         {
@@ -196,7 +241,7 @@ public class NpmUpgradeIntegrationTests
                                 ["dist"] = new JsonObject { ["tarball"] = $"{_origin}/tarballs/{name.Replace('/', '-')}-{version}.tgz", ["shasum"] = new string('a', 40) }
                             };
                             if (IncludeTransitive && name == "stable")
-                                entry["dependencies"] = new JsonObject { ["leaf"] = "^1.0.0" };
+                                entry["dependencies"] = new JsonObject { ["leaf"] = "^" + _versions["leaf"][0] };
                             if (Failure == "peer-conflict" && name == "stable" && version == "1.2.0")
                                 entry["peerDependencies"] = new JsonObject { ["missing-peer"] = "^9.0.0" };
                             versions[version] = entry;
