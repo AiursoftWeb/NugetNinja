@@ -26,6 +26,12 @@ failures leave the original files unchanged. Candidate versions are checked agai
 before creating a change. The manifest and lockfile are updated together; changed
 dependency declarations or a changed lockfile increment the package's patch version once. A second unchanged run does
 not increment it. Builds, tests, review and publishing remain the existing CI jobs.
+Valid locked transitive versions are retained unless npm resolution needs to change them;
+this is a direct-dependency updater, not a recursive vulnerability remediation command.
 
 The generated lockfile uses npm-style JSON formatting. Exclude `package-lock.json`
 from source-only formatter checks; keep validating it with `npm ci`.
+
+The existing `dotnet test` suite exercises native npm against a local metadata-only
+registry, including lockfile formats 2/3, compatible resolution, idempotence and
+failure recovery. Node.js and npm must also be on PATH when running these tests.
