@@ -131,6 +131,166 @@ public class NpmUpgradeIntegrationTests
         CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync());
     }
 
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public async Task MultipleNestedPackagesResolveIndependentlyAndConvergeWithoutPublishingVersions(bool versionless)
+    {
+        var root = Directory.CreateTempSubdirectory("ninja-web-test-").FullName;
+        await using var first = new RegistryFixture();
+        await using var second = new RegistryFixture();
+        try
+        {
+            await first.CreateLockAsync(3);
+            await second.CreateLockAsync(2);
+            first.MoveTo(Path.Combine(root, "src", "First", "wwwroot"));
+            second.MoveTo(Path.Combine(root, "src", "Second", "wwwroot"));
+            if (versionless)
+            {
+                var manifest = JsonNode.Parse(await File.ReadAllTextAsync(first.ManifestPath))!.AsObject();
+                manifest.Remove("version");
+                manifest["private"] = true;
+                await File.WriteAllTextAsync(first.ManifestPath, manifest.ToJsonString());
+                var packageLock = JsonNode.Parse(await File.ReadAllTextAsync(first.LockPath))!.AsObject();
+                packageLock.Remove("version");
+                packageLock["packages"]![""]!.AsObject().Remove("version");
+                await File.WriteAllTextAsync(first.LockPath, packageLock.ToJsonString());
+            }
+            first.PublishUpdates = second.PublishUpdates = true;
+            second.SetAvailableVersions("stable", "1.0.0", "1.4.0", "2.0.0");
+            var model = first.Model;
+            model.RootPath = root;
+            var actions = await new NpmPackageUpgradeDetector().AnalyzeAsync(model).ToListAsync();
+            Assert.HasCount(2, actions);
+            foreach (var action in actions) await action.TakeActionAsync();
+            Assert.AreEqual("1.2.0", JsonNode.Parse((await first.ReadFilesAsync())[0])!["dependencies"]!["stable"]!.GetValue<string>());
+            Assert.AreEqual("1.4.0", JsonNode.Parse((await second.ReadFilesAsync())[0])!["dependencies"]!["stable"]!.GetValue<string>());
+            foreach (var fixture in new[] { first, second })
+            {
+                var files = await fixture.ReadFilesAsync();
+                var expectedVersion = fixture == first && versionless ? null : "1.0.0";
+                Assert.AreEqual(expectedVersion, JsonNode.Parse(files[0])!["version"]?.GetValue<string>());
+                Assert.AreEqual(expectedVersion, JsonNode.Parse(files[1])!["version"]?.GetValue<string>());
+                Assert.AreEqual(0, fixture.TarballRequests);
+            }
+            Assert.HasCount(0, await new NpmPackageUpgradeDetector().AnalyzeAsync(model).ToListAsync());
+        }
+        finally
+        {
+            // Fixtures remove their individual package directories after the test.
+            Directory.Delete(root, true);
+        }
+    }
+
+    [TestMethod]
+    public async Task RootAndNestedPackagesKeepDistinctVersionAndProjectOwnership()
+    {
+        await using var root = new RegistryFixture();
+        await using var nested = new RegistryFixture();
+        await root.CreateLockAsync(3);
+        await nested.CreateLockAsync(3);
+        nested.MoveTo(Path.Combine(root.DirectoryPath, "src", "Web", "wwwroot"));
+        root.PublishUpdates = nested.PublishUpdates = true;
+        var model = root.Model;
+        var project = new Aiursoft.NugetNinja.Core.Model.Workspace.Project(
+            Path.Combine(root.DirectoryPath, "src", "Web", "Web.csproj"), new HtmlAgilityPack.HtmlDocument().DocumentNode);
+        model.AllProjects.Add(project);
+        var actions = await new NpmPackageUpgradeDetector().AnalyzeAsync(model).ToListAsync();
+        Assert.HasCount(2, actions);
+        Assert.IsNull(actions[0].SourceProject);
+        Assert.AreSame(project, actions[1].SourceProject);
+        foreach (var action in actions) await action.TakeActionAsync();
+        Assert.AreEqual("1.0.1", JsonNode.Parse((await root.ReadFilesAsync())[0])!["version"]!.GetValue<string>());
+        Assert.AreEqual("1.0.0", JsonNode.Parse((await nested.ReadFilesAsync())[0])!["version"]!.GetValue<string>());
+    }
+
+    [TestMethod]
+    public async Task NestedPackageWithoutConfigUsesRepositoryRegistry()
+    {
+        await using var root = new RegistryFixture();
+        await using var nested = new RegistryFixture();
+        await root.CreateLockAsync(3);
+        await nested.CreateLockAsync(3);
+        nested.MoveTo(Path.Combine(root.DirectoryPath, "src", "Web", "wwwroot"));
+        File.Delete(Path.Combine(nested.DirectoryPath, ".npmrc"));
+        root.PublishUpdates = true;
+        nested.PublishUpdates = true;
+        nested.SetAvailableVersions("stable", "1.0.0", "1.4.0");
+        var actions = await new NpmPackageUpgradeDetector().AnalyzeAsync(root.Model).ToListAsync();
+        foreach (var action in actions) await action.TakeActionAsync();
+        var manifest = JsonNode.Parse((await nested.ReadFilesAsync())[0])!;
+        Assert.AreEqual("1.2.0", manifest["dependencies"]!["stable"]!.GetValue<string>());
+    }
+
+    [TestMethod]
+    public async Task AnInvalidLaterPackageDoesNotExposePartialActions()
+    {
+        await using var fixture = new RegistryFixture();
+        await fixture.CreateLockAsync(3);
+        fixture.PublishUpdates = true;
+        var before = await fixture.ReadFilesAsync();
+        var bad = Path.Combine(fixture.DirectoryPath, "src", "Bad", "wwwroot");
+        Directory.CreateDirectory(bad);
+        await File.WriteAllTextAsync(Path.Combine(bad, "package.json"), "{}");
+        var count = 0;
+        var exception = await Assert.ThrowsExactlyAsync<InvalidDataException>(async () =>
+        {
+            await foreach (var action in new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model))
+            {
+                count++;
+                await action.TakeActionAsync();
+            }
+        });
+        Assert.AreEqual(0, count);
+        StringAssert.Contains(exception.Message, "src");
+        StringAssert.Contains(exception.Message, "Bad");
+        CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync());
+    }
+
+    [TestMethod]
+    public async Task GeneratedDirectoriesAndLinksCannotIntroducePackages()
+    {
+        await using var fixture = new RegistryFixture();
+        await using var outside = new RegistryFixture();
+        await fixture.CreateLockAsync(3);
+        foreach (var name in new[] { "node_modules", "bin", "obj", ".git" })
+        {
+            var directory = Path.Combine(fixture.DirectoryPath, name, "broken");
+            Directory.CreateDirectory(directory);
+            await File.WriteAllTextAsync(Path.Combine(directory, "package.json"), "{}");
+        }
+        await File.WriteAllTextAsync(Path.Combine(outside.DirectoryPath, "package.json"), "{}");
+        if (!OperatingSystem.IsWindows())
+            Directory.CreateSymbolicLink(Path.Combine(fixture.DirectoryPath, "linked"), outside.DirectoryPath);
+        fixture.PublishUpdates = true;
+        Assert.HasCount(1, await new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model).ToListAsync());
+    }
+
+    [TestMethod]
+    [DataRow("workspace")]
+    [DataRow("shrinkwrap")]
+    [DataRow("lock-only")]
+    [DataRow("malformed")]
+    [DataRow("null")]
+    public async Task UnsupportedNestedPackagesFailWithTheirPath(string kind)
+    {
+        await using var fixture = new RegistryFixture();
+        await fixture.CreateLockAsync(3);
+        var child = Path.Combine(fixture.DirectoryPath, "src", "Broken", "wwwroot");
+        Directory.CreateDirectory(child);
+        await File.WriteAllTextAsync(Path.Combine(child, "package.json"),
+            kind == "workspace" ? "{\"workspaces\":[]}" : kind == "malformed" ? "broken json" : kind == "null" ? "null" : "{}");
+        await File.WriteAllTextAsync(Path.Combine(child, "package-lock.json"), "{}");
+        if (kind == "shrinkwrap") await File.WriteAllTextAsync(Path.Combine(child, "npm-shrinkwrap.json"), "{}");
+        if (kind == "lock-only") File.Delete(Path.Combine(child, "package.json"));
+        Exception? caught = null;
+        try { await new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model).ToListAsync(); }
+        catch (Exception exception) { caught = exception; }
+        Assert.IsNotNull(caught);
+        StringAssert.Contains(caught.Message, "Broken");
+        StringAssert.Contains(caught.Message, "package.json");
+    }
+
     // A local metadata-only registry keeps these native npm regressions independent of public releases.
     private sealed class RegistryFixture : IAsyncDisposable
     {
@@ -147,7 +307,7 @@ public class NpmUpgradeIntegrationTests
             ["leaf"] = ["1.0.0", "1.1.0", "2.0.0"]
         };
         private readonly string _origin;
-        public string DirectoryPath { get; } = Directory.CreateTempSubdirectory("ninja-npm-test-").FullName;
+        public string DirectoryPath { get; private set; } = Directory.CreateTempSubdirectory("ninja-npm-test-").FullName;
         public string ManifestPath => Path.Combine(DirectoryPath, "package.json");
         public string LockPath => Path.Combine(DirectoryPath, "package-lock.json");
         public bool PublishUpdates { get; set; }
@@ -165,6 +325,15 @@ public class NpmUpgradeIntegrationTests
             _listener.Start();
             _origin = $"http://127.0.0.1:{((IPEndPoint)_listener.LocalEndpoint).Port}";
             _server = ServeAsync();
+        }
+
+        public void MoveTo(string directory)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(directory)!);
+            Directory.Move(DirectoryPath, directory);
+            var npmrc = Path.Combine(directory, ".npmrc");
+            File.WriteAllText(npmrc, File.ReadAllText(npmrc).Replace(DirectoryPath, directory));
+            DirectoryPath = directory;
         }
 
         public void SetAvailableVersions(string name, params string[] versions) => _versions[name] = versions;
@@ -265,7 +434,7 @@ public class NpmUpgradeIntegrationTests
             _stopping = true;
             _listener.Stop();
             await _server;
-            Directory.Delete(DirectoryPath, true);
+            if (Directory.Exists(DirectoryPath)) Directory.Delete(DirectoryPath, true);
         }
     }
 }
