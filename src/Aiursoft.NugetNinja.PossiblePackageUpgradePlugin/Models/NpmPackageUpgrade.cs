@@ -9,9 +9,10 @@ public class NpmPackageUpgrade(
     string originalLock,
     string updatedManifest,
     string updatedLock,
-    string summary) : IAction
+    string summary,
+    Project? sourceProject = null) : IAction
 {
-    public Project? SourceProject => null;
+    public Project? SourceProject => sourceProject;
 
     public string BuildMessage() => summary;
 

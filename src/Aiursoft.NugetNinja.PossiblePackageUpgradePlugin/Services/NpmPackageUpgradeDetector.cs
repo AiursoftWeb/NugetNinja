@@ -25,24 +25,78 @@ public class NpmPackageUpgradeDetector : IActionDetector
     {
         if (context.NinjaConfig.Npm?.UpdateDependencies != true) yield break;
 
-        var manifestPath = Path.Combine(context.RootPath, "package.json");
-        var lockPath = Path.Combine(context.RootPath, "package-lock.json");
-        if (!File.Exists(manifestPath) || !File.Exists(lockPath))
+        var directories = FindPackageDirectories(context.RootPath).ToArray();
+        if (directories.Length == 0)
+            throw new InvalidDataException("npm updates require package.json and package-lock.json files.");
+
+        // Finish analysis of every independent package before exposing any modifying action.
+        var actions = new List<IAction>();
+        foreach (var directory in directories)
         {
-            throw new InvalidDataException("npm updates require root package.json and package-lock.json files.");
+            try
+            {
+                var action = await AnalyzePackageAsync(context, directory);
+                if (action != null) actions.Add(action);
+            }
+            catch (Exception exception) when (exception is InvalidOperationException or IOException or InvalidDataException or
+                                            NotSupportedException or JsonException or TimeoutException)
+            {
+                var message = $"{Path.GetRelativePath(context.RootPath, directory)}/package.json: {exception.Message}";
+                throw exception switch
+                {
+                    NotSupportedException => new NotSupportedException(message, exception),
+                    InvalidOperationException => new InvalidOperationException(message, exception),
+                    TimeoutException => new TimeoutException(message, exception),
+                    _ => new InvalidDataException(message, exception)
+                };
+            }
         }
+
+        foreach (var action in actions) yield return action;
+    }
+
+    private static IEnumerable<string> FindPackageDirectories(string directory)
+    {
+        var manifest = Path.Combine(directory, "package.json");
+        var packageLock = Path.Combine(directory, "package-lock.json");
+        if (File.Exists(manifest) || File.Exists(packageLock) || File.Exists(Path.Combine(directory, "npm-shrinkwrap.json")))
+            yield return directory;
+
+        foreach (var child in new DirectoryInfo(directory).EnumerateDirectories().OrderBy(d => d.Name, StringComparer.Ordinal))
+        {
+            if ((child.Attributes & FileAttributes.ReparsePoint) != 0 ||
+                child.Name is ".git" or "node_modules" or "bin" or "obj") continue;
+            foreach (var package in FindPackageDirectories(child.FullName)) yield return package;
+        }
+    }
+
+    private static async Task<IAction?> AnalyzePackageAsync(Model context, string directory)
+    {
+        var manifestPath = Path.Combine(directory, "package.json");
+        var lockPath = Path.Combine(directory, "package-lock.json");
+        if (File.Exists(Path.Combine(directory, "npm-shrinkwrap.json")))
+            throw new NotSupportedException("npm updates do not support shrinkwrap.");
+        if (!File.Exists(manifestPath) || !File.Exists(lockPath))
+            throw new InvalidDataException("npm updates require both package.json and package-lock.json.");
+        if ((File.GetAttributes(manifestPath) & FileAttributes.ReparsePoint) != 0 ||
+            (File.GetAttributes(lockPath) & FileAttributes.ReparsePoint) != 0)
+            throw new NotSupportedException("npm updates do not support linked manifests or lockfiles.");
 
         var originalManifest = await File.ReadAllTextAsync(manifestPath);
         var originalLock = await File.ReadAllTextAsync(lockPath);
-        var manifest = JsonNode.Parse(originalManifest)!.AsObject();
-        var packageLock = JsonNode.Parse(originalLock)!.AsObject();
-        if (manifest.ContainsKey("workspaces") || File.Exists(Path.Combine(context.RootPath, "npm-shrinkwrap.json")))
+        var manifest = JsonNode.Parse(originalManifest) as JsonObject
+            ?? throw new InvalidDataException("The npm manifest must be a JSON object.");
+        var packageLock = JsonNode.Parse(originalLock) as JsonObject
+            ?? throw new InvalidDataException("The npm lockfile must be a JSON object.");
+        if (manifest.ContainsKey("workspaces"))
         {
-            throw new NotSupportedException("npm updates currently support a single root package with package-lock.json, without workspaces or shrinkwrap.");
+            throw new NotSupportedException("npm updates require independent packages without workspaces.");
         }
 
-        var version = NpmVersion.Parse(manifest["version"]?.GetValue<string>()
-            ?? throw new InvalidDataException("npm updates require a root package version."));
+        var version = Path.GetRelativePath(context.RootPath, directory) == "."
+            ? NpmVersion.Parse(manifest["version"]?.GetValue<string>()
+                ?? throw new InvalidDataException("npm updates require a root package version."))
+            : null;
         if (packageLock["lockfileVersion"]?.GetValue<int>() is not (2 or 3))
             throw new NotSupportedException("npm updates require package-lock.json format 2 or 3.");
         var packages = packageLock["packages"]?.AsObject()
@@ -72,14 +126,15 @@ public class NpmPackageUpgradeDetector : IActionDetector
             }
         }
 
-        if (dependencies.Count == 0) yield break;
+        if (dependencies.Count == 0) return null;
 
         var temporary = Directory.CreateTempSubdirectory("nugetninja-npm-").FullName;
         try
         {
             await File.WriteAllTextAsync(Path.Combine(temporary, "package.json"), Serialize(resolutionManifest));
             await File.WriteAllTextAsync(Path.Combine(temporary, "package-lock.json"), originalLock);
-            var npmrc = Path.Combine(context.RootPath, ".npmrc");
+            var npmrc = Path.Combine(directory, ".npmrc");
+            if (!File.Exists(npmrc)) npmrc = Path.Combine(context.RootPath, ".npmrc");
             if (File.Exists(npmrc)) File.Copy(npmrc, Path.Combine(temporary, ".npmrc"));
             await ResolveAsync(temporary, dependencies.DistinctBy(d => d.Name).ToArray());
 
@@ -107,20 +162,38 @@ public class NpmPackageUpgradeDetector : IActionDetector
                 else resolvedRoot.Remove(section);
             }
 
-            if (JsonNode.DeepEquals(manifest, updated) && JsonNode.DeepEquals(packageLock, resolvedLock)) yield break;
+            if (JsonNode.DeepEquals(manifest, updated) && JsonNode.DeepEquals(packageLock, resolvedLock)) return null;
 
-            var next = version.NextPatch().ToString();
-            updated["version"] = next;
-            resolvedLock["version"] = next;
-            resolvedRoot["version"] = next;
             var details = changes.Count == 0 ? "Refresh the npm dependency declarations and lockfile" : string.Join("; ", changes);
-            yield return new NpmPackageUpgrade(context.RootPath, originalManifest, originalLock,
-                Serialize(updated), Serialize(resolvedLock), $"{details}. Package version: {version} -> {next}.");
+            if (version != null)
+            {
+                // Root packages are the existing npm publishers. Nested web assets are not published independently.
+                var next = version.NextPatch().ToString();
+                updated["version"] = next;
+                resolvedLock["version"] = next;
+                resolvedRoot["version"] = next;
+                details += $". Package version: {version} -> {next}.";
+            }
+
+            var owner = context.AllProjects
+                .Where(project => IsWithin(Path.GetDirectoryName(project.PathOnDisk)!, directory))
+                .OrderByDescending(project => Path.GetDirectoryName(project.PathOnDisk)!.Length)
+                .FirstOrDefault();
+            return new NpmPackageUpgrade(directory, originalManifest, originalLock,
+                Serialize(updated), Serialize(resolvedLock),
+                $"{Path.GetRelativePath(context.RootPath, manifestPath)}: {details}", owner);
         }
         finally
         {
             Directory.Delete(temporary, true);
         }
+    }
+
+    private static bool IsWithin(string parent, string directory)
+    {
+        var relative = Path.GetRelativePath(parent, directory);
+        return !Path.IsPathRooted(relative) && relative != ".." &&
+               !relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal);
     }
 
     private static string Serialize(JsonNode node) => node.ToJsonString(JsonOptions) + "\n";
