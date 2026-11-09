@@ -8,6 +8,25 @@ namespace Aiursoft.NugetNinja.Core.Tests;
 public class NpmUpdateTests
 {
     [TestMethod]
+    [DataRow("0.58.0-dev-20261103", true)]
+    [DataRow("3.0.0-5020620260917001", true)]
+    [DataRow("1.2.3-rc.0", true)]
+    [DataRow("1.2.3-01alpha", true)]
+    [DataRow("1.2.3", false)]
+    [DataRow("^1.2.3-beta.1", false)]
+    [DataRow("~1.2.3-beta.1", false)]
+    [DataRow("1.2.3-01", false)]
+    [DataRow("1.2.3-rc.01", false)]
+    [DataRow("1.2.3-rc..1", false)]
+    [DataRow("1.2.3-rc.1\n", false)]
+    [DataRow("npm:other@1.2.3-beta.1", false)]
+    [DataRow("file:../1.2.3-beta.1", false)]
+    public void OnlyExactCanonicalPrereleasesCanBePreserved(string version, bool expected)
+    {
+        Assert.AreEqual(expected, NpmVersion.IsExactPrerelease(version));
+    }
+
+    [TestMethod]
     [DataRow("1.2.3", "1.2.4", true)]
     [DataRow("1.2.3", "1.9.0", true)]
     [DataRow("1.2.3", "2.0.0", false)]

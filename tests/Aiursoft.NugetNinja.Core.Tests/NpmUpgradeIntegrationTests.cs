@@ -19,6 +19,57 @@ namespace Aiursoft.NugetNinja.Core.Tests;
 public class NpmUpgradeIntegrationTests
 {
     [TestMethod]
+    [DataRow(2, "0.58.0-dev-20261103")]
+    [DataRow(3, "0.58.0-dev-20261103")]
+    [DataRow(3, "3.0.0-5020620260917001")]
+    public async Task ExactPrereleaseStaysPinnedWhileOtherPackagesAndItsTransitivesUpdate(int lockVersion, string pin)
+    {
+        await using var fixture = new RegistryFixture { PinnedPrerelease = pin };
+        fixture.SetAvailableVersions("preview", pin, "99.0.0-dev.1", "99.0.0");
+        await fixture.CreateLockAsync(lockVersion);
+        var before = await fixture.ReadFilesAsync();
+        fixture.PublishUpdates = true;
+        var detector = new NpmPackageUpgradeDetector();
+        var actions = await detector.AnalyzeAsync(fixture.Model).ToListAsync();
+        Assert.HasCount(1, actions);
+        CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync());
+        await actions.Single().TakeActionAsync();
+        var updated = await fixture.ReadFilesAsync();
+        var manifest = JsonNode.Parse(updated[0])!;
+        var packageLock = JsonNode.Parse(updated[1])!;
+        Assert.AreEqual(pin, manifest["dependencies"]!["preview"]!.GetValue<string>());
+        Assert.AreEqual(pin, packageLock["packages"]!["node_modules/preview"]!["version"]!.GetValue<string>());
+        Assert.AreEqual("1.2.0", manifest["dependencies"]!["stable"]!.GetValue<string>());
+        Assert.AreEqual("1.1.0", packageLock["packages"]!["node_modules/leaf"]!["version"]!.GetValue<string>());
+        Assert.AreEqual("1.0.1", manifest["version"]!.GetValue<string>());
+        Assert.HasCount(0, await detector.AnalyzeAsync(fixture.Model).ToListAsync());
+        CollectionAssert.AreEqual(updated, await fixture.ReadFilesAsync());
+        Assert.IsFalse(File.Exists(Path.Combine(fixture.DirectoryPath, "script-ran")));
+        Assert.AreEqual(0, fixture.TarballRequests);
+    }
+
+    [TestMethod]
+    [DataRow("0.58.0-dev-20261109")]
+    [DataRow("^0.58.0-dev-20261103")]
+    [DataRow("~0.58.0-dev-20261103")]
+    public async Task PrereleaseMismatchOrRangesLeaveBothFilesUntouched(string declaration)
+    {
+        await using var fixture = new RegistryFixture { PinnedPrerelease = "0.58.0-dev-20261103" };
+        fixture.SetAvailableVersions("preview", fixture.PinnedPrerelease);
+        await fixture.CreateLockAsync(3);
+        var manifest = JsonNode.Parse(await File.ReadAllTextAsync(fixture.ManifestPath))!;
+        manifest["dependencies"]!["preview"] = declaration;
+        await File.WriteAllTextAsync(fixture.ManifestPath, manifest.ToJsonString());
+        var before = await fixture.ReadFilesAsync();
+        Exception? caught = null;
+        try { await new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model).ToListAsync(); }
+        catch (Exception exception) when (exception is InvalidDataException or NotSupportedException) { caught = exception; }
+        Assert.IsNotNull(caught);
+        CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync());
+        Assert.AreEqual(0, fixture.TarballRequests);
+    }
+
+    [TestMethod]
     [DataRow(false, true, true, false, DisplayName = "Shared opt-in upgrades packages in the same run")]
     [DataRow(true, false, true, false, DisplayName = "Shared opt-out prevents upgrades in the same run")]
     [DataRow(false, true, false, false, DisplayName = "Preview leaves configuration and packages untouched")]
@@ -426,6 +477,7 @@ public class NpmUpgradeIntegrationTests
         public string LockPath => Path.Combine(DirectoryPath, "package-lock.json");
         public bool PublishUpdates { get; set; }
         public bool IncludeTransitive { get; set; }
+        public string? PinnedPrerelease { get; init; }
         public string? Failure { get; set; }
         public int TarballRequests { get; private set; }
         public WorkspaceModel Model => new()
@@ -466,6 +518,7 @@ public class NpmUpgradeIntegrationTests
                 ["devDependencies"] = new JsonObject { ["tool"] = "2.0.0" },
                 ["optionalDependencies"] = new JsonObject { ["optional"] = "3.0.0" }
             };
+            if (PinnedPrerelease != null) manifest["dependencies"]!["preview"] = PinnedPrerelease;
             await File.WriteAllTextAsync(ManifestPath, manifest.ToJsonString());
             await File.WriteAllTextAsync(Path.Combine(DirectoryPath, ".npmrc"),
                 $"registry={_origin}\nfetch-retries=0\ncache={DirectoryPath}/cache\n");
@@ -525,6 +578,8 @@ public class NpmUpgradeIntegrationTests
                             };
                             if (IncludeTransitive && name == "stable")
                                 entry["dependencies"] = new JsonObject { ["leaf"] = "^" + _versions["leaf"][0] };
+                            if (PinnedPrerelease != null && name == "preview")
+                                entry["dependencies"] = new JsonObject { ["leaf"] = "^1.0.0" };
                             if (Failure == "peer-conflict" && name == "stable" && version == "1.2.0")
                                 entry["peerDependencies"] = new JsonObject { ["missing-peer"] = "^9.0.0" };
                             versions[version] = entry;
