@@ -25,6 +25,14 @@ Existing exact/caret/tilde declaration styles are preserved. Unsupported specs,
 workspaces and shrinkwrap fail explicitly when opted in; other repositories are
 unchanged by default.
 
+An exact prerelease dependency, such as `0.58.0-dev-20261103`, is preserved at
+that exact version while other dependencies and compatible transitive dependencies
+continue to update. Its declaration must match the installed lockfile version,
+and resolution must retain that pin. Ninja never selects a newer prerelease or
+replaces that pin with a stable release. Prerelease ranges (`^` or `~`), tags,
+aliases and build-metadata versions remain unsupported. Root publishing package
+versions must still be stable. Package approval and S360 checks are unchanged.
+
 Ninja finds manifest/lockfile pairs throughout the repository, skipping `.git`,
 `node_modules`, `bin`, `obj` and directory links. A missing partner or unsupported
 package fails with its path; it is not silently skipped. Repositories with no npm

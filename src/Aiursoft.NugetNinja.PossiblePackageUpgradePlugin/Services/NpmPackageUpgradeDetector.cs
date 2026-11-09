@@ -19,7 +19,8 @@ public class NpmPackageUpgradeDetector : IActionDetector
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    private sealed record Dependency(string Section, string Name, string Prefix, NpmVersion Floor);
+    private sealed record Dependency(string Section, string Name, string Prefix, NpmVersion? Floor,
+        string? PinnedPrerelease = null);
 
     public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
     {
@@ -110,9 +111,17 @@ public class NpmPackageUpgradeDetector : IActionDetector
             {
                 var spec = node!.GetValue<string>();
                 var prefix = spec.StartsWith('^') || spec.StartsWith('~') ? spec[..1] : string.Empty;
-                var declared = NpmVersion.Parse(spec[prefix.Length..]);
                 var locked = packages["node_modules/" + name]?["version"]?.GetValue<string>()
                     ?? throw new InvalidDataException($"The npm lockfile has no installed version for '{name}'.");
+                if (NpmVersion.IsExactPrerelease(spec))
+                {
+                    if (locked != spec)
+                        throw new InvalidDataException($"The locked prerelease of '{name}' must match its exact declaration.");
+                    dependencies.Add(new Dependency(section, name, string.Empty, null, spec));
+                    continue;
+                }
+
+                var declared = NpmVersion.Parse(spec[prefix.Length..]);
                 var floor = NpmVersion.Parse(locked);
                 if (!declared.Allows(floor))
                 {
@@ -143,14 +152,23 @@ public class NpmPackageUpgradeDetector : IActionDetector
             var changes = new List<string>();
             foreach (var dependency in dependencies)
             {
-                var resolved = NpmVersion.Parse(resolvedPackages["node_modules/" + dependency.Name]!["version"]!.GetValue<string>());
-                if (!dependency.Floor.Allows(resolved))
+                var resolvedVersion = resolvedPackages["node_modules/" + dependency.Name]!["version"]!.GetValue<string>();
+                if (dependency.PinnedPrerelease != null)
+                {
+                    if (resolvedVersion != dependency.PinnedPrerelease)
+                        throw new InvalidDataException($"npm changed the fixed prerelease of '{dependency.Name}'.");
+                    continue;
+                }
+
+                var resolved = NpmVersion.Parse(resolvedVersion);
+                var floor = dependency.Floor!;
+                if (!floor.Allows(resolved))
                 {
                     throw new InvalidDataException($"npm selected an incompatible or downgraded version for '{dependency.Name}'.");
                 }
 
                 updated[dependency.Section]![dependency.Name] = dependency.Prefix + resolved;
-                if (dependency.Floor != resolved) changes.Add($"{dependency.Name}: {dependency.Floor} -> {resolved}");
+                if (floor != resolved) changes.Add($"{dependency.Name}: {floor} -> {resolved}");
             }
 
             // Restore the original declaration style in both files. npm only resolves the bounded candidate graph.

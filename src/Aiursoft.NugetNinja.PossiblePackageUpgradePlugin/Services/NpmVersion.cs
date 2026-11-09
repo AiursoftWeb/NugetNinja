@@ -5,6 +5,15 @@ namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 
 public sealed record NpmVersion(int Major, int Minor, int Patch) : IComparable<NpmVersion>
 {
+    public static bool IsExactPrerelease(string value)
+    {
+        const string number = "(?:0|[1-9][0-9]*)";
+        const string identifier = "(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)";
+        return Regex.IsMatch(value,
+            $@"\A{number}\.{number}\.{number}-{identifier}(?:\.{identifier})*\z",
+            RegexOptions.CultureInvariant);
+    }
+
     public static NpmVersion Parse(string value)
     {
         var match = Regex.Match(value, @"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$", RegexOptions.CultureInvariant);
