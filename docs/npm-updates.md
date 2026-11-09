@@ -12,6 +12,9 @@ npm:
 Run `ninja upgrade-pkg --path .` or the usual `ninja all --path .`.
 `--dry-run` resolves and previews changes without changing the repository.
 The existing PR bot uses the same upgrade plugin and contribution branch.
+The normal `all` workflow synchronizes expected files before analyzing dependencies,
+so an updated shared npm switch takes effect in that run. `upgrade-pkg` and the bot's
+update-only mode use the repository's current configuration without synchronizing files.
 
 Node.js and npm must be on PATH. Root publishing packages must have a stable
 three-part version; nested frontend packages may omit it. Each package needs a
