@@ -24,7 +24,8 @@ unchanged by default.
 
 Ninja finds manifest/lockfile pairs throughout the repository, skipping `.git`,
 `node_modules`, `bin`, `obj` and directory links. A missing partner or unsupported
-package fails with its path; it is not silently skipped. Analysis completes for all
+package fails with its path; it is not silently skipped. Repositories with no npm
+manifest, lockfile or shrinkwrap are unchanged, so a shared opt-in is safe for .NET-only repositories. Analysis completes for all
 packages before any npm changes are applied.
 
 Npm resolves each graph in its own temporary directory using the package's `.npmrc`

@@ -51,4 +51,25 @@ public class NpmUpdateTests
         model.NinjaConfig.Npm = new NinjaNpmConfig { UpdateDependencies = false };
         Assert.AreEqual(0, (await detector.AnalyzeAsync(model).ToListAsync()).Count);
     }
+    [TestMethod]
+    public async Task SharedOptInSkipsRepositoriesWithoutNpmFiles()
+    {
+        var directory = Directory.CreateTempSubdirectory("ninja-no-npm-").FullName;
+        try
+        {
+            await File.WriteAllTextAsync(Path.Combine(directory, "Example.csproj"),
+                "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>");
+            var model = new WorkspaceModel
+            {
+                RootPath = directory,
+                NinjaConfig = new NinjaConfig { Npm = new NinjaNpmConfig { UpdateDependencies = true } }
+            };
+            Assert.HasCount(0, await new NpmPackageUpgradeDetector().AnalyzeAsync(model).ToListAsync());
+            await File.WriteAllTextAsync(Path.Combine(directory, "package.json"), "{}");
+            await Assert.ThrowsExactlyAsync<InvalidDataException>(async () =>
+                await new NpmPackageUpgradeDetector().AnalyzeAsync(model).ToListAsync());
+        }
+        finally { Directory.Delete(directory, true); }
+    }
+
 }

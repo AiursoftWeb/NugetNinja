@@ -26,8 +26,6 @@ public class NpmPackageUpgradeDetector : IActionDetector
         if (context.NinjaConfig.Npm?.UpdateDependencies != true) yield break;
 
         var directories = FindPackageDirectories(context.RootPath).ToArray();
-        if (directories.Length == 0)
-            throw new InvalidDataException("npm updates require package.json and package-lock.json files.");
 
         // Finish analysis of every independent package before exposing any modifying action.
         var actions = new List<IAction>();
