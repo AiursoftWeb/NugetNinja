@@ -205,14 +205,13 @@ public class NpmPackageUpgradeDetector : IActionDetector
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        start.ArgumentList.Add("install");
+        start.ArgumentList.Add("update");
         foreach (var dependency in dependencies)
         {
-            // Package names come from a manifest, never from a shell command string or npm option.
+            // Validate the manifest names before asking npm to refresh the bounded graph.
             var name = dependency.Name;
             if (!Regex.IsMatch(name, @"^(?:@[a-z0-9_.-]+/)?[a-z0-9_][a-z0-9_.-]*$", RegexOptions.CultureInvariant))
                 throw new InvalidDataException($"Unsupported npm package name '{name}'.");
-            start.ArgumentList.Add(name + "@" + dependency.Floor.UpdateRange);
         }
 
         foreach (var option in new[] { "--package-lock-only", "--ignore-scripts", "--no-audit", "--no-fund", "--save", "--save-exact", "--include=dev" })
