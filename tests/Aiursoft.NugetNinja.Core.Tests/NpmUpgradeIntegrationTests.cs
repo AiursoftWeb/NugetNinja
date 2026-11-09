@@ -146,17 +146,47 @@ public class NpmUpgradeIntegrationTests
     }
 
     [TestMethod]
-    public async Task UnchangedDirectReferencesRetainLockedTransitiveVersions()
+    [DataRow(2, false)]
+    [DataRow(3, false)]
+    [DataRow(2, true)]
+    [DataRow(3, true)]
+    public async Task UnchangedDirectReferencesRefreshCompatibleTransitiveVersions(int lockVersion, bool nested)
     {
         await using var fixture = new RegistryFixture();
         fixture.IncludeTransitive = true;
-        await fixture.CreateLockAsync(3);
-        fixture.PublishUpdates = true;
-        var before = await fixture.ReadFilesAsync();
-        Assert.HasCount(0, await new NpmPackageUpgradeDetector().AnalyzeAsync(fixture.Model).ToListAsync());
-        CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync());
-        var packageLock = JsonNode.Parse(before[1])!;
-        Assert.AreEqual("1.0.0", packageLock["packages"]!["node_modules/leaf"]!["version"]!.GetValue<string>());
+        await fixture.CreateLockAsync(lockVersion);
+        var root = nested ? Directory.CreateTempSubdirectory("ninja-transitive-web-").FullName : null;
+        try
+        {
+            if (root != null) fixture.MoveTo(Path.Combine(root, "src", "Web", "wwwroot"));
+            var model = fixture.Model;
+            if (root != null) model.RootPath = root;
+            fixture.PublishUpdates = true;
+            var before = await fixture.ReadFilesAsync();
+            var actions = await new NpmPackageUpgradeDetector().AnalyzeAsync(model).ToListAsync();
+            Assert.HasCount(1, actions);
+            CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync(), "Analysis must not change project files.");
+            await actions.Single().TakeActionAsync();
+            var updated = await fixture.ReadFilesAsync();
+            var manifest = JsonNode.Parse(updated[0])!;
+            var packageLock = JsonNode.Parse(updated[1])!;
+            Assert.AreEqual("1.0.0", manifest["dependencies"]!["stable"]!.GetValue<string>());
+            Assert.AreEqual("1.0.0", packageLock["packages"]!["node_modules/stable"]!["version"]!.GetValue<string>());
+            Assert.AreEqual("1.1.0", packageLock["packages"]!["node_modules/leaf"]!["version"]!.GetValue<string>(),
+                "A compatible leaf release must not remain locked just because its parent did not change.");
+            var expectedVersion = nested ? "1.0.0" : "1.0.1";
+            Assert.AreEqual(expectedVersion, manifest["version"]!.GetValue<string>());
+            Assert.AreEqual(expectedVersion, packageLock["version"]!.GetValue<string>());
+            Assert.AreEqual(expectedVersion, packageLock["packages"]![""]!["version"]!.GetValue<string>());
+            Assert.HasCount(0, await new NpmPackageUpgradeDetector().AnalyzeAsync(model).ToListAsync());
+            CollectionAssert.AreEqual(updated, await fixture.ReadFilesAsync(), "A second run must not bump the version again.");
+            Assert.IsFalse(File.Exists(Path.Combine(fixture.DirectoryPath, "script-ran")));
+            Assert.AreEqual(0, fixture.TarballRequests);
+        }
+        finally
+        {
+            if (root != null) Directory.Delete(root, true);
+        }
     }
 
     [TestMethod]

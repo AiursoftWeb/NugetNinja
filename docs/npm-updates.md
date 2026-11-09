@@ -40,8 +40,11 @@ dependency declarations or a changed lockfile increment a root package's patch v
 Nested frontend package versions stay unchanged: they are assets of their owning .NET
 project, not independent npm releases. The owning project's existing version propagation
 applies when running `all`. A second unchanged run does not increment versions. Builds, tests, review and publishing remain the existing CI jobs.
-Valid locked transitive versions are retained unless npm resolution needs to change them;
-this is a direct-dependency updater, not a recursive vulnerability remediation command.
+Npm also refreshes transitive dependencies within the constraints declared by their
+parents, even when every direct dependency is unchanged. A transitive-only lockfile
+change increments a root publisher patch once; nested frontend versions stay unchanged.
+The updater uses native `npm update`, not forced overrides or `npm audit fix --force`.
+S360 continues to check the complete resolved graph before build and publish.
 
 For packages in separate repositories, the dependency must first be published and
 visible in the configured registry. A subsequent bot run updates the consumer's
