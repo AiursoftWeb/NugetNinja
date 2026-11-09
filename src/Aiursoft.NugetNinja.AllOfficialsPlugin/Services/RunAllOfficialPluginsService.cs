@@ -30,6 +30,9 @@ public class RunAllOfficialPluginsService(
 {
     private readonly List<IActionDetector> _pluginDetectors =
     [
+        // Synchronize shared configuration before dependency analysis. Each pass
+        // reparses it, so opt-in and opt-out take effect in the same run.
+        expectFilesDetector,
         // Freeze transitive security overrides while upgrading their parents. The
         // cleanup pass reparses the changed projects and retires an override once
         // its parent now supplies an equal or newer version.
@@ -38,7 +41,6 @@ public class RunAllOfficialPluginsService(
         uselessProjectReferenceDetector,
         duplicatePropertyDetector,
         missingPropertyDetector,
-        expectFilesDetector,
         deprecatedPackageDetector
     ];
 

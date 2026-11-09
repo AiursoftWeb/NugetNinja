@@ -3,8 +3,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json.Nodes;
+using Aiursoft.Canon;
+using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
+using Aiursoft.NugetNinja.Core.Model.Framework;
+using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
+using Aiursoft.NugetNinja.Core.Services.Nuget;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
+using Microsoft.Extensions.DependencyInjection;
 using WorkspaceModel = Aiursoft.NugetNinja.Core.Model.Workspace.Model;
 
 namespace Aiursoft.NugetNinja.Core.Tests;
@@ -12,6 +18,84 @@ namespace Aiursoft.NugetNinja.Core.Tests;
 [TestClass]
 public class NpmUpgradeIntegrationTests
 {
+    [TestMethod]
+    [DataRow(false, true, true, false, DisplayName = "Shared opt-in upgrades packages in the same run")]
+    [DataRow(true, false, true, false, DisplayName = "Shared opt-out prevents upgrades in the same run")]
+    [DataRow(false, true, false, false, DisplayName = "Preview leaves configuration and packages untouched")]
+    [DataRow(false, true, true, true, DisplayName = "Update-only mode does not synchronize configuration")]
+    public async Task OfficialWorkflowUsesSynchronizedNpmConfiguration(
+        bool initiallyEnabled, bool remotelyEnabled, bool apply, bool updateOnly)
+    {
+        await using var fixture = new RegistryFixture();
+        await fixture.CreateLockAsync(3);
+        fixture.PublishUpdates = true;
+        var configPath = Path.Combine(fixture.DirectoryPath, "ninja.yaml");
+        static string Config(bool enabled) => $$"""
+            configVersion: 1
+            npm:
+              updateDependencies: {{enabled.ToString().ToLowerInvariant()}}
+            files:
+              - name: ninja.yaml
+                contentUri: https://config.test/ninja.yaml
+            """;
+        var originalConfig = Config(initiallyEnabled);
+        await File.WriteAllTextAsync(configPath, originalConfig);
+        var originalPackages = await fixture.ReadFilesAsync();
+        using var handler = new SharedConfigurationHandler(Config(remotelyEnabled));
+        var services = new ServiceCollection();
+        services.AddMemoryCache();
+        services.AddTaskCanon();
+        services.AddLogging();
+        services.Configure<AppSettings>(_ => { });
+        services.AddSingleton(new HttpClient(handler));
+        services.AddTransient<Extractor>();
+        services.AddTransient<ProjectsEnumerator>();
+        services.AddTransient<VersionCrossChecker>();
+        services.AddTransient<NugetService>();
+        new AllOfficialsPlugin.StartUp().ConfigureServices(services);
+        services.AddTransient<RunAllOfficialPluginsService>();
+        using var provider = services.BuildServiceProvider();
+        var runner = provider.GetRequiredService<RunAllOfficialPluginsService>();
+
+        await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly);
+
+        Assert.AreEqual(apply && !updateOnly ? Config(remotelyEnabled) : originalConfig,
+            await File.ReadAllTextAsync(configPath));
+        var shouldUpgrade = apply && !updateOnly && remotelyEnabled;
+        var manifest = JsonNode.Parse((await fixture.ReadFilesAsync())[0])!;
+        Assert.AreEqual(shouldUpgrade ? "1.2.0" : "1.0.0",
+            manifest["dependencies"]!["stable"]!.GetValue<string>());
+        Assert.AreEqual(shouldUpgrade ? "1.0.1" : "1.0.0", manifest["version"]!.GetValue<string>());
+        if (!shouldUpgrade)
+            CollectionAssert.AreEqual(originalPackages, await fixture.ReadFilesAsync());
+        Assert.AreEqual(updateOnly ? 0 : 1, handler.Requests);
+        if (apply && !updateOnly)
+        {
+            var updatedPackages = await fixture.ReadFilesAsync();
+            await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly);
+            CollectionAssert.AreEqual(updatedPackages, await fixture.ReadFilesAsync(),
+                "A second official run must not introduce another package or version change.");
+        }
+        Assert.IsFalse(File.Exists(Path.Combine(fixture.DirectoryPath, "script-ran")));
+        Assert.AreEqual(0, fixture.TarballRequests);
+    }
+
+    private sealed class SharedConfigurationHandler(string content) : HttpMessageHandler
+    {
+        public int Requests { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Assert.AreEqual("https://config.test/ninja.yaml", request.RequestUri!.AbsoluteUri);
+            Requests++;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(content)
+            });
+        }
+    }
+
     [TestMethod]
     [DataRow(2)]
     [DataRow(3)]
