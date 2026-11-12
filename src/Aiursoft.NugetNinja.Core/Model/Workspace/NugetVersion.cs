@@ -9,7 +9,7 @@ public struct NugetVersion : IComparable<NugetVersion>, IEquatable<NugetVersion>
         if (trimmedVersion.Contains("-"))
         {
             PrimaryVersion = Version.Parse(trimmedVersion.Split("-")[0]);
-            AdditionalText = trimmedVersion.Split("-")[1].ToLower().Trim();
+            AdditionalText = trimmedVersion.Split("-")[1].ToLowerInvariant().Trim();
         }
         else
         {
