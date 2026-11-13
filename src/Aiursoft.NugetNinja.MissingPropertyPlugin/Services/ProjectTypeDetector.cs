@@ -11,7 +11,7 @@ public class ProjectTypeDetector(ILogger<ProjectTypeDetector> logger)
     {
         var hasProgram = CheckForProgramCs(project.PathOnDisk);
         
-        var isWebProject = project.Sdk?.ToLower().EndsWith("web") ?? false;
+        var isWebProject = project.Sdk?.ToLowerInvariant().EndsWith("web") ?? false;
         logger.LogTrace("Project {Project} is web project status is {UseWeb}", project, isWebProject);
 
         var hasWindows = project.UseWindowsForms.IsTrue() || project.UseWPF.IsTrue(); 
@@ -26,7 +26,7 @@ public class ProjectTypeDetector(ILogger<ProjectTypeDetector> logger)
         var hasVersion = !string.IsNullOrWhiteSpace(project.Version);
         logger.LogTrace("Project {Project} built has version status is {HasVersion}", project, hasVersion);
 
-        var isExecutable = hasProgram || packAsTool || isWebProject || (project.OutputType?.ToLower().EndsWith("exe") ?? false);
+        var isExecutable = hasProgram || packAsTool || isWebProject || (project.OutputType?.ToLowerInvariant().EndsWith("exe") ?? false);
         return new ProjectInfo
         {
             IsExecutable = isExecutable,

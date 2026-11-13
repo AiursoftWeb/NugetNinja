@@ -43,7 +43,7 @@ public class Project(string pathOnDisk, HtmlNode doc)
 
     public bool Executable()
     {
-        return Sdk?.EndsWith("Web") ?? OutputType?.ToLower().EndsWith("exe") ?? false;
+        return Sdk?.EndsWith("Web") ?? OutputType?.ToLowerInvariant().EndsWith("exe") ?? false;
     }
 
     public bool ContainsTestLibrary()

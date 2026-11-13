@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 using Aiursoft.NugetNinja.GitServerBase.Models;
 using Aiursoft.NugetNinja.GitServerBase.Models.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -240,7 +241,7 @@ public class GitLabService(HttpWrapper httpClient, ILogger<GitLabService> logger
 
     public async Task<string> RotateToken(string endPoint, string oldToken)
     {
-        var expiresAt = DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd");
+        var expiresAt = DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         logger.LogInformation("Attempting to rotate GitLab token for endpoint: {EndPoint}. New expiration: {ExpiresAt}", endPoint, expiresAt);
 
         // GitLab supports passing expires_at as a query parameter for the rotate endpoint.

@@ -142,7 +142,7 @@ public class NugetService
                                      $"Couldn't find a valid PackageBaseAddress from nuget server with path: '{serverRoot}'!");
         var registrationsBaseUrl = responseModel
                                        .Resources
-                                       .OrderByDescending(r => r.Type)
+                                       .OrderByDescending(r => r.Type, StringComparer.Ordinal)
                                        .FirstOrDefault(r => r.Type.StartsWith("RegistrationsBaseUrl"))
                                        ?.Id
                                    ?? throw new WebException(
@@ -161,7 +161,7 @@ public class NugetService
     private async Task<IReadOnlyCollection<NugetVersion>> GetAllPublishedVersionsFromNuget(string packageName)
     {
         var apiEndpoint = await GetApiEndpoint() ?? throw new InvalidOperationException("Can NOT locate a valid nuget API endpoint!");
-        var requestUrl = $"{apiEndpoint.PackageBaseAddress.TrimEnd('/')}/{packageName.ToLower()}/index.json";
+        var requestUrl = $"{apiEndpoint.PackageBaseAddress.TrimEnd('/')}/{packageName.ToLowerInvariant()}/index.json";
         var responseModel = await HttpGetJson<GetAllPublishedVersionsResponseModel>(requestUrl, _patToken);
         return responseModel
                    .Versions
@@ -243,7 +243,7 @@ public class NugetService
             _vulnerabilityCache = vulnerabilityCache;
         }
 
-        var key = package.Name.ToLower();
+        var key = package.Name.ToLowerInvariant();
         if (_vulnerabilityCache.TryGetValue(key, out var entries))
         {
             var matching = entries
@@ -308,7 +308,7 @@ public class NugetService
     {
         var apiEndpoint = await GetApiEndpoint() ?? throw new InvalidOperationException("Can NOT locate a valid nuget API endpoint!");
         var requestUrl =
-            $"{apiEndpoint.PackageBaseAddress.TrimEnd('/')}/{package.Name.ToLower()}/{package.Version}/{package.Name.ToLower()}.nuspec";
+            $"{apiEndpoint.PackageBaseAddress.TrimEnd('/')}/{package.Name.ToLowerInvariant()}/{package.Version}/{package.Name.ToLowerInvariant()}.nuspec";
         var nuspec = await HttpGetString(requestUrl, _patToken);
         var doc = new HtmlDocument();
         doc.LoadHtml(nuspec);

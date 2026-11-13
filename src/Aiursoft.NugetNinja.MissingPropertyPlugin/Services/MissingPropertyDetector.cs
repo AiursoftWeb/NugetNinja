@@ -93,24 +93,24 @@ public class MissingPropertyDetector(
             }
 
             // Is test project
-            if (project.IsTestProject != projectInfo.IsUnitTest.ToString().ToLower())
+            if (project.IsTestProject != projectInfo.IsUnitTest.ToString().ToLowerInvariant())
             {
                 logger.LogTrace("Project {Project} is missing property IsTestProject", project);
-                yield return new MissingProperty(project, nameof(project.IsTestProject), projectInfo.IsUnitTest.ToString().ToLower());
+                yield return new MissingProperty(project, nameof(project.IsTestProject), projectInfo.IsUnitTest.ToString().ToLowerInvariant());
             }
 
             // Is Packable
-            if (project.IsPackable != projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower())
+            if (project.IsPackable != projectInfo.ShouldPackAsNugetLibrary.ToString().ToLowerInvariant())
             {
                 logger.LogTrace("Project {Project} is missing property IsPackable", project);
-                yield return new MissingProperty(project, nameof(project.IsPackable), projectInfo.ShouldPackAsNugetLibrary.ToString().ToLower());
+                yield return new MissingProperty(project, nameof(project.IsPackable), projectInfo.ShouldPackAsNugetLibrary.ToString().ToLowerInvariant());
             }
 
             // GeneratePackageOnBuild
             if (projectInfo.ShouldPackAsNugetLibrary && project.GeneratePackageOnBuild.IsFalse())
             {
                 logger.LogTrace("Project {Project} is missing property GeneratePackageOnBuild", project);
-                yield return new MissingProperty(project, nameof(project.GeneratePackageOnBuild), true.ToString().ToLower());
+                yield return new MissingProperty(project, nameof(project.GeneratePackageOnBuild), true.ToString().ToLowerInvariant());
             }
 
             if (projectInfo.ShouldPackAsNugetTool)
@@ -119,7 +119,7 @@ public class MissingPropertyDetector(
                 if (project.PackAsTool.IsFalse())
                 {
                     logger.LogTrace("Project {Project} is missing property PackAsTool", project);
-                    yield return new MissingProperty(project, nameof(project.PackAsTool), projectInfo.ShouldPackAsNugetTool.ToString().ToLower());
+                    yield return new MissingProperty(project, nameof(project.PackAsTool), projectInfo.ShouldPackAsNugetTool.ToString().ToLowerInvariant());
                 }
 
                 // Tool command name
@@ -238,9 +238,9 @@ public class MissingPropertyDetector(
         for (var i = 0; i < runtimes.Length; i++)
             foreach (var notSupportedRuntime in _notSupportedRuntimes)
                 if (runtimes[i].Contains(notSupportedRuntime, StringComparison.OrdinalIgnoreCase))
-                    runtimes[i] = runtimes[i].ToLower().Replace(notSupportedRuntime, _suggestedRuntime);
+                    runtimes[i] = runtimes[i].ToLowerInvariant().Replace(notSupportedRuntime, _suggestedRuntime);
 
-        var cleanedRuntimes = runtimes.Select(r => r.ToLower().Trim()).Distinct().ToArray();
+        var cleanedRuntimes = runtimes.Select(r => r.ToLowerInvariant().Trim()).Distinct().ToArray();
 
         var deprecatedCount = project.GetTargetFrameworks().Except(cleanedRuntimes).Count();
         var insertedCount = cleanedRuntimes.Except(project.GetTargetFrameworks()).Count();
@@ -264,7 +264,7 @@ public class MissingPropertyDetector(
                     fileName += "-";
                 }
 
-                fileName += char.ToLower(lastName[i]);
+                fileName += char.ToLowerInvariant(lastName[i]);
             }
             else
             {
