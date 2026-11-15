@@ -16,8 +16,29 @@ using WorkspaceModel = Aiursoft.NugetNinja.Core.Model.Workspace.Model;
 namespace Aiursoft.NugetNinja.Core.Tests;
 
 [TestClass]
+[DoNotParallelize]
 public class NpmUpgradeIntegrationTests
 {
+    private string? _registry;
+    private string? _uppercaseRegistry;
+
+    [TestInitialize]
+    public void UseFixtureRegistry()
+    {
+        // The fixture's .npmrc must win over the build pipeline's registry.
+        _registry = Environment.GetEnvironmentVariable("npm_config_registry");
+        _uppercaseRegistry = Environment.GetEnvironmentVariable("NPM_CONFIG_REGISTRY");
+        Environment.SetEnvironmentVariable("npm_config_registry", null);
+        Environment.SetEnvironmentVariable("NPM_CONFIG_REGISTRY", null);
+    }
+
+    [TestCleanup]
+    public void RestoreBuildRegistry()
+    {
+        Environment.SetEnvironmentVariable("npm_config_registry", _registry);
+        Environment.SetEnvironmentVariable("NPM_CONFIG_REGISTRY", _uppercaseRegistry);
+    }
+
     [TestMethod]
     [DataRow(2, "0.58.0-dev-20261103")]
     [DataRow(3, "0.58.0-dev-20261103")]
