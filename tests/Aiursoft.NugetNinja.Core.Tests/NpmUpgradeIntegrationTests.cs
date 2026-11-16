@@ -63,12 +63,49 @@ public class NpmUpgradeIntegrationTests
             Assert.AreEqual(before, original.MetadataRequests, "The project's original registry must not receive upgrade queries.");
             Assert.IsGreaterThan(0, selected.MetadataRequests);
             Assert.AreEqual(originalConfig, await File.ReadAllTextAsync(npmrc), "Source selection must not rewrite the contributor's registry configuration.");
+            var updatedLock = JsonNode.Parse(await File.ReadAllTextAsync(original.LockPath))!;
+            Assert.StartsWith(original.Origin + "/", updatedLock["packages"]!["node_modules/stable"]!["resolved"]!.GetValue<string>());
             Assert.HasCount(0, await detector.AnalyzeAsync(original.Model).ToListAsync());
         }
         finally
         {
             Environment.SetEnvironmentVariable("npm_config_registry", null);
         }
+    }
+
+    [TestMethod]
+    [DataRow(2)]
+    [DataRow(3)]
+    public async Task RegistrySubpathsStayOutOfContributorLockfiles(int lockVersion)
+    {
+        await using var original = new RegistryFixture { IncludeTransitive = true, LeafName = "@other/leaf" };
+        await using var scoped = new RegistryFixture { PathBase = "/public-scope" };
+        await using var selected = new RegistryFixture
+        {
+            PathBase = "/npm", IncludeTransitive = true, PublishUpdates = true, LeafName = "@other/leaf"
+        };
+        original.SetAvailableVersions("@other/leaf", "1.0.0", "1.1.0");
+        selected.SetAvailableVersions("@other/leaf", "1.0.0", "1.1.0");
+        selected.SetAvailableVersions("@scope/scoped", "1.1.0");
+        await original.CreateLockAsync(lockVersion);
+        var npmrc = Path.Combine(original.DirectoryPath, ".npmrc");
+        await File.AppendAllTextAsync(npmrc, $"@scope:registry={scoped.Origin}\n@other:registry={scoped.Origin}\n");
+        var config = await File.ReadAllTextAsync(npmrc);
+        var before = original.MetadataRequests;
+        var detector = new NpmPackageUpgradeDetector(Options.Create(new AppSettings { NpmRegistry = selected.Origin }));
+        var actions = await detector.AnalyzeAsync(original.Model).ToListAsync();
+        await actions.Single().TakeActionAsync();
+
+        var updated = await File.ReadAllTextAsync(original.LockPath);
+        Assert.DoesNotContain(selected.Origin, updated);
+        var packages = JsonNode.Parse(updated)!["packages"]!;
+        Assert.StartsWith(scoped.Origin + "/", packages["node_modules/@scope/scoped"]!["resolved"]!.GetValue<string>());
+        Assert.StartsWith(scoped.Origin + "/", packages["node_modules/@other/leaf"]!["resolved"]!.GetValue<string>());
+        Assert.AreEqual(config, await File.ReadAllTextAsync(npmrc));
+        Assert.AreEqual(before, original.MetadataRequests);
+        Assert.AreEqual(0, scoped.MetadataRequests);
+        Assert.IsGreaterThan(0, selected.MetadataRequests);
+        Assert.HasCount(0, await detector.AnalyzeAsync(original.Model).ToListAsync());
     }
 
     [TestMethod]
@@ -557,7 +594,8 @@ public class NpmUpgradeIntegrationTests
             ["leaf"] = ["1.0.0", "1.1.0", "2.0.0"]
         };
         private readonly string _origin;
-        public string Origin => _origin;
+        public string Origin => _origin + PathBase;
+        public string PathBase { get; init; } = string.Empty;
         public int MetadataRequests { get; private set; }
         public string DirectoryPath { get; private set; } = Directory.CreateTempSubdirectory("ninja-npm-test-").FullName;
         public string ManifestPath => Path.Combine(DirectoryPath, "package.json");
@@ -609,7 +647,7 @@ public class NpmUpgradeIntegrationTests
             if (PinnedPrerelease != null) manifest["dependencies"]!["preview"] = PinnedPrerelease;
             await File.WriteAllTextAsync(ManifestPath, manifest.ToJsonString());
             await File.WriteAllTextAsync(Path.Combine(DirectoryPath, ".npmrc"),
-                $"registry={_origin}\nfetch-retries=0\ncache={DirectoryPath}/cache\n");
+                $"registry={Origin}\nfetch-retries=0\ncache={DirectoryPath}/cache\n");
             using var process = new Process();
             process.StartInfo = new ProcessStartInfo("npm")
             {
@@ -651,6 +689,8 @@ public class NpmUpgradeIntegrationTests
                     var request = await reader.ReadLineAsync();
                     while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) { }
                     var name = Uri.UnescapeDataString(request!.Split(' ')[1].Split('?')[0].TrimStart('/'));
+                    if (PathBase.Length > 0 && name.StartsWith(PathBase.Trim('/') + "/", StringComparison.Ordinal))
+                        name = name[(PathBase.Trim('/').Length + 1)..];
                     MetadataRequests++;
                     if (name.StartsWith("tarballs/", StringComparison.Ordinal)) TarballRequests++;
                     var available = _versions.GetValueOrDefault(name);
@@ -663,7 +703,7 @@ public class NpmUpgradeIntegrationTests
                             var entry = new JsonObject
                             {
                                 ["name"] = name, ["version"] = version,
-                                ["dist"] = new JsonObject { ["tarball"] = $"{_origin}/tarballs/{name.Replace('/', '-')}-{version}.tgz", ["shasum"] = new string('a', 40) }
+                                ["dist"] = new JsonObject { ["tarball"] = $"{Origin}/tarballs/{name.Replace('/', '-')}-{version}.tgz", ["shasum"] = new string('a', 40) }
                             };
                             if (IncludeTransitive && name == "stable")
                                 entry["dependencies"] = new JsonObject { [LeafName] = "^" + _versions[LeafName][0] };
