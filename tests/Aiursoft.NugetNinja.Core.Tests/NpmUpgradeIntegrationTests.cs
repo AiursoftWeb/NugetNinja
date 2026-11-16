@@ -109,6 +109,30 @@ public class NpmUpgradeIntegrationTests
     }
 
     [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public async Task RegistryCredentialsCannotBeWrittenToProjectFiles(bool embeddedInSelectedRegistry)
+    {
+        await using var original = new RegistryFixture();
+        await using var selected = new RegistryFixture { PublishUpdates = true };
+        await original.CreateLockAsync(3);
+        var before = await original.ReadFilesAsync();
+        var registry = selected.Origin;
+        if (embeddedInSelectedRegistry)
+            registry = registry.Replace("http://", "http://user:do-not-commit@");
+        else
+            await File.AppendAllTextAsync(Path.Combine(original.DirectoryPath, ".npmrc"),
+                $"registry={original.Origin.Replace("http://", "http://user:do-not-commit@")}\n");
+        var detector = new NpmPackageUpgradeDetector(Options.Create(new AppSettings { NpmRegistry = registry }));
+        if (embeddedInSelectedRegistry)
+            await Assert.ThrowsAsync<InvalidOperationException>(() => detector.AnalyzeAsync(original.Model).ToListAsync());
+        else
+            await Assert.ThrowsAsync<InvalidDataException>(() => detector.AnalyzeAsync(original.Model).ToListAsync());
+        CollectionAssert.AreEqual(before, await original.ReadFilesAsync());
+        Assert.AreEqual(0, selected.MetadataRequests);
+    }
+
+    [TestMethod]
     public async Task ConfiguredRegistryFailureDoesNotFallBackOrChangeTheProject()
     {
         await using var fixture = new RegistryFixture();

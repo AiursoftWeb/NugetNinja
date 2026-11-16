@@ -230,8 +230,8 @@ public class NpmPackageUpgradeDetector(IOptions<AppSettings> options) : IActionD
         if (!string.IsNullOrWhiteSpace(registry))
         {
             var uri = new Uri(registry, UriKind.Absolute);
-            if (uri.Scheme != "https" && !(uri.Scheme == "http" && uri.IsLoopback))
-                throw new InvalidOperationException("The npm registry must use HTTPS, or HTTP on loopback for local development.");
+            if ((uri.Scheme != "https" && !(uri.Scheme == "http" && uri.IsLoopback)) || uri.UserInfo.Length > 0)
+                throw new InvalidOperationException("The npm registry must use HTTPS, or loopback HTTP, without embedded credentials.");
             arguments.Add($"--registry={registry}");
             // Include scopes configured for transitive dependencies, not just direct references.
             var config = JsonNode.Parse(await RunNpmAsync(directory, ["config", "list", "--json"]))?.AsObject()
@@ -244,6 +244,8 @@ public class NpmPackageUpgradeDetector(IOptions<AppSettings> options) : IActionD
             contributorRegistries = contributorConfig
                 .Where(item => item.Key == "registry" || item.Key.EndsWith(":registry", StringComparison.Ordinal))
                 .ToDictionary(item => item.Key, item => new Uri(item.Value!.GetValue<string>().TrimEnd('/') + "/"), StringComparer.Ordinal);
+            if (!contributorRegistries.ContainsKey("registry") || contributorRegistries.Values.Any(source => source.UserInfo.Length > 0))
+                throw new InvalidDataException("Registry URLs with embedded credentials cannot be committed to lockfiles; configure npm authentication separately.");
             var scopes = config.Select(item => item.Key)
                 .Where(key => Regex.IsMatch(key, @"^@[a-z0-9_.-]+:registry$", RegexOptions.CultureInvariant))
                 .Select(key => key.Split(':')[0])
