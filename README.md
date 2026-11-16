@@ -95,6 +95,7 @@ Options:
 Commands:
   all, all-officials  The command to run all officially supported features.
   fill-properties     The command to fill all missing properties for .csproj files.
+  clean-dup           The command to clean all duplicate properties for .csproj files.
   remove-deprecated   The command to replace all deprecated packages to new packages.
   upgrade-pkg         The command to upgrade all package references to possible latest and avoid conflicts.
   clean-pkg           The command to clean up possible useless package references.
