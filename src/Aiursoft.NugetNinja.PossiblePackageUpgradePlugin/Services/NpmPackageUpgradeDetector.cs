@@ -315,6 +315,8 @@ public class NpmPackageUpgradeDetector(IOptions<AppSettings> options) : IActionD
         if (ignoreRegistryEnvironment)
             foreach (var name in start.Environment.Keys.Where(IsRegistryEnvironment).ToArray()) start.Environment.Remove(name);
         foreach (var argument in arguments) start.ArgumentList.Add(argument);
+        // Configuration reads must not trigger npm's own update check against the project registry.
+        start.ArgumentList.Add("--no-update-notifier");
         using var process = new Process();
         process.StartInfo = start;
         try
