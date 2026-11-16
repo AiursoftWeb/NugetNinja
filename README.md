@@ -1,4 +1,6 @@
-# Nuget Ninja
+# Aiursoft NugetNinja
+
+<a name="nuget-ninja"></a>
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AiursoftWeb/nugetninja/blob/master/LICENSE)
 [![Pipeline stat](https://badge-proxy.aiursoft.com/aiursoft/nugetninja/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/nugetninja/-/pipelines)
@@ -10,19 +12,62 @@
 
 Nuget Ninja is a tool for detecting dependencies of .NET projects. It analyzes the dependency structure of .NET projects in a directory and builds a directed acyclic graph. And will give some modification suggestions for Nuget packages, so that the dependencies of the project are as concise and up-to-date as possible.
 
+## Overview
+
+### What is NugetNinja?
+
+Analyze the dependency graph of .NET projects, suggest and apply package and project-reference improvements, and enforce expected repository files. Optional npm updates and PR/Merge bots extend the same workflow.
+
 ## Installation
 
-Requirements:
-
-1. [.NET 10 SDK](http://dot.net/)
-
-Run the following command to install this tool:
+Install the CLI with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0):
 
 ```bash
 dotnet tool install --global Aiursoft.NugetNinja
 ```
 
+Update an existing installation:
+
+```bash
+dotnet tool update --global Aiursoft.NugetNinja
+```
+
+Remove the CLI:
+
+```bash
+dotnet tool uninstall --global Aiursoft.NugetNinja
+```
+
+<a name="deployment-with-docker"></a>
+**Deployment with Docker**
+
+You can run the Nuget Ninja bots using Docker. The image includes both bots and runs them periodically via cron.
+
+```bash
+docker run -d \
+    --name nuget-ninja \
+    -e "PrBot__Servers__0__Provider=GitHub" \
+    -e "PrBot__Servers__0__Token=YOUR_GITHUB_TOKEN" \
+    -e "PrBot__Servers__0__UserName=YOUR_GITHUB_USERNAME" \
+    -e "PrBot__Servers__0__UserEmail=your-email@example.com" \
+    -e "PrBot__Servers__0__DisplayName=Nuget Ninja Bot" \
+    -e "PrBot__Servers__0__EndPoint=https://api.github.com" \
+    -e "PrBot__Servers__0__PushEndPoint=https://{0}@github.com" \
+    -e "PrBot__Servers__0__ContributionBranch=users/nugetninja/evergreen" \
+    -e "MergeBot__Servers__0__Provider=GitLab" \
+    -e "MergeBot__Servers__0__EndPoint=https://gitlab.example.com" \
+    -e "MergeBot__Servers__0__UserName=nuget-ninja" \
+    -e "MergeBot__Servers__0__Token=YOUR_GITLAB_TOKEN" \
+    aiursoft/nugetninja
+```
+
 ## Usage
+
+Run the command to see available options:
+
+```bash
+ninja --help
+```
 
 After getting the binary, run it directly in the terminal.
 
@@ -79,7 +124,37 @@ The update-only bot mode also runs a targeted package-reference cleanup for TSOs
 recorded before the parent upgrade. Ordinary cleanup and formatting plugins remain
 disabled.
 
-### Config file
+### Sample
+
+Generate suggestions for the current workspace without modifying local files:
+
+```cmd
+C:\workspace> ninja.exe all --path . --dry-run
+```
+
+Fill missing properties for current workspace:
+
+```cmd
+C:\workspace> ninja.exe fill-properties --path .
+```
+
+Run all plugins under the current folder:
+
+```cmd
+C:\workspace> ninja.exe all --path .
+```
+
+<a name="docker--bots"></a>
+### Bots
+
+Nuget Ninja provides two bots for automating dependency management:
+1. **PrBot**: Automatically scans your starred repositories and creates pull requests for dependency upgrades.
+2. **MergeBot**: Automatically merges open pull requests if the CI pipeline succeeds.
+
+## Configuration
+
+<a name="config-file"></a>
+**Config file**
 
 Beyond managing NuGet packages, NugetNinja can also enforce repository structure by ensuring common files (like `.gitignore`, `LICENSE`, or `.editorconfig`) are present and up-to-date.
 
@@ -123,79 +198,13 @@ When you run the `expect-files` command, NugetNinja will read this configuration
 
 3.  **Correct File Casing:** The tool performs a case-insensitive search for the file. If it finds a file with a matching name but different casing (e.g., your repo has `license` but the YAML specifies `LICENSE`), it will rename the file to match the exact casing in the `name` property.
 
-### Sample
-
-Generate suggestions for the current workspace without modifying local files:
-
-```cmd
-C:\workspace> ninja.exe all --path . --dry-run
-```
-
-Fill missing properties for current workspace:
-
-```cmd
-C:\workspace> ninja.exe fill-properties --path .
-```
-
-Run all plugins under the current folder:
-
-```cmd
-C:\workspace> ninja.exe all --path .
-```
-
-## Run locally
-
-Requirements about how to run
-
-1. [.NET 10 SDK](http://dot.net/)
-2. Execute `dotnet run` to run the app
-
-## Run in Microsoft Visual Studio
-
-1. Open the `.sln` file in the project path.
-2. Press `F5`.
-
-## How to contribute
-
-There are many ways to contribute to the project: logging bugs, submitting pull requests, reporting issues, and creating suggestions.
-
-Even if you with push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your workflow cruft out of sight.
-
-We're also interested in your feedback on the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.
-
-## Docker & Bots
-
-Nuget Ninja provides two bots for automating dependency management:
-1. **PrBot**: Automatically scans your starred repositories and creates pull requests for dependency upgrades.
-2. **MergeBot**: Automatically merges open pull requests if the CI pipeline succeeds.
-
-### Deployment with Docker
-
-You can run the Nuget Ninja bots using Docker. The image includes both bots and runs them periodically via cron.
-
-```bash
-docker run -d \
-    --name nuget-ninja \
-    -e "PrBot__Servers__0__Provider=GitHub" \
-    -e "PrBot__Servers__0__Token=YOUR_GITHUB_TOKEN" \
-    -e "PrBot__Servers__0__UserName=YOUR_GITHUB_USERNAME" \
-    -e "PrBot__Servers__0__UserEmail=your-email@example.com" \
-    -e "PrBot__Servers__0__DisplayName=Nuget Ninja Bot" \
-    -e "PrBot__Servers__0__EndPoint=https://api.github.com" \
-    -e "PrBot__Servers__0__PushEndPoint=https://{0}@github.com" \
-    -e "PrBot__Servers__0__ContributionBranch=users/nugetninja/evergreen" \
-    -e "MergeBot__Servers__0__Provider=GitLab" \
-    -e "MergeBot__Servers__0__EndPoint=https://gitlab.example.com" \
-    -e "MergeBot__Servers__0__UserName=nuget-ninja" \
-    -e "MergeBot__Servers__0__Token=YOUR_GITLAB_TOKEN" \
-    hub.aiursoft.com/aiursoft/nugetninja
-```
-
-### Configuration via Environment Variables
+<a name="configuration-via-environment-variables"></a>
+**Configuration via Environment Variables**
 
 The bots support full configuration via environment variables. This is the recommended way to provide secrets and server information. **PrBot** and **MergeBot** have their own configuration sections to avoid conflicts.
 
-#### PR Bot Server Configuration
+<a name="pr-bot-server-configuration"></a>
+**PR Bot Server Configuration**
 To configure servers for **PrBot**, use the `PrBot__Servers__N__Property` pattern:
 
 - `PrBot__Servers__N__Provider`: The git provider (e.g., `GitHub`, `GitLab`, `Gitea`).
@@ -207,7 +216,8 @@ To configure servers for **PrBot**, use the `PrBot__Servers__N__Property` patter
 - `PrBot__Servers__N__ContributionBranch`: The branch name used for creating PRs.
 - `PrBot__Servers__N__OnlyUpdate`: (Optional) Set to `true` to only run the update plugin.
 
-#### Merge Bot Server Configuration
+<a name="merge-bot-server-configuration"></a>
+**Merge Bot Server Configuration**
 To configure servers for **MergeBot**, use the `MergeBot__Servers__N__Property` pattern:
 
 - `MergeBot__Servers__N__Provider`: The git provider (only `GitLab` is currently supported for MergeBot).
@@ -215,7 +225,8 @@ To configure servers for **MergeBot**, use the `MergeBot__Servers__N__Property` 
 - `MergeBot__Servers__N__UserName`: Your username on the server.
 - `MergeBot__Servers__N__Token`: Your Personal Access Token (PAT).
 
-#### PR Bot Options
+<a name="pr-bot-options"></a>
+**PR Bot Options**
 You can also configure PR Bot specific options:
 
 - `PrBot__LocalizationEnabled`: Set to `true` to enable automatic localization.
@@ -225,7 +236,8 @@ You can also configure PR Bot specific options:
 - `PrBot__LocalizationConcurrentRequests`: Maximum concurrent requests for localization (default 8).
 - `PrBot__LocalizationTargetLanguages__0`: Target language for localization (e.g. `en-GB`). Use `__0`, `__1` for multiple languages.
 
-### Authenticated expected files
+<a name="authenticated-expected-files"></a>
+**Authenticated expected files**
 
 Expected files declare optional HTTP profiles in `ninja.yaml`, without storing credentials:
 
@@ -262,3 +274,46 @@ than a web URL that redirects to a sign-in page.
 
 Legacy `httpProfiles` selections must move to `http.profiles`; JSON environment
 profiles are no longer read. Existing anonymous configurations need no changes.
+
+## Development
+
+Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+
+From the repository root, restore and build:
+
+```bash
+dotnet restore Aiursoft.NugetNinja.sln
+dotnet build Aiursoft.NugetNinja.sln --no-restore
+```
+
+<a name="run-locally"></a>
+Run the tool from source:
+
+```bash
+dotnet run --project src/Aiursoft.NugetNinja/Aiursoft.NugetNinja.csproj -- --help
+```
+
+<a name="run-in-microsoft-visual-studio"></a>
+In Microsoft Visual Studio, open `Aiursoft.NugetNinja.sln`, select `Aiursoft.NugetNinja` as the startup project and press `F5`. Set the command-line arguments for the task you want to run.
+
+Run the existing tests:
+
+```bash
+dotnet test Aiursoft.NugetNinja.sln --no-restore
+```
+
+## Documentation
+
+- [Compatible npm updates](https://github.com/AiursoftWeb/NugetNinja/blob/master/docs/npm-updates.md)
+
+## How to contribute
+
+There are many ways to contribute to the project: logging bugs, submitting pull requests, reporting issues, and creating suggestions.
+
+Even if you have push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your workflow cruft out of sight.
+
+We're also interested in your feedback on the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.
+
+## License
+
+Licensed under the [MIT License](https://github.com/AiursoftWeb/nugetninja/blob/master/LICENSE).
