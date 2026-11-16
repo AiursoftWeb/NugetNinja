@@ -5,13 +5,19 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Models;
+using Microsoft.Extensions.Options;
 
 namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 
-public class NpmPackageUpgradeDetector : IActionDetector
+public class NpmPackageUpgradeDetector(IOptions<AppSettings> options) : IActionDetector
 {
+    public NpmPackageUpgradeDetector() : this(Options.Create(new AppSettings()))
+    {
+    }
+
     private static readonly string[] Sections = ["dependencies", "devDependencies", "optionalDependencies"];
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -69,7 +75,7 @@ public class NpmPackageUpgradeDetector : IActionDetector
         }
     }
 
-    private static async Task<IAction?> AnalyzePackageAsync(Model context, string directory)
+    private async Task<IAction?> AnalyzePackageAsync(Model context, string directory)
     {
         var manifestPath = Path.Combine(directory, "package.json");
         var lockPath = Path.Combine(directory, "package-lock.json");
@@ -214,16 +220,26 @@ public class NpmPackageUpgradeDetector : IActionDetector
 
     private static string Serialize(JsonNode node) => node.ToJsonString(JsonOptions) + "\n";
 
-    private static async Task ResolveAsync(string directory, Dependency[] dependencies)
+    private async Task ResolveAsync(string directory, Dependency[] dependencies)
     {
-        var start = new ProcessStartInfo("npm")
+        var arguments = new List<string> { "update" };
+        var registry = options.Value.NpmRegistry;
+        if (!string.IsNullOrWhiteSpace(registry))
         {
-            WorkingDirectory = directory,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false
-        };
-        start.ArgumentList.Add("update");
+            var uri = new Uri(registry, UriKind.Absolute);
+            if (uri.Scheme != "https" && !(uri.Scheme == "http" && uri.IsLoopback))
+                throw new InvalidOperationException("The npm registry must use HTTPS, or HTTP on loopback for local development.");
+            arguments.Add($"--registry={registry}");
+            // Include scopes configured for transitive dependencies, not just direct references.
+            var config = JsonNode.Parse(await RunNpmAsync(directory, ["config", "list", "--json"]))?.AsObject()
+                ?? throw new InvalidDataException("npm returned invalid registry configuration.");
+            var scopes = config.Select(item => item.Key)
+                .Where(key => Regex.IsMatch(key, @"^@[a-z0-9_.-]+:registry$", RegexOptions.CultureInvariant))
+                .Select(key => key.Split(':')[0])
+                .Concat(dependencies.Where(d => d.Name.StartsWith('@')).Select(d => d.Name.Split('/')[0]))
+                .Distinct(StringComparer.Ordinal);
+            foreach (var scope in scopes) arguments.Add($"--{scope}:registry={registry}");
+        }
         foreach (var dependency in dependencies)
         {
             // Validate the manifest names before asking npm to refresh the bounded graph.
@@ -233,8 +249,21 @@ public class NpmPackageUpgradeDetector : IActionDetector
         }
 
         foreach (var option in new[] { "--package-lock-only", "--ignore-scripts", "--no-audit", "--no-fund", "--save", "--save-exact", "--include=dev" })
-            start.ArgumentList.Add(option);
+            arguments.Add(option);
 
+        await RunNpmAsync(directory, arguments);
+    }
+
+    private static async Task<string> RunNpmAsync(string directory, IEnumerable<string> arguments)
+    {
+        var start = new ProcessStartInfo("npm")
+        {
+            WorkingDirectory = directory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        foreach (var argument in arguments) start.ArgumentList.Add(argument);
         using var process = new Process();
         process.StartInfo = start;
         try
@@ -260,12 +289,13 @@ public class NpmPackageUpgradeDetector : IActionDetector
             throw new TimeoutException("npm dependency resolution exceeded three minutes.");
         }
 
-        await output;
+        var stdout = await output;
         var stderr = await error;
         if (process.ExitCode != 0)
         {
             var code = Regex.Match(stderr, @"npm (?:error|ERR!) code ([A-Z0-9_]+)").Groups[1].Value;
             throw new InvalidOperationException($"npm dependency resolution failed (exit {process.ExitCode}, code '{code}'). No project files were changed; check package compatibility and registry access.");
         }
+        return stdout;
     }
 }

@@ -6,6 +6,9 @@ namespace Aiursoft.NugetNinja.PrBot.Configuration;
 /// </summary>
 public class PrBotOptions
 {
+    public string NugetServer { get; set; } = string.Empty;
+    public string NpmRegistry { get; set; } = string.Empty;
+
     /// <summary>
     /// Whether to enable automatic localization after NugetNinja processing.
     /// </summary>

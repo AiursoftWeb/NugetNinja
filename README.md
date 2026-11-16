@@ -85,6 +85,7 @@ Options:
   -d, --dry-run                                    Preview changes without actually making them
   -v, --verbose                                    Show detailed log
   --allow-preview                                  Allow using preview versions of packages from Nuget.
+  --npm-registry <npm-registry>                    Use this npm registry for dependency updates instead of the project's default registry.
   --nuget-server <nuget-server>                    If you want to use a customized nuget server instead of the official nuget.org, you can set it with a value like: https://nuget.myserver/v3/index.json
   --token <token>                                  The PAT token which has privilege to access the nuget server. See: 
                                                    https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
@@ -203,6 +204,8 @@ When you run the `expect-files` command, NugetNinja will read this configuration
 **Configuration via Environment Variables**
 
 The bots support full configuration via environment variables. This is the recommended way to provide secrets and server information. **PrBot** and **MergeBot** have their own configuration sections to avoid conflicts.
+
+Set `PrBot__NugetServer` and `PrBot__NpmRegistry` to select the registries used for dependency updates. Empty values retain public NuGet and the project's npm configuration. The selected NuGet service index must advertise `VulnerabilityInfo` for security checks; an unavailable audit feed is not treated as a clean result. Registry selection does not rewrite the project's source configuration.
 
 <a name="pr-bot-server-configuration"></a>
 **PR Bot Server Configuration**

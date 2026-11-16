@@ -11,6 +11,7 @@ using Aiursoft.NugetNinja.Core.Services.Nuget;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Aiursoft.NugetNinja.Core.Model.Framework;
 
@@ -25,10 +26,11 @@ public abstract class ServiceCommandHandler<TE, TS> : ExecutableCommandHandlerBu
         var verbose = context.GetValue(OptionsProvider.VerboseOption);
         var allowPreview = context.GetValue(OptionsProvider.AllowPreviewOption);
         var customNugetServer = context.GetValue(OptionsProvider.CustomNugetServerOption)!;
+        var npmRegistry = context.GetValue(OptionsProvider.NpmRegistryOption)!;
         var patToken = context.GetValue(OptionsProvider.PatTokenOption)!;
         var allowCross = context.GetValue(OptionsProvider.AllowPreviewOption);
 
-        await ExecuteWithArgs(path, dryRun, verbose, allowPreview, customNugetServer, patToken, allowCross);
+        await ExecuteWithArgs(path, dryRun, verbose, allowPreview, customNugetServer, patToken, allowCross, npmRegistry);
     }
 
     private Task ExecuteWithArgs(
@@ -38,9 +40,11 @@ public abstract class ServiceCommandHandler<TE, TS> : ExecutableCommandHandlerBu
         bool allowPreview,
         string customNugetServer,
         string patToken,
-        bool allowCross)
+        bool allowCross,
+        string npmRegistry)
     {
         var host = BuildHost(verbose, allowPreview, customNugetServer, patToken, allowCross);
+        host.Services.GetRequiredService<IOptions<AppSettings>>().Value.NpmRegistry = npmRegistry;
         return RunFromHost(host, path, dryRun);
     }
 

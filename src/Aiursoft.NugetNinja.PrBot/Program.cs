@@ -11,6 +11,7 @@ using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
 using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.Core.Services.Nuget;
+using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.GitServerBase.Models;
 using Aiursoft.NugetNinja.GitServerBase.Services;
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers;
@@ -51,6 +52,12 @@ static IHostBuilder CreateHostBuilder(string[] args)
             services.AddHttpClient();
             services.Configure<List<Server>>(context.Configuration.GetSection("PrBot:Servers"));
             services.Configure<PrBotOptions>(context.Configuration.GetSection("PrBot"));
+            services.Configure<AppSettings>(options =>
+            {
+                var botOptions = context.Configuration.GetSection("PrBot").Get<PrBotOptions>() ?? new PrBotOptions();
+                options.CustomNugetServer = botOptions.NugetServer;
+                options.NpmRegistry = botOptions.NpmRegistry;
+            });
             services.AddGitRunner();
 
             // Register localization services

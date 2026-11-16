@@ -1,5 +1,7 @@
 FROM hub.aiursoft.com/aiursoft/internalimages/dotnet
 
+ARG NUGET_SOURCE=https://api.nuget.org/v3/index.json
+
 RUN apt update
 RUN apt install -y git unzip wget cron
 RUN mkdir -p /root/.local/share/NugetNinjaWorkspace/
@@ -7,12 +9,13 @@ RUN mkdir -p /root/.dotnet/tools
 
 WORKDIR /app
 COPY . .
-RUN dotnet build -maxcpucount:1 --configuration Release --no-self-contained *.sln && \
-    dotnet pack -maxcpucount:1 --configuration Release *.sln || echo "Some packaging failed!" 
+RUN dotnet restore *.sln --source "$NUGET_SOURCE" && \
+    dotnet build -maxcpucount:1 --configuration Release --no-restore --no-self-contained *.sln && \
+    dotnet pack -maxcpucount:1 --configuration Release --no-restore --no-build *.sln
 
-RUN dotnet tool install --global Aiursoft.NugetNinja          --add-source /app/src/Aiursoft.NugetNinja/bin/Release/ && \
-    dotnet tool install --global Aiursoft.NugetNinja.PrBot    --add-source /app/src/Aiursoft.NugetNinja.PrBot/bin/Release/ && \
-    dotnet tool install --global Aiursoft.NugetNinja.MergeBot --add-source /app/src/Aiursoft.NugetNinja.MergeBot/bin/Release/
+RUN dotnet tool install --global Aiursoft.NugetNinja          --source /app/src/Aiursoft.NugetNinja/bin/Release/ && \
+    dotnet tool install --global Aiursoft.NugetNinja.PrBot    --source /app/src/Aiursoft.NugetNinja.PrBot/bin/Release/ && \
+    dotnet tool install --global Aiursoft.NugetNinja.MergeBot --source /app/src/Aiursoft.NugetNinja.MergeBot/bin/Release/
      
 RUN /root/.dotnet/tools/ninja --version
 

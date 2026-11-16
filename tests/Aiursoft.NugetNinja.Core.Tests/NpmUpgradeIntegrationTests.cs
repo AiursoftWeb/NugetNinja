@@ -11,6 +11,7 @@ using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.Core.Services.Nuget;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using WorkspaceModel = Aiursoft.NugetNinja.Core.Model.Workspace.Model;
 
 namespace Aiursoft.NugetNinja.Core.Tests;
@@ -37,6 +38,69 @@ public class NpmUpgradeIntegrationTests
     {
         Environment.SetEnvironmentVariable("npm_config_registry", _registry);
         Environment.SetEnvironmentVariable("NPM_CONFIG_REGISTRY", _uppercaseRegistry);
+    }
+
+    [TestMethod]
+    public async Task ConfiguredRegistryOverridesProjectScopesAndBuildEnvironment()
+    {
+        await using var original = new RegistryFixture();
+        await using var selected = new RegistryFixture { PublishUpdates = true };
+        await original.CreateLockAsync(3);
+        var npmrc = Path.Combine(original.DirectoryPath, ".npmrc");
+        await File.AppendAllTextAsync(npmrc, $"@scope:registry={original.Origin}\n");
+        var originalConfig = await File.ReadAllTextAsync(npmrc);
+        var before = original.MetadataRequests;
+        Environment.SetEnvironmentVariable("npm_config_registry", "http://127.0.0.1:1");
+        try
+        {
+            var detector = new NpmPackageUpgradeDetector(Options.Create(new AppSettings { NpmRegistry = selected.Origin }));
+            var actions = await detector.AnalyzeAsync(original.Model).ToListAsync();
+            Assert.HasCount(1, actions);
+            await actions.Single().TakeActionAsync();
+            var manifest = JsonNode.Parse(await File.ReadAllTextAsync(original.ManifestPath))!;
+            Assert.AreEqual("1.2.0", manifest["dependencies"]!["stable"]!.GetValue<string>());
+            Assert.AreEqual("~1.1.0", manifest["dependencies"]!["@scope/scoped"]!.GetValue<string>());
+            Assert.AreEqual(before, original.MetadataRequests, "The project's original registry must not receive upgrade queries.");
+            Assert.IsGreaterThan(0, selected.MetadataRequests);
+            Assert.AreEqual(originalConfig, await File.ReadAllTextAsync(npmrc), "Source selection must not rewrite the contributor's registry configuration.");
+            Assert.HasCount(0, await detector.AnalyzeAsync(original.Model).ToListAsync());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("npm_config_registry", null);
+        }
+    }
+
+    [TestMethod]
+    public async Task ConfiguredRegistryFailureDoesNotFallBackOrChangeTheProject()
+    {
+        await using var fixture = new RegistryFixture();
+        await fixture.CreateLockAsync(3);
+        var before = await fixture.ReadFilesAsync();
+        var requests = fixture.MetadataRequests;
+        var detector = new NpmPackageUpgradeDetector(Options.Create(new AppSettings { NpmRegistry = "http://127.0.0.1:1" }));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => detector.AnalyzeAsync(fixture.Model).ToListAsync());
+        CollectionAssert.AreEqual(before, await fixture.ReadFilesAsync());
+        Assert.AreEqual(requests, fixture.MetadataRequests);
+    }
+
+    [TestMethod]
+    public async Task ConfiguredRegistryAlsoOverridesAScopeUsedOnlyByTransitivePackages()
+    {
+        await using var original = new RegistryFixture { IncludeTransitive = true, LeafName = "@other/leaf" };
+        await using var selected = new RegistryFixture { IncludeTransitive = true, PublishUpdates = true, LeafName = "@other/leaf" };
+        original.SetAvailableVersions("@other/leaf", "1.0.0", "1.1.0");
+        selected.SetAvailableVersions("@other/leaf", "1.0.0", "1.1.0");
+        await original.CreateLockAsync(3);
+        await File.AppendAllTextAsync(Path.Combine(original.DirectoryPath, ".npmrc"), $"@other:registry={original.Origin}\n");
+        var count = original.MetadataRequests;
+        var detector = new NpmPackageUpgradeDetector(Options.Create(new AppSettings { NpmRegistry = selected.Origin }));
+        var actions = await detector.AnalyzeAsync(original.Model).ToListAsync();
+        Assert.HasCount(1, actions);
+        await actions.Single().TakeActionAsync();
+        var packageLock = JsonNode.Parse(await File.ReadAllTextAsync(original.LockPath))!;
+        Assert.AreEqual("1.1.0", packageLock["packages"]!["node_modules/@other/leaf"]!["version"]!.GetValue<string>());
+        Assert.AreEqual(count, original.MetadataRequests);
     }
 
     [TestMethod]
@@ -493,11 +557,14 @@ public class NpmUpgradeIntegrationTests
             ["leaf"] = ["1.0.0", "1.1.0", "2.0.0"]
         };
         private readonly string _origin;
+        public string Origin => _origin;
+        public int MetadataRequests { get; private set; }
         public string DirectoryPath { get; private set; } = Directory.CreateTempSubdirectory("ninja-npm-test-").FullName;
         public string ManifestPath => Path.Combine(DirectoryPath, "package.json");
         public string LockPath => Path.Combine(DirectoryPath, "package-lock.json");
         public bool PublishUpdates { get; set; }
         public bool IncludeTransitive { get; set; }
+        public string LeafName { get; init; } = "leaf";
         public string? PinnedPrerelease { get; init; }
         public string? Failure { get; set; }
         public int TarballRequests { get; private set; }
@@ -584,13 +651,14 @@ public class NpmUpgradeIntegrationTests
                     var request = await reader.ReadLineAsync();
                     while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) { }
                     var name = Uri.UnescapeDataString(request!.Split(' ')[1].Split('?')[0].TrimStart('/'));
+                    MetadataRequests++;
                     if (name.StartsWith("tarballs/", StringComparison.Ordinal)) TarballRequests++;
                     var available = _versions.GetValueOrDefault(name);
                     var status = Failure == "offline" ? 503 : available == null ? 404 : 200;
                     var versions = new JsonObject();
                     if (available != null)
                     {
-                        foreach (var version in PublishUpdates && (!IncludeTransitive || name == "leaf") ? available : available.Take(1))
+                        foreach (var version in PublishUpdates && (!IncludeTransitive || name == LeafName) ? available : available.Take(1))
                         {
                             var entry = new JsonObject
                             {
@@ -598,7 +666,7 @@ public class NpmUpgradeIntegrationTests
                                 ["dist"] = new JsonObject { ["tarball"] = $"{_origin}/tarballs/{name.Replace('/', '-')}-{version}.tgz", ["shasum"] = new string('a', 40) }
                             };
                             if (IncludeTransitive && name == "stable")
-                                entry["dependencies"] = new JsonObject { ["leaf"] = "^" + _versions["leaf"][0] };
+                                entry["dependencies"] = new JsonObject { [LeafName] = "^" + _versions[LeafName][0] };
                             if (PinnedPrerelease != null && name == "preview")
                                 entry["dependencies"] = new JsonObject { ["leaf"] = "^1.0.0" };
                             if (Failure == "peer-conflict" && name == "stable" && version == "1.2.0")

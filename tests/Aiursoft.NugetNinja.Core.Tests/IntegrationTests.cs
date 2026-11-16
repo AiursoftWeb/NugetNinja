@@ -26,6 +26,7 @@ public class IntegrationTests
         .WithGlobalOptions(OptionsProvider.VerboseOption)
         .WithGlobalOptions(OptionsProvider.AllowPreviewOption)
         .WithGlobalOptions(OptionsProvider.CustomNugetServerOption)
+        .WithGlobalOptions(OptionsProvider.NpmRegistryOption)
         .WithGlobalOptions(OptionsProvider.PatTokenOption)
         .WithGlobalOptions(OptionsProvider.AllowPackageVersionCrossMicrosoftRuntime);
 

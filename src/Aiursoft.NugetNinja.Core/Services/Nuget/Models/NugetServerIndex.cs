@@ -19,6 +19,9 @@ public class NugetServerIndex
 
 public class NugetServerEndPoints(string packageBaseAddress, string registrationsBaseUrl)
 {
+    public string? SearchQueryService { get; init; }
+    public string? VulnerabilityInfo { get; init; }
+
     /// <summary>
     ///     Base URL of Azure storage where NuGet package registration info is stored
     ///     Sample: https://api.nuget.org/v3/registration5-semver1/
