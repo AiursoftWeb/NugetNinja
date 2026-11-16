@@ -16,8 +16,6 @@ namespace Aiursoft.NugetNinja.Core.Services.Nuget;
 public class NugetService
 {
     private const string DefaultNugetServer = "https://api.nuget.org/v3/index.json";
-    private const string NuGetSearchUrl = "https://azuresearch-ea.nuget.org/query";
-    private const string NuGetVulnerabilityIndexUrl = "https://api.nuget.org/v3/vulnerabilities/index.json";
     private readonly string _customNugetServer = DefaultNugetServer;
     private readonly string _patToken;
     private readonly bool _allowPreview;
@@ -86,13 +84,13 @@ public class NugetService
 
     public Task<CatalogInformation> GetPackageDeprecationInfo(Package package)
     {
-        return _cacheService.RunWithCache($"nuget-deprecation-info-{package}-version-{package.Version}-cache",
+        return _cacheService.RunWithCache($"nuget-deprecation-info-{_customNugetServer}-{package}-version-{package.Version}-cache",
             () => GetPackageDeprecationInfoFromNuget(package));
     }
 
     public Task<IReadOnlyCollection<NugetVersion>> GetAllPublishedVersions(string packageName)
     {
-        return _cacheService.RunWithCache($"all-nuget-published-versions-package-{packageName}-preview-cache",
+        return _cacheService.RunWithCache($"all-nuget-published-versions-{_customNugetServer}-package-{packageName}-preview-{_allowPreview}-cache",
             () => GetAllPublishedVersionsFromNuget(packageName));
     }
 
@@ -105,7 +103,7 @@ public class NugetService
 
     public Task<Package[]> GetPackageDependencies(Package package)
     {
-        return _cacheService.RunWithCache($"nuget-package-{package.Name}-dependencies-{package.Version}-cache",
+        return _cacheService.RunWithCache($"nuget-package-{_customNugetServer}-{package.Name}-dependencies-{package.Version}-cache",
             () => GetPackageDependenciesFromNuget(package));
     }
 
@@ -155,7 +153,11 @@ public class NugetService
             registrationsBaseUrl = registrationsBaseUrl.Replace("api.nuget.org", "nuget.azure.cn");
         }
         
-        return new NugetServerEndPoints(packageBaseAddress, registrationsBaseUrl);
+        return new NugetServerEndPoints(packageBaseAddress, registrationsBaseUrl)
+        {
+            SearchQueryService = responseModel.Resources.FirstOrDefault(r => r.Type.StartsWith("SearchQueryService", StringComparison.Ordinal))?.Id,
+            VulnerabilityInfo = responseModel.Resources.FirstOrDefault(r => r.Type.StartsWith("VulnerabilityInfo/", StringComparison.Ordinal))?.Id
+        };
     }
 
     private async Task<IReadOnlyCollection<NugetVersion>> GetAllPublishedVersionsFromNuget(string packageName)
@@ -188,7 +190,7 @@ public class NugetService
                 // Safety-sensitive callers use GetKnownVulnerabilities, which propagates
                 // this failure and therefore fails closed.
                 _logger.LogWarning(exception,
-                    "Failed to fetch vulnerability info for '{Package}' from nuget.org", package);
+                    "Failed to fetch vulnerability info for '{Package}' from {Source}", package, _customNugetServer);
             }
 
             return new CatalogInformation
@@ -199,17 +201,19 @@ public class NugetService
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to get package deprecation/vulnerability info for '{Package}' from nuget.org",
-                package);
+            _logger.LogWarning(e, "Failed to get package deprecation/vulnerability info for '{Package}' from {Source}",
+                package, _customNugetServer);
             return new CatalogInformation();
         }
     }
 
     private async Task<Deprecation?> GetDeprecationFromSearch(Package package)
     {
+        var endpoint = await GetApiEndpoint();
+        if (string.IsNullOrWhiteSpace(endpoint.SearchQueryService)) return null;
         var searchUrl =
-            $"{NuGetSearchUrl}?q={Uri.EscapeDataString(package.Name)}&semVerLevel=2.0.0&prerelease=true&take=5";
-        var response = await HttpGetJson<NuGetSearchResponse>(searchUrl, string.Empty);
+            $"{endpoint.SearchQueryService}{(endpoint.SearchQueryService.Contains('?') ? '&' : '?')}q={Uri.EscapeDataString(package.Name)}&semVerLevel=2.0.0&prerelease=true&take=5";
+        var response = await HttpGetJson<NuGetSearchResponse>(searchUrl, _patToken);
         var match = response.Data.FirstOrDefault(d =>
             string.Equals(d.Id, package.Name, StringComparison.OrdinalIgnoreCase));
         return match?.Deprecation;
@@ -219,15 +223,24 @@ public class NugetService
     {
         if (_vulnerabilityCache == null)
         {
+            var endpoint = await GetApiEndpoint();
+            if (string.IsNullOrWhiteSpace(endpoint.VulnerabilityInfo))
+                throw new InvalidOperationException($"The NuGet source '{_customNugetServer}' does not provide VulnerabilityInfo. Vulnerability checks cannot be completed.");
             var index = await HttpGetJson<List<VulnerabilityIndexEntry>>(
-                NuGetVulnerabilityIndexUrl, string.Empty);
+                endpoint.VulnerabilityInfo, _patToken);
+            if (index.Count is < 1 or > 16 || index.Any(page => !Uri.TryCreate(page.Id, UriKind.Absolute, out _)))
+                throw new InvalidDataException("The NuGet source returned an invalid vulnerability index.");
             var vulnerabilityCache = new Dictionary<string, List<VulnerabilityBaseEntry>>(
                 StringComparer.OrdinalIgnoreCase);
 
-            foreach (var page in index.Where(page => !string.IsNullOrWhiteSpace(page.Id)))
+            foreach (var page in index)
             {
-                var pageEntries = await HttpGetJson<Dictionary<string, List<VulnerabilityBaseEntry>>>(
-                    page.Id, string.Empty);
+                var document = await HttpGetJson<JsonElement>(page.Id, _patToken);
+                // The NuGet protocol also permits [] for an empty vulnerability page.
+                var pageEntries = document.ValueKind == JsonValueKind.Array && document.GetArrayLength() == 0
+                    ? new Dictionary<string, List<VulnerabilityBaseEntry>>()
+                    : document.Deserialize<Dictionary<string, List<VulnerabilityBaseEntry>>>()
+                        ?? throw new InvalidDataException("The NuGet source returned an invalid vulnerability page.");
                 foreach (var (packageName, packageEntries) in pageEntries)
                 {
                     if (!vulnerabilityCache.TryGetValue(packageName, out var existingEntries))
@@ -344,7 +357,7 @@ public class NugetService
         }
         catch (Exception e)
         {
-            if (url.Contains("api.nuget.org"))
+            if (_customNugetServer == DefaultNugetServer && new Uri(url).Host == "api.nuget.org")
             {
                 var fallbackUrl = url.Replace("api.nuget.org", "globalcdn.nuget.org");
                 _logger.LogWarning(e, "Failed to fetch from {Url}. Retrying with fallback: {FallbackUrl}", url, fallbackUrl);

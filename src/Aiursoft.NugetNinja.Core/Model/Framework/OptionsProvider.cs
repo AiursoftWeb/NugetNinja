@@ -40,6 +40,11 @@ public static class OptionsProvider
             Description = "If you want to use a customized nuget server instead of the official nuget.org, you can set it with a value like: https://nuget.myserver/v3/index.json" // 规则 2
         };
 
+    public static readonly Option<string> NpmRegistryOption = new(name: "--npm-registry")
+    {
+        Description = "Use this npm registry for dependency updates instead of the project's default registry."
+    };
+
     public static readonly Option<string> PatTokenOption =
         new(
             name: "--token") // 规则 1

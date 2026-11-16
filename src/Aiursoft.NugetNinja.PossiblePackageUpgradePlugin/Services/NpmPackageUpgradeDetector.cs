@@ -5,13 +5,19 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Models;
+using Microsoft.Extensions.Options;
 
 namespace Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 
-public class NpmPackageUpgradeDetector : IActionDetector
+public class NpmPackageUpgradeDetector(IOptions<AppSettings> options) : IActionDetector
 {
+    public NpmPackageUpgradeDetector() : this(Options.Create(new AppSettings()))
+    {
+    }
+
     private static readonly string[] Sections = ["dependencies", "devDependencies", "optionalDependencies"];
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -69,7 +75,7 @@ public class NpmPackageUpgradeDetector : IActionDetector
         }
     }
 
-    private static async Task<IAction?> AnalyzePackageAsync(Model context, string directory)
+    private async Task<IAction?> AnalyzePackageAsync(Model context, string directory)
     {
         var manifestPath = Path.Combine(directory, "package.json");
         var lockPath = Path.Combine(directory, "package-lock.json");
@@ -143,9 +149,11 @@ public class NpmPackageUpgradeDetector : IActionDetector
             var npmrc = Path.Combine(directory, ".npmrc");
             if (!File.Exists(npmrc)) npmrc = Path.Combine(context.RootPath, ".npmrc");
             if (File.Exists(npmrc)) File.Copy(npmrc, Path.Combine(temporary, ".npmrc"));
-            await ResolveAsync(temporary, dependencies.DistinctBy(d => d.Name).ToArray());
+            var contributorRegistries = await ResolveAsync(temporary, dependencies.DistinctBy(d => d.Name).ToArray());
 
             var resolvedLock = JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(temporary, "package-lock.json")))!.AsObject();
+            if (contributorRegistries != null)
+                RestoreContributorSources(resolvedLock, contributorRegistries);
             var resolvedPackages = resolvedLock["packages"]!.AsObject();
             var resolvedRoot = resolvedPackages[""]!.AsObject();
             var updated = (JsonObject)manifest.DeepClone();
@@ -214,16 +222,37 @@ public class NpmPackageUpgradeDetector : IActionDetector
 
     private static string Serialize(JsonNode node) => node.ToJsonString(JsonOptions) + "\n";
 
-    private static async Task ResolveAsync(string directory, Dependency[] dependencies)
+    private async Task<IReadOnlyDictionary<string, Uri>?> ResolveAsync(string directory, Dependency[] dependencies)
     {
-        var start = new ProcessStartInfo("npm")
+        var arguments = new List<string> { "update" };
+        var registry = options.Value.NpmRegistry;
+        Dictionary<string, Uri>? contributorRegistries = null;
+        if (!string.IsNullOrWhiteSpace(registry))
         {
-            WorkingDirectory = directory,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false
-        };
-        start.ArgumentList.Add("update");
+            var uri = new Uri(registry, UriKind.Absolute);
+            if ((uri.Scheme != "https" && !(uri.Scheme == "http" && uri.IsLoopback)) || uri.UserInfo.Length > 0)
+                throw new InvalidOperationException("The npm registry must use HTTPS, or loopback HTTP, without embedded credentials.");
+            arguments.Add($"--registry={registry}");
+            // Include scopes configured for transitive dependencies, not just direct references.
+            var config = JsonNode.Parse(await RunNpmAsync(directory, ["config", "list", "--json"]))?.AsObject()
+                ?? throw new InvalidDataException("npm returned invalid registry configuration.");
+            // Machine registry overrides select where the bot resolves packages, not the
+            // addresses committed for contributors. Let npm interpret the project configuration.
+            var contributorConfig = Environment.GetEnvironmentVariables().Keys.Cast<string>().Any(IsRegistryEnvironment)
+                ? JsonNode.Parse(await RunNpmAsync(directory, ["config", "list", "--json"], ignoreRegistryEnvironment: true))!.AsObject()
+                : config;
+            contributorRegistries = contributorConfig
+                .Where(item => item.Key == "registry" || item.Key.EndsWith(":registry", StringComparison.Ordinal))
+                .ToDictionary(item => item.Key, item => new Uri(item.Value!.GetValue<string>().TrimEnd('/') + "/"), StringComparer.Ordinal);
+            if (!contributorRegistries.ContainsKey("registry") || contributorRegistries.Values.Any(source => source.UserInfo.Length > 0))
+                throw new InvalidDataException("Registry URLs with embedded credentials cannot be committed to lockfiles; configure npm authentication separately.");
+            var scopes = config.Select(item => item.Key)
+                .Where(key => Regex.IsMatch(key, @"^@[a-z0-9_.-]+:registry$", RegexOptions.CultureInvariant))
+                .Select(key => key.Split(':')[0])
+                .Concat(dependencies.Where(d => d.Name.StartsWith('@')).Select(d => d.Name.Split('/')[0]))
+                .Distinct(StringComparer.Ordinal);
+            foreach (var scope in scopes) arguments.Add($"--{scope}:registry={registry}");
+        }
         foreach (var dependency in dependencies)
         {
             // Validate the manifest names before asking npm to refresh the bounded graph.
@@ -233,8 +262,61 @@ public class NpmPackageUpgradeDetector : IActionDetector
         }
 
         foreach (var option in new[] { "--package-lock-only", "--ignore-scripts", "--no-audit", "--no-fund", "--save", "--save-exact", "--include=dev" })
-            start.ArgumentList.Add(option);
+            arguments.Add(option);
 
+        await RunNpmAsync(directory, arguments);
+        return contributorRegistries;
+    }
+
+    private void RestoreContributorSources(JsonObject packageLock, IReadOnlyDictionary<string, Uri> registries)
+    {
+        var selected = new Uri(options.Value.NpmRegistry.TrimEnd('/') + "/");
+        foreach (var (path, entry) in packageLock["packages"]!.AsObject())
+        {
+            var segment = path.LastIndexOf("node_modules/", StringComparison.Ordinal);
+            if (segment >= 0 && entry is JsonObject package)
+                RestoreResolved(package, package["name"]?.GetValue<string>() ?? path[(segment + "node_modules/".Length)..]);
+        }
+        if (packageLock["dependencies"] is JsonObject legacyDependencies)
+            RestoreLegacy(legacyDependencies);
+
+        void RestoreLegacy(JsonObject dependencies)
+        {
+            foreach (var (name, entry) in dependencies)
+            {
+                if (entry is not JsonObject package) continue;
+                RestoreResolved(package, name);
+                if (package["dependencies"] is JsonObject children) RestoreLegacy(children);
+            }
+        }
+
+        void RestoreResolved(JsonObject package, string name)
+        {
+            if (!Uri.TryCreate(package["resolved"]?.GetValue<string>(), UriKind.Absolute, out var resolved) ||
+                !selected.IsBaseOf(resolved)) return;
+            var scope = name.StartsWith('@') && name.Contains('/') ? name[..name.IndexOf('/')] + ":registry" : "registry";
+            var contributor = registries.GetValueOrDefault(scope) ?? registries["registry"];
+            package["resolved"] = new Uri(contributor, selected.MakeRelativeUri(resolved)).AbsoluteUri;
+        }
+    }
+
+    private static bool IsRegistryEnvironment(string name) =>
+        name.StartsWith("npm_config_", StringComparison.OrdinalIgnoreCase) && name.EndsWith("registry", StringComparison.OrdinalIgnoreCase);
+
+    private static async Task<string> RunNpmAsync(string directory, IEnumerable<string> arguments, bool ignoreRegistryEnvironment = false)
+    {
+        var start = new ProcessStartInfo("npm")
+        {
+            WorkingDirectory = directory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        if (ignoreRegistryEnvironment)
+            foreach (var name in start.Environment.Keys.Where(IsRegistryEnvironment).ToArray()) start.Environment.Remove(name);
+        foreach (var argument in arguments) start.ArgumentList.Add(argument);
+        // Configuration reads must not trigger npm's own update check against the project registry.
+        start.ArgumentList.Add("--no-update-notifier");
         using var process = new Process();
         process.StartInfo = start;
         try
@@ -260,12 +342,13 @@ public class NpmPackageUpgradeDetector : IActionDetector
             throw new TimeoutException("npm dependency resolution exceeded three minutes.");
         }
 
-        await output;
+        var stdout = await output;
         var stderr = await error;
         if (process.ExitCode != 0)
         {
             var code = Regex.Match(stderr, @"npm (?:error|ERR!) code ([A-Z0-9_]+)").Groups[1].Value;
             throw new InvalidOperationException($"npm dependency resolution failed (exit {process.ExitCode}, code '{code}'). No project files were changed; check package compatibility and registry access.");
         }
+        return stdout;
     }
 }

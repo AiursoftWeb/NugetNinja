@@ -506,6 +506,14 @@ public class PluginDetectorTests
                         {
                           "@id": "https://packages.test/registrations/",
                           "@type": "RegistrationsBaseUrl/3.6.0"
+                        },
+                        {
+                          "@id": "https://packages.test/query",
+                          "@type": "SearchQueryService/3.5.0"
+                        },
+                        {
+                          "@id": "https://packages.test/v3/vulnerabilities/index.json",
+                          "@type": "VulnerabilityInfo/6.7.0"
                         }
                       ]
                     }
@@ -591,6 +599,14 @@ public class PluginDetectorTests
                         {
                           "@id": "https://packages.test/registrations/",
                           "@type": "RegistrationsBaseUrl/3.6.0"
+                        },
+                        {
+                          "@id": "https://packages.test/query",
+                          "@type": "SearchQueryService/3.5.0"
+                        },
+                        {
+                          "@id": "https://packages.test/v3/vulnerabilities/index.json",
+                          "@type": "VulnerabilityInfo/6.7.0"
                         }
                       ]
                     }
@@ -608,7 +624,7 @@ public class PluginDetectorTests
                     [
                       {
                         "@name": "base",
-                        "@id": "https://api.nuget.org/v3-vulnerabilities/base.json"
+                        "@id": "https://packages.test/v3-vulnerabilities/base.json"
                       }
                     ]
                     """, "application/json"));

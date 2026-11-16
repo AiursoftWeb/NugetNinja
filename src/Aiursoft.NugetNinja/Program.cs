@@ -25,6 +25,7 @@ return await new NestedCommandApp()
     .WithGlobalOptions(OptionsProvider.VerboseOption)
     .WithGlobalOptions(OptionsProvider.AllowPreviewOption)
     .WithGlobalOptions(OptionsProvider.CustomNugetServerOption)
+    .WithGlobalOptions(OptionsProvider.NpmRegistryOption)
     .WithGlobalOptions(OptionsProvider.PatTokenOption)
     .WithGlobalOptions(OptionsProvider.AllowPackageVersionCrossMicrosoftRuntime)
     .RunAsync(args);
