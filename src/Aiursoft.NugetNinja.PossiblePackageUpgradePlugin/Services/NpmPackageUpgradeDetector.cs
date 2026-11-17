@@ -330,7 +330,7 @@ public class NpmPackageUpgradeDetector(IOptions<AppSettings> options) : IActionD
 
         var output = process.StandardOutput.ReadToEndAsync();
         var error = process.StandardError.ReadToEndAsync();
-        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(30));
         try
         {
             await process.WaitForExitAsync(timeout.Token);
@@ -339,7 +339,7 @@ public class NpmPackageUpgradeDetector(IOptions<AppSettings> options) : IActionD
         {
             process.Kill(entireProcessTree: true);
             await process.WaitForExitAsync();
-            throw new TimeoutException("npm dependency resolution exceeded three minutes.");
+            throw new TimeoutException("npm dependency resolution exceeded 30 minutes.");
         }
 
         var stdout = await output;
