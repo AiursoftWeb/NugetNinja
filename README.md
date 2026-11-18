@@ -109,6 +109,19 @@ Commands:
 ### npm packages
 
 Opt in to [compatible npm updates](https://github.com/AiursoftWeb/NugetNinja/blob/master/docs/npm-updates.md) through `ninja.yaml`.
+
+To upgrade a set of directly referenced NuGet packages together, declare their exact IDs in `ninja.yaml`:
+
+```yaml
+nuget:
+  sameVersionGroups:
+    native-library:
+      - Example.Managed
+      - Example.Native
+```
+
+When a project declares every member with a literal, unconditional version, Ninja selects the highest common stable version on its configured feed without downgrading any member. If the shared version is unavailable or a member is held by a security override, Ninja leaves the group unchanged and continues with unrelated updates. A project that references only part of the group uses normal upgrade behavior. Each package ID can belong to one group.
+
 The existing `upgrade-pkg`, `all` and PR bot workflows update the manifest and lockfile together.
 
 ### Transitive security overrides

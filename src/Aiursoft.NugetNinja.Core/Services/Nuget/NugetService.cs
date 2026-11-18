@@ -53,33 +53,30 @@ public class NugetService
         var allVersions = (await GetAllPublishedVersions(packageName) ?? throw new InvalidOperationException($"No version found with package: '{packageName}'."))
             .OrderByDescending(t => t)
             .ToList();
-        var first5Versions = allVersions 
-            .Take(5)
-            .ToList(); // Only take latest 5 versions.
+        return RuntimeCompatibleVersions(packageName, allVersions, runtimes).First();
+    }
 
-        
-        if (_allowPackageVersionCrossMicrosoftRuntime)
-        {
-            return allVersions.First();
-        }
-        else
-        {
-            var likeMsRuntimeVersions = _versionCrossChecker.LikeRuntimeVersions(first5Versions);
-            if (!likeMsRuntimeVersions)
-            {
-                return allVersions.First();
-            }
-            
-            _logger.LogTrace("The package {PackageName}'s first 5 versions look like matching MS runtime versions",
-                packageName);
-            var latest = allVersions.FirstOrDefault(v =>
-            {
-                if (v.PrimaryVersion == null) return false;
-                var versionString = $"{v.PrimaryVersion.Major}.{v.PrimaryVersion.Minor}";
-                return runtimes.Any(r => r.Contains(versionString));
-            });
-            return latest != default ? latest : allVersions.First();
-        }
+    public async Task<IReadOnlyCollection<NugetVersion>> GetStableGroupVersions(string packageName, string[] runtimes)
+    {
+        var stableVersions = (await GetAllPublishedVersions(packageName))
+            .Where(version => !version.IsPreviewVersion())
+            .OrderByDescending(version => version)
+            .ToList();
+        return RuntimeCompatibleVersions(packageName, stableVersions, runtimes);
+    }
+
+    private IReadOnlyCollection<NugetVersion> RuntimeCompatibleVersions(
+        string packageName, List<NugetVersion> versions, string[] runtimes)
+    {
+        if (_allowPackageVersionCrossMicrosoftRuntime ||
+            !_versionCrossChecker.LikeRuntimeVersions(versions.Take(5).ToList()))
+            return versions;
+
+        _logger.LogTrace("The package {PackageName}'s first 5 versions look like matching MS runtime versions",
+            packageName);
+        var compatible = versions.Where(version => version.PrimaryVersion is { } primary &&
+            runtimes.Any(runtime => runtime.Contains($"{primary.Major}.{primary.Minor}"))).ToList();
+        return compatible.Count > 0 ? compatible : versions;
     }
 
     public Task<CatalogInformation> GetPackageDeprecationInfo(Package package)

@@ -42,7 +42,13 @@ public class Model
             OptionWriteEmptyNodes = true
         };
         csprojDoc.LoadHtml(csprojContent);
-        var packageReferences = GetPackageReferences(csprojDoc);
+        var declared = csprojDoc.DocumentNode.Descendants("PackageReference")
+            .Select(node => node.Attributes["Include"]?.Value)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var sameVersionGroups = NinjaConfig.Nuget?.SameVersionGroups
+            .Where(group => group.Value.All(declared.Contains))
+            .ToDictionary() ?? new Dictionary<string, string[]>();
+        var packageReferences = GetPackageReferences(csprojDoc, sameVersionGroups.Values);
         var projectReferences = GetProjectReferences(csprojDoc, csprojFolder);
         var frameworkReferences = GetFrameworkReferences(csprojDoc);
 
@@ -57,16 +63,20 @@ public class Model
         var project = new Project(csprojPath, csprojDoc.DocumentNode)
         {
             PackageReferences = packageReferences.ToList(),
+            SameVersionGroups = sameVersionGroups,
             ProjectReferences = subProjectReferenceObjects,
             FrameworkReferences = frameworkReferences.ToList()
         };
         return project;
     }
 
-    private Package[] GetPackageReferences(HtmlDocument doc)
+    private Package[] GetPackageReferences(HtmlDocument doc, IEnumerable<string[]> groups)
     {
+        var grouped = groups.SelectMany(members => members).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var packageReferences = doc.DocumentNode
             .Descendants("PackageReference")
+            .Where(node => !grouped.Contains(node.Attributes["Include"]?.Value ?? string.Empty) ||
+                           Project.IsLiteralPackageVersion(node.Attributes["Version"]?.Value))
             .Select(p => new Package(
                 p.GetRequiredAttributeValue("Include"),
                 p.GetRequiredAttributeValue("Version")))

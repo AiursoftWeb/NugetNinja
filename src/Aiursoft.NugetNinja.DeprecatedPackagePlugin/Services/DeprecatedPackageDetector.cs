@@ -31,7 +31,8 @@ public class DeprecatedPackageDetector(
             if (catalogInformation.Deprecation != null)
             {
                 Package? alternative = null;
-                if (!string.IsNullOrWhiteSpace(catalogInformation.Deprecation.AlternatePackage?.Id))
+                if (!project.IsGroupedPackage(package.Name) &&
+                    !string.IsNullOrWhiteSpace(catalogInformation.Deprecation.AlternatePackage?.Id))
                 {
                     var alternativeVersion =
                         await nugetService.GetLatestVersion(catalogInformation.Deprecation.AlternatePackage.Id, project.GetTargetFrameworks());
