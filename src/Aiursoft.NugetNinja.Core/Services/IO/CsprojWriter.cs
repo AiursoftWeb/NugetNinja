@@ -61,7 +61,9 @@ public class CsprojWriter
         "Using"
     ];
 
-    public async Task SaveCsprojToDisk(HtmlDocument doc, string path)
+    public Task SaveCsprojToDisk(HtmlDocument doc, string path) => SaveCsprojToDisk(doc, path, atomic: false);
+
+    internal async Task SaveCsprojToDisk(HtmlDocument doc, string path, bool atomic)
     {
         SortAllPropertyGroups(doc);
         var memoryStream = new MemoryStream();
@@ -85,7 +87,24 @@ public class CsprojWriter
             @"<$1>$2</$1>");
 
         var indentedText = FormatXml(csprojText);
-        await File.WriteAllTextAsync(path, indentedText);
+        if (!atomic)
+        {
+            await File.WriteAllTextAsync(path, indentedText);
+            return;
+        }
+
+        var temporary = $"{path}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            await File.WriteAllTextAsync(temporary, indentedText);
+            if (!OperatingSystem.IsWindows())
+                File.SetUnixFileMode(temporary, File.GetUnixFileMode(path));
+            File.Move(temporary, path, overwrite: true);
+        }
+        finally
+        {
+            File.Delete(temporary);
+        }
     }
 
     private string FormatXml(string xml)

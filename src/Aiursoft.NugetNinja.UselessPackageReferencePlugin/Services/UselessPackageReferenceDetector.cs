@@ -43,6 +43,9 @@ public class UselessPackageReferenceDetector(
 
         foreach (var directReference in context.PackageReferences)
         {
+            if (context.IsGroupedPackage(directReference.Name))
+                continue;
+
             var accessiblePackagesForThisProject = accessiblePackages.ToList();
             foreach (var otherDirectReference in context.PackageReferences.Where(p => p != directReference))
                 try

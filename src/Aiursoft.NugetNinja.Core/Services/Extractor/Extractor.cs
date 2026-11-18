@@ -18,11 +18,6 @@ public class Extractor(ILogger<Extractor> logger)
             RootPath = rootPath
         };
 
-        foreach (var csprojPath in csprojs)
-        {
-            await model.IncludeProject(csprojPath, logger);
-        }
-        
         var configFilePath = Path.Combine(rootPath, "ninja.yaml");
         if (File.Exists(configFilePath))
         {
@@ -33,12 +28,18 @@ public class Extractor(ILogger<Extractor> logger)
                 .IgnoreUnmatchedProperties()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
-            var deserialized = deserializer.Deserialize<NinjaConfig>(configContent);
-            model.NinjaConfig = deserialized;
+            var deserialized = deserializer.Deserialize<NinjaConfig?>(configContent);
+            model.NinjaConfig = deserialized ?? new NinjaConfig();
+            model.NinjaConfig.Nuget?.Validate();
         }
         else
         {
             logger.LogWarning("Can not find ninja config file: {Path}", configFilePath);
+        }
+
+        foreach (var csprojPath in csprojs)
+        {
+            await model.IncludeProject(csprojPath, logger);
         }
 
         return model;
@@ -56,6 +57,8 @@ public class NinjaConfig
     public NinjaHttpConfig? Http { get; set; } = new();
 
     public NinjaNpmConfig? Npm { get; set; }
+
+    public NinjaNugetConfig? Nuget { get; set; }
     
     // ReSharper disable once CollectionNeverUpdated.Global
     public List<NinjaConfigFile> Files { get; set; } = [];
