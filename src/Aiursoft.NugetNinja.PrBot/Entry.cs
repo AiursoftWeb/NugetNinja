@@ -2,10 +2,14 @@
 using Aiursoft.Canon;
 using Aiursoft.GitRunner;
 using Aiursoft.GitRunner.Models;
+using Aiursoft.CSTools.Services;
 using Aiursoft.NugetNinja.AllOfficialsPlugin.Services;
+using Aiursoft.NugetNinja.Core.Abstracts;
+using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.GitServerBase.Models;
 using Aiursoft.NugetNinja.GitServerBase.Services; // New using statement
 using Aiursoft.NugetNinja.GitServerBase.Services.Providers;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Models;
 using Aiursoft.NugetNinja.PrBot.Configuration; // New using statement
 using Aiursoft.NugetNinja.PrBot.Services;
 using Microsoft.Extensions.Logging;
@@ -19,6 +23,8 @@ public class Entry(
     IEnumerable<IVersionControlService> versionControls,
     RunAllOfficialPluginsService runAllOfficialPluginsService,
     WorkspaceManager workspaceManager,
+    CommandService commands,
+    Extractor extractor,
     LocalizationService localizationService,
     TokenManagementService tokenManagementService, // Changed
     IOptions<PrBotOptions> prBotOptions,
@@ -116,29 +122,28 @@ public class Entry(
         if (string.IsNullOrWhiteSpace(repo.Owner?.Login) || string.IsNullOrWhiteSpace(repo.Name))
             throw new InvalidDataException($"The repo with path: {repo} is having invalid data!");
 
-        // Clone locally.
         var workPath = Path.Combine(_workspaceFolder, $"{repo.Id}-{repo.Name}");
-        _logger.LogInformation("Cloning repository: {RepoName} to {WorkPath}...", repo.Name, workPath);
+        var proposalStore = new ProposalCooldownStore(_workspaceFolder,
+            $"{connectionConfiguration.EndPoint}\n{connectionConfiguration.UserName}\n{repo.Id}");
+        using var proposalLock = proposalStore.Lock();
+
+        _logger.LogInformation("Cloning repository: {RepoName} to {Path}...", repo.Name, workPath);
         await _workspaceManager.ResetRepo(
             workPath,
             repo.DefaultBranch ?? throw new NullReferenceException($"The default branch of {repo} is null!"),
-            repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint branch of {repo} is null!"),
+            repo.CloneUrl ?? throw new NullReferenceException($"The clone endpoint of {repo} is null!"),
             CloneMode.Full,
             $"{connectionConfiguration.UserName}:{connectionConfiguration.Token}");
 
-        // Run all plugins.
-        await _runAllOfficialPluginsService.RunAllPlugins(workPath, true, onlyRunUpdatePlugin: connectionConfiguration.OnlyUpdate);
+        var cooldowns = (await extractor.ReadConfigAsync(workPath)).ProposalCooldowns;
+        if (cooldowns is not null)
+        {
+            await ProcessWithCooldowns(repo, connectionConfiguration, versionControl, workPath, cooldowns, proposalStore);
+            return;
+        }
 
-        // Run localization (nice to have, failures are acceptable).
-        try
-        {
-            _logger.LogInformation("Starting localization for repository: {RepoName}...", repo.Name);
-            await _localizationService.LocalizeProjectAsync(workPath);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Localization failed for repository: {RepoName}. Continuing anyway...", repo.Name);
-        }
+        await _runAllOfficialPluginsService.RunAllPlugins(workPath, true, onlyRunUpdatePlugin: connectionConfiguration.OnlyUpdate);
+        await Localize(repo, workPath);
 
         // Consider changes...
         if (!await _workspaceManager.PendingCommit(workPath))
@@ -158,38 +163,142 @@ public class Entry(
             return;
         }
 
-        // Fork repo.
-        if (!await versionControl.RepoExists(
-                connectionConfiguration.EndPoint,
-                connectionConfiguration.UserName,
-                repo.Name,
-                connectionConfiguration.Token))
-        {
-            await versionControl.ForkRepo(
-                connectionConfiguration.EndPoint,
-                repo.Owner.Login,
-                repo.Name,
-                connectionConfiguration.Token);
-            await Task.Delay(5000);
-            while (!await versionControl.RepoExists(
-                       connectionConfiguration.EndPoint,
-                       connectionConfiguration.UserName,
-                       repo.Name,
-                       connectionConfiguration.Token))
-                // Wait a while. GitHub may need some time to fork the repo.
-                await Task.Delay(5000);
-        }
-
-        // Push to forked repo.
-        var pushPath = versionControl.GetPushPath(connectionConfiguration, repo);
-
+        await EnsureFork(repo, connectionConfiguration, versionControl);
         await _workspaceManager.Push(
             workPath,
             connectionConfiguration.ContributionBranch,
-            pushPath,
+            versionControl.GetPushPath(connectionConfiguration, repo),
             true);
-
         await EnsurePullRequest(repo, connectionConfiguration, versionControl);
+    }
+
+    private async Task ProcessWithCooldowns(
+        Repository repo, Server server, IVersionControlService versionControl, string workPath,
+        NinjaProposalCooldowns cooldowns, ProposalCooldownStore store)
+    {
+        var publication = store.Load();
+        var branch = new ProposalBranch(commands, workPath, server.ContributionBranch, versionControl.GetPushPath(server, repo));
+        var forkExists = await versionControl.RepoExists(server.EndPoint, server.UserName, repo.Name!, server.Token);
+        var remoteRevision = forkExists ? await branch.ReadRemoteRevision() : null;
+
+        if (publication.Pending is not null)
+        {
+            publication.Recover(remoteRevision);
+            store.Save(publication);
+            if (publication.Pending is { Pushed: true } pending &&
+                remoteRevision == pending.Revision &&
+                !await HasOpenPullRequest(repo, server, versionControl) &&
+                await branch.HasUnmergedChanges(pending.Revision))
+            {
+                await EnsurePullRequest(repo, server, versionControl);
+            }
+
+            publication.Pending = null;
+            store.Save(publication);
+        }
+
+        if (remoteRevision is not null && await HasOpenPullRequest(repo, server, versionControl))
+        {
+            await branch.PreserveExistingProposal(remoteRevision);
+        }
+
+        var priorTree = await branch.Snapshot();
+        var roundTime = DateTimeOffset.UtcNow;
+        var canUpgradeNuget = publication.IsReady(ProposalCategory.Nuget, cooldowns.NugetInterval, roundTime);
+        var canUpgradeNpm = publication.IsReady(ProposalCategory.Npm, cooldowns.NpmInterval, roundTime);
+        var changed = new HashSet<ProposalCategory>();
+        await _runAllOfficialPluginsService.RunAllPlugins(workPath, true, server.OnlyUpdate, IncludeAction);
+
+        if (publication.IsReady(ProposalCategory.Translation, cooldowns.TranslationInterval, roundTime))
+        {
+            var beforeTranslation = await branch.Snapshot();
+            await Localize(repo, workPath);
+            if (await branch.Snapshot() != beforeTranslation)
+            {
+                changed.Add(ProposalCategory.Translation);
+            }
+        }
+
+        if (await branch.Snapshot() == priorTree)
+        {
+            _logger.LogInformation("No new proposal changes for {Repo}", repo);
+            return;
+        }
+
+        await _workspaceManager.SetUserConfig(workPath, server.DisplayName, server.UserEmail);
+        if (!await _workspaceManager.CommitToBranch(workPath, "Auto csproj fix and update by bot.", server.ContributionBranch))
+        {
+            return;
+        }
+
+        if (!forkExists)
+        {
+            await EnsureFork(repo, server, versionControl);
+        }
+
+        publication.Pending = new PendingProposal(await branch.CurrentRevision(), DateTimeOffset.UtcNow, [.. changed]);
+        store.Save(publication);
+        await branch.Push(remoteRevision);
+        publication.ConfirmPush(DateTimeOffset.UtcNow);
+        store.Save(publication);
+        await EnsurePullRequest(repo, server, versionControl);
+        publication.Pending = null;
+        store.Save(publication);
+
+        bool IncludeAction(IAction action)
+        {
+            switch (action)
+            {
+                case NpmPackageUpgrade when canUpgradeNpm:
+                    changed.Add(ProposalCategory.Npm);
+                    return true;
+                case NpmPackageUpgrade:
+                    _logger.LogInformation("Deferring npm upgrade for {Repo} until its proposal cooldown elapses", repo);
+                    return false;
+                case PossiblePackageUpgrade or PackageGroupUpgrade when canUpgradeNuget:
+                    changed.Add(ProposalCategory.Nuget);
+                    return true;
+                case PossiblePackageUpgrade or PackageGroupUpgrade:
+                    _logger.LogInformation("Deferring NuGet upgrade for {Repo} until its proposal cooldown elapses", repo);
+                    return false;
+                default:
+                    return true;
+            }
+        }
+    }
+
+    private async Task Localize(Repository repo, string workPath)
+    {
+        try
+        {
+            await _localizationService.LocalizeProjectAsync(workPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Localization failed for repository: {RepoName}. Continuing anyway...", repo.Name);
+        }
+    }
+
+    private async Task EnsureFork(Repository repo, Server server, IVersionControlService versionControl)
+    {
+        if (await versionControl.RepoExists(server.EndPoint, server.UserName, repo.Name!, server.Token))
+        {
+            return;
+        }
+
+        await versionControl.ForkRepo(server.EndPoint, repo.Owner!.Login!, repo.Name!, server.Token);
+        do
+        {
+            await Task.Delay(5000);
+        } while (!await versionControl.RepoExists(server.EndPoint, server.UserName, repo.Name!, server.Token));
+    }
+
+    private async Task<bool> HasOpenPullRequest(Repository repo, Server server, IVersionControlService versionControl)
+    {
+        var pullRequests = await versionControl.GetPullRequests(
+            server.EndPoint, repo.Owner!.Login!, repo.Name!, $"{server.UserName}:{server.ContributionBranch}", server.Token);
+        return pullRequests.Any(p => p.State == "open" &&
+            string.Equals(p.User?.Login, server.UserName, StringComparison.OrdinalIgnoreCase));
     }
 
     private async Task EnsurePullRequest(Repository repo, Server connectionConfiguration,
@@ -204,16 +313,7 @@ public class Entry(
                 await Task.Delay(TimeSpan.FromSeconds(5));
             }
 
-            var existingPullRequestsByBot = (await versionControl.GetPullRequests(
-                    connectionConfiguration.EndPoint,
-                    repo.Owner!.Login!,
-                    repo.Name!,
-                    $"{connectionConfiguration.UserName}:{connectionConfiguration.ContributionBranch}",
-                    connectionConfiguration.Token))
-                .Where(p => string.Equals(p.User?.Login, connectionConfiguration.UserName,
-                    StringComparison.OrdinalIgnoreCase));
-
-            if (existingPullRequestsByBot.All(p => p.State != "open"))
+            if (!await HasOpenPullRequest(repo, connectionConfiguration, versionControl))
                 // Create a new pull request.
                 await versionControl.CreatePullRequest(
                     connectionConfiguration.EndPoint,

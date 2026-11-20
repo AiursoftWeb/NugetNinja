@@ -68,3 +68,22 @@ from source-only formatter checks; keep validating it with `npm ci`.
 The existing `dotnet test` suite exercises native npm against a local metadata-only
 registry, including lockfile formats 2/3, compatible resolution, idempotence and
 failure recovery. Node.js and npm must also be on PATH when running these tests.
+
+The PR bot also accepts independent minimum intervals in a repository's
+`ninja.yaml`:
+
+```yaml
+proposalCooldowns:
+  nuget: 1d
+  npm: 7d
+  translation: 0
+```
+
+Use `0` for immediate proposals, or a whole number followed by `h` or `d`.
+An omitted field defaults to `0`. The bot uses the policy on the default branch.
+A change is eligible immediately if the bot has not yet published that category
+for this repository. Each interval starts when the bot successfully pushes new
+changes in that category. Existing proposed changes stay in the MR when another
+category is ready, and an unchanged proposal keeps its commit. Packages deferred
+by the policy are resolved again on a later run. The state is stored in the bot's
+persistent workspace. Manual CLI runs use their normal behavior.
