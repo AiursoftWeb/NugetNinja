@@ -71,16 +71,12 @@ internal sealed class ProposalPublication
         {
             ConfirmPush(pending.PreparedAt);
         }
-        else if (revision == pending.PreviousRevision)
-        {
-            Pending = null;
-        }
         else
         {
-            throw new InvalidOperationException("The proposed branch changed during an unconfirmed push.");
+            Pending = null;
         }
     }
 }
 
 internal sealed record PendingProposal(
-    string Revision, string? PreviousRevision, DateTimeOffset PreparedAt, ProposalCategory[] Categories, bool Pushed = false);
+    string Revision, DateTimeOffset PreparedAt, ProposalCategory[] Categories, bool Pushed = false);

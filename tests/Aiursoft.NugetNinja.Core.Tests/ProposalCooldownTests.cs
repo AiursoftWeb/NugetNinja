@@ -53,7 +53,7 @@ public class ProposalCooldownTests
         using var handle = store.Lock();
         var publication = store.Load();
         Assert.IsTrue(publication.IsReady(ProposalCategory.Npm, TimeSpan.FromDays(7), _now));
-        publication.Pending = new PendingProposal("npm-commit", null, _now, [ProposalCategory.Npm]);
+        publication.Pending = new PendingProposal("npm-commit", _now, [ProposalCategory.Npm]);
         store.Save(publication);
 
         publication = store.Load();
@@ -62,7 +62,7 @@ public class ProposalCooldownTests
         Assert.IsTrue(publication.IsReady(ProposalCategory.Nuget, TimeSpan.FromDays(1), _now));
 
         var tomorrow = _now.AddDays(1);
-        publication.Pending = new PendingProposal("other-changes", "npm-commit", tomorrow,
+        publication.Pending = new PendingProposal("other-changes", tomorrow,
             [ProposalCategory.Nuget, ProposalCategory.Translation]);
         publication.ConfirmPush(tomorrow);
         publication.Pending = null;
@@ -79,13 +79,16 @@ public class ProposalCooldownTests
     }
 
     [TestMethod]
-    public void RejectedPushCanBeRetriedWithoutAdvancingCooldown()
+    [DataRow(null)]
+    [DataRow("before-push")]
+    [DataRow("concurrent-update")]
+    public void RejectedPushCanBeRetriedWithoutAdvancingCooldown(string? observedRevision)
     {
         var publication = new ProposalPublication
         {
-            Pending = new PendingProposal("proposed-head", "before-push", _now, [ProposalCategory.Npm])
+            Pending = new PendingProposal("proposed-head", _now, [ProposalCategory.Npm])
         };
-        publication.Recover("before-push");
+        publication.Recover(observedRevision);
         Assert.IsNull(publication.Pending);
         Assert.HasCount(0, publication.LastPublished);
         Assert.IsTrue(publication.IsReady(ProposalCategory.Npm, TimeSpan.FromDays(7), _now.AddSeconds(1)));

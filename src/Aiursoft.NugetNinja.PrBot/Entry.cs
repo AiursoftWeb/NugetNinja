@@ -233,8 +233,7 @@ public class Entry(
             await EnsureFork(repo, server, versionControl);
         }
 
-        publication.Pending = new PendingProposal(await branch.CurrentRevision(), remoteRevision,
-            DateTimeOffset.UtcNow, [.. changed]);
+        publication.Pending = new PendingProposal(await branch.CurrentRevision(), DateTimeOffset.UtcNow, [.. changed]);
         store.Save(publication);
         await branch.Push(remoteRevision);
         publication.ConfirmPush(DateTimeOffset.UtcNow);
