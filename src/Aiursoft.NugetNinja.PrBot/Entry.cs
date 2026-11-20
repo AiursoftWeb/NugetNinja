@@ -207,7 +207,8 @@ public class Entry(
         var canUpgradeNuget = publication.IsReady(ProposalCategory.Nuget, cooldowns.NugetInterval, roundTime);
         var canUpgradeNpm = publication.IsReady(ProposalCategory.Npm, cooldowns.NpmInterval, roundTime);
         var changed = new HashSet<ProposalCategory>();
-        await _runAllOfficialPluginsService.RunAllPlugins(workPath, true, server.OnlyUpdate, IncludeAction);
+        await _runAllOfficialPluginsService.RunAllPlugins(workPath, true, server.OnlyUpdate, IncludeAction,
+            continueOnNpmFailure: true);
 
         if (publication.IsReady(ProposalCategory.Translation, cooldowns.TranslationInterval, roundTime))
         {

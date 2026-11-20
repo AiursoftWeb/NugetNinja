@@ -49,8 +49,13 @@ public class RunAllOfficialPluginsService(
     public Task RunAllPlugins(string path, bool shouldTakeAction, bool onlyRunUpdatePlugin) =>
         RunAllPlugins(path, shouldTakeAction, onlyRunUpdatePlugin, null);
 
+    public Task RunAllPlugins(
+        string path, bool shouldTakeAction, bool onlyRunUpdatePlugin, Func<IAction, bool>? includeAction) =>
+        RunAllPlugins(path, shouldTakeAction, onlyRunUpdatePlugin, includeAction, continueOnNpmFailure: false);
+
     public async Task RunAllPlugins(
-        string path, bool shouldTakeAction, bool onlyRunUpdatePlugin, Func<IAction, bool>? includeAction)
+        string path, bool shouldTakeAction, bool onlyRunUpdatePlugin, Func<IAction, bool>? includeAction,
+        bool continueOnNpmFailure)
     {
         HashSet<string>? updateOnlySecurityOverrides = null;
         if (onlyRunUpdatePlugin)
@@ -79,7 +84,9 @@ public class RunAllOfficialPluginsService(
             var model = await extractor.Parse(path);
 
             logger.LogInformation("Analyzing possible actions via {Name}...", plugin.GetType().Name);
-            var actions = plugin.AnalyzeAsync(model);
+            var actions = continueOnNpmFailure && plugin is PackageReferenceUpgradeDetector upgrades
+                ? upgrades.AnalyzeAsync(model, continueOnNpmFailure: true)
+                : plugin.AnalyzeAsync(model);
 
             await foreach (var action in actions)
             {
