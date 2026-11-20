@@ -10,7 +10,7 @@ public class ProposalCooldownTests
 {
     private readonly string _path = Path.Combine(Path.GetTempPath(), "ninja-proposals-" + Guid.NewGuid().ToString("N"));
     private readonly CommandService _commands = new();
-    private readonly DateTimeOffset _now = DateTimeOffset.Parse("2026-11-20T12:00:00Z");
+    private readonly DateTimeOffset _now = new(2026, 11, 20, 12, 0, 0, TimeSpan.Zero);
 
     [TestInitialize]
     public void CreateWorkspace() => Directory.CreateDirectory(_path);
