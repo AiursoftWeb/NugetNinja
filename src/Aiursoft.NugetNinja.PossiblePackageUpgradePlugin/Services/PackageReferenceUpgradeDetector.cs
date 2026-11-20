@@ -14,7 +14,10 @@ public class PackageReferenceUpgradeDetector(
     NpmPackageUpgradeDetector npmPackageUpgradeDetector)
     : IActionDetector
 {
-    public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context)
+    public IAsyncEnumerable<IAction> AnalyzeAsync(Model context) =>
+        AnalyzeAsync(context, continueOnNpmFailure: false);
+
+    public async IAsyncEnumerable<IAction> AnalyzeAsync(Model context, bool continueOnNpmFailure)
     {
         var securityOverrides = await securityOverrideService.FindOverridesAsync(context);
 
@@ -64,11 +67,35 @@ public class PackageReferenceUpgradeDetector(
             }
         }
 
-        await foreach (var action in npmPackageUpgradeDetector.AnalyzeAsync(context))
+        var npmActions = npmPackageUpgradeDetector.AnalyzeAsync(context);
+        if (!continueOnNpmFailure)
+        {
+            await foreach (var action in npmActions)
+            {
+                yield return action;
+            }
+
+            yield break;
+        }
+
+        List<IAction> resolved;
+        try
+        {
+            // Publish npm only after all of its packages have been analyzed successfully.
+            resolved = await npmActions.ToListAsync();
+        }
+        catch (Exception exception) when (exception is not (OperationCanceledException or OutOfMemoryException))
+        {
+            logger.LogWarning(exception, "Unable to analyze npm updates. Keeping existing npm files and continuing with other changes.");
+            resolved = [];
+        }
+
+        foreach (var action in resolved)
         {
             yield return action;
         }
     }
+
     private async Task<PackageGroupUpgrade?> FindGroupUpgradeAsync(Project project, string name,
         string[] members, TransitiveSecurityOverride[] frozen)
     {

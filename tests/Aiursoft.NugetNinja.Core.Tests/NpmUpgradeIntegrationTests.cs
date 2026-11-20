@@ -217,17 +217,20 @@ public class NpmUpgradeIntegrationTests
     }
 
     [TestMethod]
-    [DataRow(false, true, true, false, true, DisplayName = "Shared opt-in upgrades packages in the same run")]
-    [DataRow(true, false, true, false, true, DisplayName = "Shared opt-out prevents upgrades in the same run")]
-    [DataRow(false, true, false, false, true, DisplayName = "Preview leaves configuration and packages untouched")]
-    [DataRow(false, true, true, true, true, DisplayName = "Update-only mode does not synchronize configuration")]
-    [DataRow(true, true, true, false, false, DisplayName = "Deferring npm preserves the manifest and lockfile")]
+    [DataRow(false, true, true, false, true, false, DisplayName = "Shared opt-in upgrades packages in the same run")]
+    [DataRow(true, false, true, false, true, false, DisplayName = "Shared opt-out prevents upgrades in the same run")]
+    [DataRow(false, true, false, false, true, false, DisplayName = "Preview leaves configuration and packages untouched")]
+    [DataRow(false, true, true, true, true, false, DisplayName = "Update-only mode does not synchronize configuration")]
+    [DataRow(true, true, true, false, false, false, DisplayName = "Deferring npm preserves the manifest and lockfile")]
+    [DataRow(false, true, true, false, true, true, DisplayName = "An npm outage leaves npm files intact and allows shared changes")]
     public async Task OfficialWorkflowUsesSynchronizedNpmConfiguration(
-        bool initiallyEnabled, bool remotelyEnabled, bool apply, bool updateOnly, bool applyNpm)
+        bool initiallyEnabled, bool remotelyEnabled, bool apply, bool updateOnly, bool applyNpm, bool npmUnavailable)
     {
         await using var fixture = new RegistryFixture();
         await fixture.CreateLockAsync(3);
         fixture.PublishUpdates = true;
+        if (npmUnavailable)
+            fixture.Failure = "offline";
         var configPath = Path.Combine(fixture.DirectoryPath, "ninja.yaml");
         static string Config(bool enabled) => $$"""
             configVersion: 1
@@ -256,11 +259,12 @@ public class NpmUpgradeIntegrationTests
         using var provider = services.BuildServiceProvider();
         var runner = provider.GetRequiredService<RunAllOfficialPluginsService>();
 
-        await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly, action => applyNpm || action is not NpmPackageUpgrade);
+        await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly,
+            action => applyNpm || action is not NpmPackageUpgrade, continueOnNpmFailure: npmUnavailable);
 
         Assert.AreEqual(apply && !updateOnly ? Config(remotelyEnabled) : originalConfig,
             await File.ReadAllTextAsync(configPath));
-        var shouldUpgrade = apply && !updateOnly && remotelyEnabled && applyNpm;
+        var shouldUpgrade = apply && !updateOnly && remotelyEnabled && applyNpm && !npmUnavailable;
         var manifest = JsonNode.Parse((await fixture.ReadFilesAsync())[0])!;
         Assert.AreEqual(shouldUpgrade ? "1.2.0" : "1.0.0",
             manifest["dependencies"]!["stable"]!.GetValue<string>());
@@ -271,9 +275,16 @@ public class NpmUpgradeIntegrationTests
         if (apply && !updateOnly)
         {
             var updatedPackages = await fixture.ReadFilesAsync();
-            await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly, action => applyNpm || action is not NpmPackageUpgrade);
+            await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly,
+                action => applyNpm || action is not NpmPackageUpgrade, continueOnNpmFailure: npmUnavailable);
             CollectionAssert.AreEqual(updatedPackages, await fixture.ReadFilesAsync(),
                 "A second official run must not introduce another package or version change.");
+        }
+        if (npmUnavailable)
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly));
+            CollectionAssert.AreEqual(originalPackages, await fixture.ReadFilesAsync());
         }
         Assert.IsFalse(File.Exists(Path.Combine(fixture.DirectoryPath, "script-ran")));
         Assert.AreEqual(0, fixture.TarballRequests);

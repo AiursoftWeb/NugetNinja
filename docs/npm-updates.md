@@ -86,4 +86,6 @@ for this repository. Each interval starts when the bot successfully pushes new
 changes in that category. Existing proposed changes stay in the MR when another
 category is ready, and an unchanged proposal keeps its commit. Packages deferred
 by the policy are resolved again on a later run. The state is stored in the bot's
-persistent workspace. Manual CLI runs use their normal behavior.
+persistent workspace. If npm resolution fails, the bot keeps the current
+manifest and lockfile and continues with other proposals. A later run can retry
+npm resolution. Manual CLI runs use their normal behavior.
