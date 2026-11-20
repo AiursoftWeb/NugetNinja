@@ -124,6 +124,7 @@ public class ProposalCooldownTests
         await File.WriteAllTextAsync(businessChange, "new default branch change");
         await Git(repo, "add .");
         await Git(repo, "commit -m Business");
+        Assert.IsTrue(await branch.HasUnmergedChanges(prior));
         await branch.PreserveExistingProposal(prior);
         Assert.AreEqual("published update", await File.ReadAllTextAsync(npm));
         Assert.IsTrue(File.Exists(businessChange));
@@ -139,6 +140,7 @@ public class ProposalCooldownTests
 
         var current = await branch.ReadRemoteRevision();
         Assert.AreEqual(await branch.CurrentRevision(), current);
+        Assert.IsFalse(await branch.HasUnmergedChanges(current!), "An already merged proposal must not be recreated.");
         Assert.AreEqual("published update", await Git(fork, $"show {current}:package-lock.json"));
         Assert.AreEqual("new translation", await Git(fork, $"show {current}:strings.resx"));
     }

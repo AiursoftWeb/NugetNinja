@@ -185,7 +185,10 @@ public class Entry(
         {
             publication.Recover(remoteRevision);
             store.Save(publication);
-            if (publication.Pending is { Pushed: true } pending && remoteRevision == pending.Revision)
+            if (publication.Pending is { Pushed: true } pending &&
+                remoteRevision == pending.Revision &&
+                !await HasOpenPullRequest(repo, server, versionControl) &&
+                await branch.HasUnmergedChanges(pending.Revision))
             {
                 await EnsurePullRequest(repo, server, versionControl);
             }

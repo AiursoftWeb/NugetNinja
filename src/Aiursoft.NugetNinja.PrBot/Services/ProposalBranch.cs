@@ -37,6 +37,16 @@ internal sealed class ProposalBranch(CommandService commands, string path, strin
 
     public async Task PreserveExistingProposal(string expectedRevision)
     {
+        // Use the merged tree as a baseline without committing a rebase-only change.
+        var combinedTree = await ReadCombinedTree(expectedRevision);
+        await Run($"read-tree --reset -u {combinedTree}");
+    }
+
+    public async Task<bool> HasUnmergedChanges(string expectedRevision) =>
+        await ReadCombinedTree(expectedRevision) != await Run("rev-parse HEAD^{tree}");
+
+    private async Task<string> ReadCombinedTree(string expectedRevision)
+    {
         await Run($"fetch --quiet --no-tags {Remote} {Quote(_reference)}", useRemote: true);
         var observedRevision = await CurrentRevision("FETCH_HEAD");
         if (observedRevision != expectedRevision)
@@ -44,11 +54,8 @@ internal sealed class ProposalBranch(CommandService commands, string path, strin
             throw new InvalidOperationException("The proposed branch changed while it was being read.");
         }
 
-        // Build on top of the current target and retain the pending proposal.
-        // A rebase-only change must not start a new pipeline.
-        var combinedTree = (await Run($"merge-tree --write-tree HEAD {observedRevision}"))
+        return (await Run($"merge-tree --write-tree HEAD {observedRevision}"))
             .Split('\n')[0].Trim();
-        await Run($"read-tree --reset -u {combinedTree}");
     }
 
     public async Task<string> Snapshot()
