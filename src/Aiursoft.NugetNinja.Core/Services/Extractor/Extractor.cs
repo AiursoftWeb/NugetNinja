@@ -18,24 +18,7 @@ public class Extractor(ILogger<Extractor> logger)
             RootPath = rootPath
         };
 
-        var configFilePath = Path.Combine(rootPath, "ninja.yaml");
-        if (File.Exists(configFilePath))
-        {
-            logger.LogTrace("Found and parsing ninja config file: {Path}", configFilePath);
-            var configContent = await File.ReadAllTextAsync(configFilePath);
-            
-            var deserializer = new DeserializerBuilder()
-                .IgnoreUnmatchedProperties()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                .Build();
-            var deserialized = deserializer.Deserialize<NinjaConfig?>(configContent);
-            model.NinjaConfig = deserialized ?? new NinjaConfig();
-            model.NinjaConfig.Nuget?.Validate();
-        }
-        else
-        {
-            logger.LogWarning("Can not find ninja config file: {Path}", configFilePath);
-        }
+        model.NinjaConfig = await ReadConfigAsync(rootPath);
 
         foreach (var csprojPath in csprojs)
         {
@@ -43,6 +26,27 @@ public class Extractor(ILogger<Extractor> logger)
         }
 
         return model;
+    }
+
+    public async Task<NinjaConfig> ReadConfigAsync(string rootPath)
+    {
+        var configFilePath = Path.Combine(rootPath, "ninja.yaml");
+        if (!File.Exists(configFilePath))
+        {
+            logger.LogWarning("Can not find ninja config file: {Path}", configFilePath);
+            return new NinjaConfig();
+        }
+
+        logger.LogTrace("Found and parsing ninja config file: {Path}", configFilePath);
+        var configContent = await File.ReadAllTextAsync(configFilePath);
+        var deserializer = new DeserializerBuilder()
+            .IgnoreUnmatchedProperties()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+        var config = deserializer.Deserialize<NinjaConfig?>(configContent) ?? new NinjaConfig();
+        config.Nuget?.Validate();
+        config.ProposalCooldowns?.Validate();
+        return config;
     }
 }
 
@@ -59,6 +63,8 @@ public class NinjaConfig
     public NinjaNpmConfig? Npm { get; set; }
 
     public NinjaNugetConfig? Nuget { get; set; }
+
+    public NinjaProposalCooldowns? ProposalCooldowns { get; set; }
     
     // ReSharper disable once CollectionNeverUpdated.Global
     public List<NinjaConfigFile> Files { get; set; } = [];

@@ -9,6 +9,7 @@ using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Extractor;
 using Aiursoft.NugetNinja.Core.Services.Nuget;
+using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Models;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -216,12 +217,13 @@ public class NpmUpgradeIntegrationTests
     }
 
     [TestMethod]
-    [DataRow(false, true, true, false, DisplayName = "Shared opt-in upgrades packages in the same run")]
-    [DataRow(true, false, true, false, DisplayName = "Shared opt-out prevents upgrades in the same run")]
-    [DataRow(false, true, false, false, DisplayName = "Preview leaves configuration and packages untouched")]
-    [DataRow(false, true, true, true, DisplayName = "Update-only mode does not synchronize configuration")]
+    [DataRow(false, true, true, false, true, DisplayName = "Shared opt-in upgrades packages in the same run")]
+    [DataRow(true, false, true, false, true, DisplayName = "Shared opt-out prevents upgrades in the same run")]
+    [DataRow(false, true, false, false, true, DisplayName = "Preview leaves configuration and packages untouched")]
+    [DataRow(false, true, true, true, true, DisplayName = "Update-only mode does not synchronize configuration")]
+    [DataRow(true, true, true, false, false, DisplayName = "Deferring npm preserves the manifest and lockfile")]
     public async Task OfficialWorkflowUsesSynchronizedNpmConfiguration(
-        bool initiallyEnabled, bool remotelyEnabled, bool apply, bool updateOnly)
+        bool initiallyEnabled, bool remotelyEnabled, bool apply, bool updateOnly, bool applyNpm)
     {
         await using var fixture = new RegistryFixture();
         await fixture.CreateLockAsync(3);
@@ -254,11 +256,11 @@ public class NpmUpgradeIntegrationTests
         using var provider = services.BuildServiceProvider();
         var runner = provider.GetRequiredService<RunAllOfficialPluginsService>();
 
-        await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly);
+        await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly, action => applyNpm || action is not NpmPackageUpgrade);
 
         Assert.AreEqual(apply && !updateOnly ? Config(remotelyEnabled) : originalConfig,
             await File.ReadAllTextAsync(configPath));
-        var shouldUpgrade = apply && !updateOnly && remotelyEnabled;
+        var shouldUpgrade = apply && !updateOnly && remotelyEnabled && applyNpm;
         var manifest = JsonNode.Parse((await fixture.ReadFilesAsync())[0])!;
         Assert.AreEqual(shouldUpgrade ? "1.2.0" : "1.0.0",
             manifest["dependencies"]!["stable"]!.GetValue<string>());
@@ -269,7 +271,7 @@ public class NpmUpgradeIntegrationTests
         if (apply && !updateOnly)
         {
             var updatedPackages = await fixture.ReadFilesAsync();
-            await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly);
+            await runner.RunAllPlugins(fixture.DirectoryPath, apply, updateOnly, action => applyNpm || action is not NpmPackageUpgrade);
             CollectionAssert.AreEqual(updatedPackages, await fixture.ReadFilesAsync(),
                 "A second official run must not introduce another package or version change.");
         }

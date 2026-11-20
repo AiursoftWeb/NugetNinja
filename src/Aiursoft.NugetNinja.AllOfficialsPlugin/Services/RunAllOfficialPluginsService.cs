@@ -46,7 +46,11 @@ public class RunAllOfficialPluginsService(
 
     public Task OnServiceStartedAsync(string path, bool shouldTakeAction) => RunAllPlugins(path, shouldTakeAction, false);
 
-    public async Task RunAllPlugins(string path, bool shouldTakeAction, bool onlyRunUpdatePlugin)
+    public Task RunAllPlugins(string path, bool shouldTakeAction, bool onlyRunUpdatePlugin) =>
+        RunAllPlugins(path, shouldTakeAction, onlyRunUpdatePlugin, null);
+
+    public async Task RunAllPlugins(
+        string path, bool shouldTakeAction, bool onlyRunUpdatePlugin, Func<IAction, bool>? includeAction)
     {
         HashSet<string>? updateOnlySecurityOverrides = null;
         if (onlyRunUpdatePlugin)
@@ -84,6 +88,11 @@ public class RunAllOfficialPluginsService(
                     !updateOnlySecurityOverrides!.Contains(SecurityOverrideKey(
                         uselessPackageReference.SourceProject.PathOnDisk,
                         uselessPackageReference.TargetPackage.Name)))
+                {
+                    continue;
+                }
+
+                if (includeAction is not null && !includeAction(action))
                 {
                     continue;
                 }
