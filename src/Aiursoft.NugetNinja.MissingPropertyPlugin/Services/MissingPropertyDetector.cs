@@ -122,12 +122,12 @@ public class MissingPropertyDetector(
                     yield return new MissingProperty(project, nameof(project.PackAsTool), projectInfo.ShouldPackAsNugetTool.ToString().ToLowerInvariant());
                 }
 
-                // Tool command name
-                if (project.ToolCommandName != project.AssemblyName)
+                // The command name is part of the tool's public interface.
+                if (string.IsNullOrWhiteSpace(project.ToolCommandName))
                 {
-                    var assemblyName = GenerateExecutableFileName(project.FileName);
+                    var commandName = GenerateExecutableFileName(project.FileName);
                     logger.LogTrace("Project {Project} is missing property ToolCommandName", project);
-                    yield return new MissingProperty(project, nameof(project.ToolCommandName), assemblyName);
+                    yield return new MissingProperty(project, nameof(project.ToolCommandName), commandName);
                 }
             }
 

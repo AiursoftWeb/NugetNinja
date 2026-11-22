@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text;
+using System.Xml.Linq;
 using Aiursoft.Canon;
+using Aiursoft.CSTools.Services;
 using Aiursoft.NugetNinja.Core.Abstracts;
 using Aiursoft.NugetNinja.Core.Model.Framework;
 using Aiursoft.NugetNinja.Core.Model.Workspace;
@@ -8,6 +10,8 @@ using Aiursoft.NugetNinja.Core.Services.Analyser;
 using Aiursoft.NugetNinja.Core.Services.Nuget;
 using Aiursoft.NugetNinja.DeprecatedPackagePlugin.Models;
 using Aiursoft.NugetNinja.DuplicatePropertyPlugin.Services;
+using Aiursoft.NugetNinja.MissingPropertyPlugin.Models;
+using Aiursoft.NugetNinja.MissingPropertyPlugin.Services;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Models;
 using Aiursoft.NugetNinja.PossiblePackageUpgradePlugin.Services;
 using Aiursoft.NugetNinja.UselessPackageReferencePlugin.Models;
@@ -15,6 +19,7 @@ using Aiursoft.NugetNinja.UselessPackageReferencePlugin.Services;
 using HtmlAgilityPack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using WorkspaceModel = Aiursoft.NugetNinja.Core.Model.Workspace.Model;
 
 namespace Aiursoft.NugetNinja.Core.Tests;
@@ -22,6 +27,63 @@ namespace Aiursoft.NugetNinja.Core.Tests;
 [TestClass]
 public class PluginDetectorTests
 {
+    [TestMethod]
+    [DataRow("<ToolCommandName>dms-agent</ToolCommandName>", "dms-agent", false)]
+    [DataRow("<ToolCommandName>$(CommandName)</ToolCommandName>", "$(CommandName)", false)]
+    [DataRow("<ToolCommandName> </ToolCommandName>", "agent", true)]
+    [DataRow("", "agent", true)]
+    public async Task MissingPropertyDetector_OnlyAddsToolCommandNameWhenMissing(
+        string commandProperty, string expectedCommand, bool shouldAdd)
+    {
+        var project = await CreateTempProjectAsync("Aiursoft.DMS.Agent.csproj", $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>net10.0</TargetFramework>
+                <Version>1.10.1</Version>
+                <OutputType>Exe</OutputType>
+                <AssemblyName>Aiursoft.DMS.Agent</AssemblyName>
+                <PackAsTool>true</PackAsTool>
+                {commandProperty}
+              </PropertyGroup>
+            </Project>
+            """);
+        try
+        {
+            var commands = new CommandService();
+            var directory = Path.GetDirectoryName(project.PathOnDisk)!;
+            var (initCode, _, initError) = await commands.RunCommandAsync("git", "init -q", directory);
+            Assert.AreEqual(0, initCode, initError);
+            var (remoteCode, _, remoteError) = await commands.RunCommandAsync(
+                "git", "remote add origin https://example.test/dms.git", directory);
+            Assert.AreEqual(0, remoteCode, remoteError);
+
+            var detector = new MissingPropertyDetector(new ProjectTypeDetector(NullLogger<ProjectTypeDetector>.Instance),
+                NullLogger<MissingPropertyDetector>.Instance);
+            var commandActions = new List<MissingProperty>();
+            await foreach (var action in detector.AnalyzeAsync(new WorkspaceModel { AllProjects = [project] }))
+            {
+                if (action is MissingProperty property &&
+                    property.BuildMessage().Contains("'ToolCommandName'", StringComparison.Ordinal))
+                {
+                    commandActions.Add(property);
+                }
+            }
+
+            Assert.HasCount(shouldAdd ? 1 : 0, commandActions);
+            foreach (var action in commandActions)
+            {
+                await action.TakeActionAsync();
+            }
+
+            var document = XDocument.Parse(await File.ReadAllTextAsync(project.PathOnDisk));
+            Assert.AreEqual(expectedCommand, document.Descendants("ToolCommandName").Single().Value);
+        }
+        finally
+        {
+            Cleanup(project.PathOnDisk);
+        }
+    }
+
     // ── DeprecatedPackageReplacement ────────────────────────────────
 
     [TestMethod]
