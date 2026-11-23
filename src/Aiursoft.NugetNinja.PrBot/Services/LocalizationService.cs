@@ -23,9 +23,10 @@ public class LocalizationService(
     /// Localizes all projects in the workspace that have Resources directories.
     /// Searches for all .csproj files and localizes each one with a Resources directory.
     /// </summary>
-    /// <param name="workspacePath">Path to the workspace root directory</param>
-    /// <returns>True if any localization was attempted, false otherwise</returns>
-    public virtual async Task<bool> LocalizeProjectAsync(string workspacePath)
+    /// <param name="workspacePath">Path to the workspace root directory.</param>
+    /// <param name="repository">Optional repository identity as owner/repository.</param>
+    /// <returns>True if any localization was attempted, false otherwise.</returns>
+    public virtual async Task<bool> LocalizeProjectAsync(string workspacePath, string? repository = null)
     {
         if (!_options.LocalizationEnabled)
         {
@@ -42,7 +43,13 @@ public class LocalizationService(
             return false;
         }
 
-        if (_options.LocalizationTargetLanguages.Length == 0)
+        var excludedLanguages = _options.LocalizationLanguageExclusions
+            .Where(exclusion => string.Equals(exclusion.Repository, repository, StringComparison.OrdinalIgnoreCase))
+            .SelectMany(exclusion => exclusion.Languages);
+        var targetLanguages = _options.LocalizationTargetLanguages
+            .Except(excludedLanguages, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (targetLanguages.Length == 0)
         {
             logger.LogWarning("No target languages configured for localization. Skipping localization.");
             return false;
@@ -101,7 +108,7 @@ public class LocalizationService(
                 {
                     await retryEngine.RunWithRetry(async _ =>
                     {
-                        await LocalizeProjectDirectoryAsync(translateEntry, projectDir, cts.Token);
+                        await LocalizeProjectDirectoryAsync(translateEntry, projectDir, targetLanguages, cts.Token);
                     }, attempts: 3);
                     localizedCount++;
                 }
@@ -146,7 +153,7 @@ public class LocalizationService(
         return false;
     }
 
-    private async Task LocalizeProjectDirectoryAsync(TranslateEntry translateEntry, string projectPath, CancellationToken token)
+    private async Task LocalizeProjectDirectoryAsync(TranslateEntry translateEntry, string projectPath, string[] targetLanguages, CancellationToken token)
     {
         // Dedup resource keys
         logger.LogInformation("Auto-deduplicating resource keys in: {ProjectPath}...", projectPath);
@@ -166,7 +173,7 @@ public class LocalizationService(
         logger.LogInformation("Localizing C# files in: {ProjectPath}...", projectPath);
         await translateEntry.StartLocalizeContentInCSharpAsync(
             projectPath,
-            _options.LocalizationTargetLanguages,
+            targetLanguages,
             takeAction: true,
             concurrentRequests: _options.LocalizationConcurrentRequests,
             cancellationToken: token);
@@ -175,7 +182,7 @@ public class LocalizationService(
         logger.LogInformation("Localizing DataAnnotations in: {ProjectPath}...", projectPath);
         await translateEntry.StartLocalizeDataAnnotationsAsync(
             projectPath,
-            _options.LocalizationTargetLanguages,
+            targetLanguages,
             takeAction: true,
             concurrentRequests: _options.LocalizationConcurrentRequests,
             cancellationToken: token);
@@ -184,7 +191,7 @@ public class LocalizationService(
         logger.LogInformation("Localizing CSHTML files in: {ProjectPath}...", projectPath);
         await translateEntry.StartLocalizeContentInCsHtmlAsync(
             projectPath,
-            _options.LocalizationTargetLanguages,
+            targetLanguages,
             takeAction: true,
             concurentRequests: _options.LocalizationConcurrentRequests,
             cancellationToken: token);

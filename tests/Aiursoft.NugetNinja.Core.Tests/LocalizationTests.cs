@@ -64,6 +64,37 @@ public class LocalizationTests
         }
     }
 
+    [TestMethod]
+    public async Task RepositoryLanguageExclusionsApplyOnlyToTheMatchingRepository()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var rms = await CreateProject(directory, "Rms", "Existing languages only");
+            var template = await CreateProject(directory, "Template", "Croatian translation");
+            await using var services = CreateServices(new LocalizationLogger(), options =>
+            {
+                options.LocalizationTargetLanguages = ["zh-CN", "hr-HR"];
+                options.LocalizationLanguageExclusions =
+                [
+                    new LocalizationLanguageExclusion { Repository = "aiursoft/rms", Languages = ["HR-hr"] }
+                ];
+            });
+            var localization = services.GetRequiredService<LocalizationService>();
+
+            Assert.IsTrue(await localization.LocalizeProjectAsync(rms, "Aiursoft/RMS"));
+            Assert.IsTrue(await localization.LocalizeProjectAsync(template, "aiursoft/template"));
+            Assert.IsTrue(File.Exists(Path.Combine(rms, "Resources", "Sample.zh-CN.resx")));
+            Assert.IsFalse(File.Exists(Path.Combine(rms, "Resources", "Sample.hr-HR.resx")));
+            Assert.IsTrue(File.Exists(Path.Combine(template, "Resources", "Sample.hr-HR.resx")));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     private static async Task<string> CreateProject(string directory, string name, params string[] keys)
     {
         var path = Path.Combine(directory, name);
@@ -74,7 +105,7 @@ public class LocalizationTests
         return path;
     }
 
-    private static ServiceProvider CreateServices(LocalizationLogger logger)
+    private static ServiceProvider CreateServices(LocalizationLogger logger, Action<PrBotOptions>? configure = null)
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -87,6 +118,7 @@ public class LocalizationTests
             options.OllamaApiKey = "test";
             options.LocalizationTargetLanguages = ["zh-CN"];
             options.LocalizationConcurrentRequests = 2;
+            configure?.Invoke(options);
         });
         services.AddSingleton<ChatClient>(provider => new TranslationClient(provider.GetRequiredService<HttpClient>()));
         services.AddSingleton<ILogger<LocalizationService>>(logger);

@@ -272,7 +272,7 @@ public class Entry(
     {
         try
         {
-            await _localizationService.LocalizeProjectAsync(workPath);
+            await _localizationService.LocalizeProjectAsync(workPath, $"{repo.Owner!.Login}/{repo.Name}");
         }
         catch (Exception ex)
         {

@@ -40,7 +40,18 @@ public class PrBotOptions
     public string[] LocalizationTargetLanguages { get; set; } = [];
 
     /// <summary>
+    /// Languages to omit for specific repositories named as owner/repository.
+    /// </summary>
+    public LocalizationLanguageExclusion[] LocalizationLanguageExclusions { get; set; } = [];
+
+    /// <summary>
     /// The path to the workspace directory where repositories will be cloned.
     /// </summary>
     public string WorkspacePath { get; set; } = "/root/.local/share/NugetNinjaWorkspace";
+}
+
+public class LocalizationLanguageExclusion
+{
+    public string Repository { get; set; } = string.Empty;
+    public string[] Languages { get; set; } = [];
 }
